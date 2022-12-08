@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 )
+
+var Version = "development"
 
 // Note: All prompt responses will be added to this
 var migrationReq = struct {
@@ -178,8 +181,12 @@ func migrateApp(ctx *cli.Context) error {
 }
 
 func main() {
+	cli.VersionPrinter = func(cCtx *cli.Context) {
+		fmt.Println(cCtx.App.Version)
+	}
 	app := &cli.App{
 		Name:                 "harness-upgrade",
+		Version:              Version,
 		Usage:                "Upgrade Harness CD from Current Gen to Next Gen!",
 		EnableBashCompletion: true,
 		Commands: []*cli.Command{
