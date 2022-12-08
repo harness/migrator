@@ -40,12 +40,18 @@ harness-upgrade
 
 ### Migrating with a single command
 ```shell
-HARNESS_MIGRATOR_AUTH=token harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV app APP_ID
+HARNESS_MIGRATOR_AUTH=token harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
 ```
 
-| Flag        | Type                                                                                    |
+To migrate an application
+
+```shell
+HARNESS_MIGRATOR_AUTH=token harness-upgrade app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
+```
+
+| Flag        | Details                                                                                 |
 |-------------|-----------------------------------------------------------------------------------------|
-| --env       | Your target environment. It can be either Dev, QA or Prod                               |
+| --env       | Your target environment. It can be either `Dev`, `QA` or `Prod`                         |
 | --account   | ID of the account that you wish to migrate                                              |
 | --secret    | Scope at which the secret has to be created. It can be `project`, `org` or `account`    |
 | --connector | Scope at which the connector has to be created. It can be `project`, `org` or `account` |
