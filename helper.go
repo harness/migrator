@@ -61,7 +61,6 @@ func ConfirmInput(question string) bool {
 }
 
 func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
-	fmt.Println(reqUrl)
 	postBody, _ := json.Marshal(body)
 	requestBody := bytes.NewBuffer(postBody)
 	req, err := http.NewRequest("POST", reqUrl, requestBody)
@@ -75,7 +74,6 @@ func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(resp.StatusCode)
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(resp.Body)
