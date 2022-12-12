@@ -63,6 +63,9 @@ func ConfirmInput(question string) bool {
 func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 	postBody, _ := json.Marshal(body)
 	requestBody := bytes.NewBuffer(postBody)
+	log.WithFields(log.Fields{
+		"body": string(postBody),
+	}).Debug("The request body")
 	req, err := http.NewRequest("POST", reqUrl, requestBody)
 	if err != nil {
 		return nil, err
@@ -81,6 +84,9 @@ func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.WithFields(log.Fields{
+		"body": string(respBody),
+	}).Debug("The response body")
 	return respBody, nil
 }
 

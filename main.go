@@ -70,12 +70,12 @@ func PromptDefaultInputs() bool {
 
 func logMigrationDetails() {
 	log.WithFields(log.Fields{
-		"Account":            migrationReq.Account,
-		"SecretScope":        migrationReq.SecretScope,
-		"ConnectorScope":     migrationReq.ConnectorScope,
-		"App ID":             migrationReq.AppId,
-		"Org Identifier":     migrationReq.OrgIdentifier,
-		"Project Identifier": migrationReq.ProjectIdentifier,
+		"Account":           migrationReq.Account,
+		"SecretScope":       migrationReq.SecretScope,
+		"ConnectorScope":    migrationReq.ConnectorScope,
+		"AppID":             migrationReq.AppId,
+		"OrgIdentifier":     migrationReq.OrgIdentifier,
+		"ProjectIdentifier": migrationReq.ProjectIdentifier,
 	}).Info("Migration details")
 }
 
