@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 	"os"
 )
@@ -30,7 +30,7 @@ func TextInput(question string) string {
 	}
 	err := survey.AskOne(prompt, &text, survey.WithValidator(survey.Required))
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(err.Error())
 		os.Exit(0)
 	}
 	return text
@@ -45,7 +45,7 @@ func SelectInput(question string, options []string, defaultValue interface{}) st
 	}
 	err := survey.AskOne(prompt, &text, survey.WithValidator(survey.Required))
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(err.Error())
 		os.Exit(0)
 	}
 	return text
@@ -63,6 +63,9 @@ func ConfirmInput(question string) bool {
 func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 	postBody, _ := json.Marshal(body)
 	requestBody := bytes.NewBuffer(postBody)
+	log.WithFields(log.Fields{
+		"body": string(postBody),
+	}).Debug("The request body")
 	req, err := http.NewRequest("POST", reqUrl, requestBody)
 	if err != nil {
 		return nil, err
@@ -81,6 +84,9 @@ func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.WithFields(log.Fields{
+		"body": string(respBody),
+	}).Debug("The response body")
 	return respBody, nil
 }
 
@@ -100,12 +106,20 @@ func CreateEntity(url string, auth string, body RequestBody) {
 		log.Fatalln("There was error while parsing the response from server. Exiting...")
 	}
 	if len(respBody.Resource.Errors) == 0 {
-		fmt.Println(respBody)
 		return
 	}
-	log.Println("Here are the errors while migrating - ")
+	log.Info("Here are the errors while migrating - ")
 	for i := range respBody.Resource.Errors {
 		e := respBody.Resource.Errors[i]
-		log.Println(e.Message)
+		if len(e.Entity.Id) > 0 {
+			log.WithFields(log.Fields{
+				"type":  e.Entity.Type,
+				"appId": e.Entity.AppId,
+				"id":    e.Entity.Id,
+				"name":  e.Entity.Name,
+			}).Error(e.Message)
+		} else {
+			log.Error(e.Message)
+		}
 	}
 }
