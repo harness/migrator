@@ -252,12 +252,12 @@ func main() {
 			},
 			&cli.BoolFlag{
 				Name:        "debug",
-				Usage:       "If debug level logs need to be printed",
+				Usage:       "print debug level logs",
 				Destination: &migrationReq.Debug,
 			},
 			&cli.BoolFlag{
 				Name:        "json",
-				Usage:       "If debug level logs need to be printed",
+				Usage:       "log as JSON instead of standard ASCII formatter",
 				Destination: &migrationReq.Json,
 			},
 		},

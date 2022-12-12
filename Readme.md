@@ -57,6 +57,8 @@ HARNESS_MIGRATOR_AUTH=token harness-upgrade app APP_ID --project PROJECT --org O
 | --connector | Scope at which the connector has to be created. It can be `project`, `org` or `account` |
 | --org       | Identifier of the target org                                                            |
 | --project   | Identifier of the target project                                                        |
+| --debug     | If debug level logs need to be printed                                                  |
+| --json      | Formatted the logs as JSON                                                              |
 
 If not all the required flags are provided we will fall back to prompt based technique to capture all the required details.
 
