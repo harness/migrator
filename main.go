@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"log"
 	"os"
 )
 
 var Version = "development"
+
+type cliFnWrapper func(ctx *cli.Context) error
 
 // Note: All prompt responses will be added to this
 var migrationReq = struct {
@@ -19,6 +21,8 @@ var migrationReq = struct {
 	OrgIdentifier     string `survey:"org"`
 	ProjectIdentifier string `survey:"project"`
 	AppId             string `survey:"appId"`
+	Debug             bool   `survey:"debug"`
+	Json              bool   `survey:"json"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -49,7 +53,7 @@ func PromptDefaultInputs() bool {
 
 	if len(migrationReq.Account) == 0 {
 		promptConfirm = true
-		migrationReq.Account = TextInput("Account that you wish to migrateAccountLevelEntities:")
+		migrationReq.Account = TextInput("Account that you wish to migrate:")
 	}
 
 	if len(migrationReq.SecretScope) == 0 {
@@ -65,20 +69,14 @@ func PromptDefaultInputs() bool {
 }
 
 func logMigrationDetails() {
-	log.Printf("Env - %s\n"+
-		"Account - %s\n"+
-		"SecretScope - %s\n"+
-		"ConnectorScope - %s\n"+
-		"App ID - %s\n"+
-		"Org Identifier - %s\n"+
-		"Project Identifier - %s\n",
-		migrationReq.Environment,
-		migrationReq.Account,
-		migrationReq.SecretScope,
-		migrationReq.ConnectorScope,
-		migrationReq.AppId,
-		migrationReq.OrgIdentifier,
-		migrationReq.ProjectIdentifier)
+	log.WithFields(log.Fields{
+		"Account":            migrationReq.Account,
+		"SecretScope":        migrationReq.SecretScope,
+		"ConnectorScope":     migrationReq.ConnectorScope,
+		"App ID":             migrationReq.AppId,
+		"Org Identifier":     migrationReq.OrgIdentifier,
+		"Project Identifier": migrationReq.ProjectIdentifier,
+	}).Info("Migration details")
 }
 
 func migrateAccountLevelEntities(*cli.Context) error {
@@ -117,27 +115,37 @@ func migrateAccountLevelEntities(*cli.Context) error {
 	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
 
 	// Create Secret Managers
-	log.Println("Importing all secret managers from CG to NG...")
+	log.Info("Importing all secret managers from CG to NG...")
 	CreateEntity(url, migrationReq.Auth, getReqBody(SecretManager, Filter{
 		Type: All,
 	}))
-	log.Println("Imported all secret managers.")
+	log.Info("Imported all secret managers.")
 
 	// Create Secrets
-	log.Println("Importing all secrets from CG to NG...")
+	log.Info("Importing all secrets from CG to NG...")
 	CreateEntity(url, migrationReq.Auth, getReqBody(Secret, Filter{
 		Type: All,
 	}))
-	log.Println("Imported all secrets.")
+	log.Info("Imported all secrets.")
 
 	// Create Connectors
-	log.Println("Importing all connectors from CG to NG....")
+	log.Info("Importing all connectors from CG to NG....")
 	CreateEntity(url, migrationReq.Auth, getReqBody(Connector, Filter{
 		Type: All,
 	}))
-	log.Println("Imported all connectors.")
+	log.Info("Imported all connectors.")
 
 	return nil
+}
+
+func cliWrapper(fn cliFnWrapper, ctx *cli.Context) error {
+	if migrationReq.Debug {
+		log.SetLevel(log.DebugLevel)
+	}
+	if migrationReq.Json {
+		log.SetFormatter(&log.JSONFormatter{})
+	}
+	return fn(ctx)
 }
 
 func migrateApp(ctx *cli.Context) error {
@@ -171,19 +179,32 @@ func migrateApp(ctx *cli.Context) error {
 
 	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
 	// Migrating the app
-	log.Println("Importing the application....")
+	log.Info("Importing the application....")
 	CreateEntity(url, migrationReq.Auth, getReqBody(Application, Filter{
 		AppId: migrationReq.AppId,
 	}))
-	log.Println("Imported the application.")
+	log.Info("Imported the application.")
 
 	return nil
 }
 
-func main() {
+func init() {
+	// Log as JSON instead of the default ASCII formatter.
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
+
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+	// Only log the warning severity or above.
+	log.SetLevel(log.InfoLevel)
 	cli.VersionPrinter = func(cCtx *cli.Context) {
 		fmt.Println(cCtx.App.Version)
 	}
+}
+
+func main() {
 	app := &cli.App{
 		Name:                 "harness-upgrade",
 		Version:              Version,
@@ -191,9 +212,11 @@ func main() {
 		EnableBashCompletion: true,
 		Commands: []*cli.Command{
 			{
-				Name:   "app",
-				Usage:  "Import an app into a existing project by providing the `appId`",
-				Action: migrateApp,
+				Name:  "app",
+				Usage: "Import an app into a existing project by providing the `appId`",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateApp, context)
+				},
 			},
 		},
 		Flags: []cli.Flag{
@@ -204,7 +227,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:        "account",
-				Usage:       "`ID` of the account that you wish to migrateAccountLevelEntities",
+				Usage:       "`ID` of the account that you wish to migrate",
 				Destination: &migrationReq.Account,
 			},
 			&cli.StringFlag{
@@ -227,8 +250,20 @@ func main() {
 				Usage:       "project `identifier` in next gen",
 				Destination: &migrationReq.ProjectIdentifier,
 			},
+			&cli.BoolFlag{
+				Name:        "debug",
+				Usage:       "If debug level logs need to be printed",
+				Destination: &migrationReq.Debug,
+			},
+			&cli.BoolFlag{
+				Name:        "json",
+				Usage:       "If debug level logs need to be printed",
+				Destination: &migrationReq.Json,
+			},
 		},
-		Action: migrateAccountLevelEntities,
+		Action: func(context *cli.Context) error {
+			return cliWrapper(migrateAccountLevelEntities, context)
+		},
 	}
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
