@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	log "github.com/sirupsen/logrus"
@@ -20,7 +21,7 @@ const (
 var urlMap = map[string]string{
 	Prod: "https://app.harness.io/gateway/ng-migration",
 	QA:   "https://qa.harness.io/gateway/ng-migration",
-	Dev:  "https://localhost:9090",
+	Dev:  "https://localhost:9080",
 }
 
 func TextInput(question string) string {
@@ -71,11 +72,14 @@ func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+auth)
+	req.Header.Set("x-api-key", auth)
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New("received non 200 response code. The response code was " + string(rune(resp.StatusCode)))
 	}
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
@@ -91,13 +95,13 @@ func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 }
 
 func GetUrl(environment string, path string, accountId string) string {
-	return fmt.Sprintf("%s/api/ng-migration/%s?accountId=%s", urlMap[environment], path, accountId)
+	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment], path, accountId)
 }
 
 func CreateEntity(url string, auth string, body RequestBody) {
 	resp, err := PostReq(url, auth, body)
 	if err != nil {
-		log.Fatalln("There was error while migrating. Exiting...")
+		log.Fatalln("There was error while migrating. Exiting...", err)
 	}
 
 	respBody := MigrationResponseBody{}

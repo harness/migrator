@@ -26,27 +26,27 @@ To migrate an application
 harness-upgrade app
 ```
 
-We use Bearer auth token to make API calls. The token can be provided in the step-by-step guide in the prompt or as below
+We use API keys created in NextGen to make API calls. The token can be provided in the step-by-step guide in the prompt or as below
 
 ```shell
-HARNESS_MIGRATOR_AUTH=token harness-upgrade
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade
 ```
 
 OR
 ```shell
-export HARNESS_MIGRATOR_AUTH=token
+export HARNESS_MIGRATOR_AUTH=apiKey
 harness-upgrade
 ```
 
 ### Migrating with a single command
 ```shell
-HARNESS_MIGRATOR_AUTH=token harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
 ```
 
 To migrate an application
 
 ```shell
-HARNESS_MIGRATOR_AUTH=token harness-upgrade app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
 ```
 
 | Flag        | Details                                                                                 |

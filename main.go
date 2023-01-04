@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"net/http"
 	"os"
 )
 
@@ -23,6 +25,7 @@ var migrationReq = struct {
 	AppId             string `survey:"appId"`
 	Debug             bool   `survey:"debug"`
 	Json              bool   `survey:"json"`
+	AllowInsecureReq  bool   `survey:"insecure"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -43,12 +46,16 @@ func PromptDefaultInputs() bool {
 	// Check if auth is provided. If not provided then request for one
 	migrationReq.Auth = os.Getenv("HARNESS_MIGRATOR_AUTH")
 	if len(migrationReq.Auth) == 0 {
-		migrationReq.Auth = TextInput("The environment variable 'HARNESS_MIGRATOR_AUTH' is not set. What is the auth token?")
+		migrationReq.Auth = TextInput("The environment variable 'HARNESS_MIGRATOR_AUTH' is not set. What is the api key?")
 	}
 
 	if len(migrationReq.Environment) == 0 {
 		promptConfirm = true
 		migrationReq.Environment = SelectInput("Which environment?", []string{"Dev", "QA", "Prod"}, Dev)
+	}
+
+	if migrationReq.Environment == "Dev" || migrationReq.AllowInsecureReq {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	if len(migrationReq.Account) == 0 {
@@ -249,6 +256,11 @@ func main() {
 				Name:        "project",
 				Usage:       "project `identifier` in next gen",
 				Destination: &migrationReq.ProjectIdentifier,
+			},
+			&cli.BoolFlag{
+				Name:        "insecure",
+				Usage:       "Allow insecure API requests. This is automatically set to true if environment is `Dev`",
+				Destination: &migrationReq.AllowInsecureReq,
 			},
 			&cli.BoolFlag{
 				Name:        "debug",
