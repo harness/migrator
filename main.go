@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var Version = "development"
@@ -23,6 +24,7 @@ var migrationReq = struct {
 	OrgIdentifier     string `survey:"org"`
 	ProjectIdentifier string `survey:"project"`
 	AppId             string `survey:"appId"`
+	WorkflowIds       string `survey:"workflowIds"`
 	Debug             bool   `survey:"debug"`
 	Json              bool   `survey:"json"`
 	AllowInsecureReq  bool   `survey:"insecure"`
@@ -43,15 +45,15 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 func PromptDefaultInputs() bool {
 	promptConfirm := false
 
+	if len(migrationReq.Environment) == 0 {
+		promptConfirm = true
+		migrationReq.Environment = SelectInput("Which environment?", []string{"Dev", "QA", "Prod"}, Dev)
+	}
+
 	// Check if auth is provided. If not provided then request for one
 	migrationReq.Auth = os.Getenv("HARNESS_MIGRATOR_AUTH")
 	if len(migrationReq.Auth) == 0 {
 		migrationReq.Auth = TextInput("The environment variable 'HARNESS_MIGRATOR_AUTH' is not set. What is the api key?")
-	}
-
-	if len(migrationReq.Environment) == 0 {
-		promptConfirm = true
-		migrationReq.Environment = SelectInput("Which environment?", []string{"Dev", "QA", "Prod"}, Dev)
 	}
 
 	if migrationReq.Environment == "Dev" || migrationReq.AllowInsecureReq {
@@ -71,6 +73,22 @@ func PromptDefaultInputs() bool {
 	if len(migrationReq.ConnectorScope) == 0 {
 		promptConfirm = true
 		migrationReq.ConnectorScope = SelectInput("Scope for connectors:", scopes, Project)
+	}
+	return promptConfirm
+}
+
+func PromptOrgAndProject() bool {
+	promptConfirm := false
+	promptOrg := len(migrationReq.OrgIdentifier) == 0
+	promptProject := len(migrationReq.ProjectIdentifier) == 0
+
+	if promptOrg {
+		promptConfirm = true
+		migrationReq.OrgIdentifier = TextInput("Which Org?")
+	}
+	if promptProject {
+		promptConfirm = true
+		migrationReq.ProjectIdentifier = TextInput("Which Project?")
 	}
 	return promptConfirm
 }
@@ -155,25 +173,14 @@ func cliWrapper(fn cliFnWrapper, ctx *cli.Context) error {
 	return fn(ctx)
 }
 
-func migrateApp(ctx *cli.Context) error {
+func migrateApp(*cli.Context) error {
 	promptConfirm := PromptDefaultInputs()
-	migrationReq.AppId = ctx.Args().Get(0)
 	if len(migrationReq.AppId) == 0 {
 		promptConfirm = true
 		migrationReq.AppId = TextInput("Please provide the application ID of the app that you wish to import -")
 	}
 
-	promptOrg := len(migrationReq.OrgIdentifier) == 0
-	promptProject := len(migrationReq.ProjectIdentifier) == 0
-
-	if promptOrg {
-		promptConfirm = true
-		migrationReq.OrgIdentifier = TextInput("Which Org?")
-	}
-	if promptProject {
-		promptConfirm = true
-		migrationReq.ProjectIdentifier = TextInput("Which Project?")
-	}
+	promptConfirm = PromptOrgAndProject() || promptConfirm
 
 	logMigrationDetails()
 
@@ -191,6 +198,41 @@ func migrateApp(ctx *cli.Context) error {
 		AppId: migrationReq.AppId,
 	}))
 	log.Info("Imported the application.")
+
+	return nil
+}
+
+func migrateWorkflows(*cli.Context) error {
+	promptConfirm := PromptDefaultInputs()
+	if len(migrationReq.AppId) == 0 {
+		promptConfirm = true
+		migrationReq.AppId = TextInput("Please provide the application ID of the app containing the workflows -")
+	}
+
+	if len(migrationReq.WorkflowIds) == 0 {
+		promptConfirm = true
+		migrationReq.WorkflowIds = TextInput("Provide the workflows that you wish to import as template as comma separated values(e.g. workflow1,workflow2)")
+	}
+
+	promptConfirm = PromptOrgAndProject() || promptConfirm
+
+	logMigrationDetails()
+
+	if promptConfirm {
+		confirm := ConfirmInput("Do you want to proceed with workflows migration?")
+		if !confirm {
+			log.Fatal("Aborting...")
+		}
+	}
+
+	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
+	// Migrating the app
+	log.Info("Importing the workflows....")
+	CreateEntity(url, migrationReq.Auth, getReqBody(Workflow, Filter{
+		WorkflowIds: strings.Split(migrationReq.WorkflowIds, ","),
+		AppId:       migrationReq.AppId,
+	}))
+	log.Info("Imported the workflows.")
 
 	return nil
 }
@@ -225,6 +267,13 @@ func main() {
 					return cliWrapper(migrateApp, context)
 				},
 			},
+			{
+				Name:  "workflows",
+				Usage: "Import workflows as stage or pipeline templates into a existing project by providing the `appId` & `workflowIds`",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateWorkflows, context)
+				},
+			},
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -234,7 +283,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:        "account",
-				Usage:       "`ID` of the account that you wish to migrate",
+				Usage:       "`id` of the account that you wish to migrate",
 				Destination: &migrationReq.Account,
 			},
 			&cli.StringFlag{
@@ -257,9 +306,19 @@ func main() {
 				Usage:       "project `identifier` in next gen",
 				Destination: &migrationReq.ProjectIdentifier,
 			},
+			&cli.StringFlag{
+				Name:        "app",
+				Usage:       "application `id` in current gen",
+				Destination: &migrationReq.AppId,
+			},
+			&cli.StringFlag{
+				Name:        "workflows",
+				Usage:       "workflows as comma separated values `workflowId1,workflowId2`",
+				Destination: &migrationReq.WorkflowIds,
+			},
 			&cli.BoolFlag{
 				Name:        "insecure",
-				Usage:       "Allow insecure API requests. This is automatically set to true if environment is `Dev`",
+				Usage:       "allow insecure API requests. This is automatically set to true if environment is Dev",
 				Destination: &migrationReq.AllowInsecureReq,
 			},
 			&cli.BoolFlag{

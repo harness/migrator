@@ -5,6 +5,7 @@ const (
 	Secret                   = "SECRET"
 	Connector                = "CONNECTOR"
 	Application              = "APPLICATION"
+	Workflow                 = "WORKFLOW"
 )
 
 const (

@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 const (
@@ -79,7 +80,7 @@ func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
-		return nil, errors.New("received non 200 response code. The response code was " + string(rune(resp.StatusCode)))
+		return nil, errors.New("received non 200 response code. The response code was " + strconv.Itoa(resp.StatusCode))
 	}
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()

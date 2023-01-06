@@ -4,8 +4,9 @@ type EntityType string
 type ImportType string
 
 type Filter struct {
-	Type  ImportType `json:"importType"`
-	AppId string     `json:"appId"`
+	Type        ImportType `json:"importType"`
+	AppId       string     `json:"appId"`
+	WorkflowIds []string   `json:"workflowIds"`
 }
 
 type DestinationDetails struct {

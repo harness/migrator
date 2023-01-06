@@ -12,6 +12,11 @@ mv harness-upgrade /somepath/
 harness-upgrade help
 ```
 
+If you are using macOS then just do
+```shell
+mv harness-upgrade /usr/local/bin/
+```
+
 If the above works successfully you should see all the commands that are supported with `harness-upgrade`
 
 ### Migrating using the step-by-step guide
@@ -24,6 +29,11 @@ harness-upgrade
 To migrate an application 
 ```shell
 harness-upgrade app
+```
+
+To migrate workflows
+```shell
+harness-upgrade workflows
 ```
 
 We use API keys created in NextGen to make API calls. The token can be provided in the step-by-step guide in the prompt or as below
@@ -39,6 +49,8 @@ harness-upgrade
 ```
 
 ### Migrating with a single command
+To migrate all account level entities
+
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
 ```
@@ -46,7 +58,13 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --project PROJECT --org ORG --accou
 To migrate an application
 
 ```shell
-HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade app --app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
+```
+
+To migrate workflows
+
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade workflows --app APP_ID --workflows WORKFLOW_IDS --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
 ```
 
 | Flag        | Details                                                                                 |
@@ -57,6 +75,8 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade app APP_ID --project PROJECT --org 
 | --connector | Scope at which the connector has to be created. It can be `project`, `org` or `account` |
 | --org       | Identifier of the target org                                                            |
 | --project   | Identifier of the target project                                                        |
+| --app       | Application ID from current gen                                                         |
+| --workflows | Workflow Ids as comma separated values(ex. workflow1,workflow2,workflow3)               |
 | --debug     | If debug level logs need to be printed                                                  |
 | --json      | Formatted the logs as JSON                                                              |
 
