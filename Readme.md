@@ -52,33 +52,35 @@ harness-upgrade
 To migrate all account level entities
 
 ```shell
-HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --env ENV
 ```
 
 To migrate an application
 
 ```shell
-HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade app --app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade app --app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --env ENV
 ```
 
 To migrate workflows
 
 ```shell
-HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade workflows --app APP_ID --workflows WORKFLOW_IDS --project PROJECT --org ORG --account ACCOUNT_ID --secret SCOPE --connector SCOPE --env ENV
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade workflows --app APP_ID --workflows WORKFLOW_IDS --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV
 ```
 
-| Flag        | Details                                                                                 |
-|-------------|-----------------------------------------------------------------------------------------|
-| --env       | Your target environment. It can be either `Dev`, `QA` or `Prod`                         |
-| --account   | ID of the account that you wish to migrate                                              |
-| --secret    | Scope at which the secret has to be created. It can be `project`, `org` or `account`    |
-| --connector | Scope at which the connector has to be created. It can be `project`, `org` or `account` |
-| --org       | Identifier of the target org                                                            |
-| --project   | Identifier of the target project                                                        |
-| --app       | Application ID from current gen                                                         |
-| --workflows | Workflow Ids as comma separated values(ex. workflow1,workflow2,workflow3)               |
-| --debug     | If debug level logs need to be printed                                                  |
-| --json      | Formatted the logs as JSON                                                              |
+| Flag              | Details                                                                                            |
+|-------------------|----------------------------------------------------------------------------------------------------|
+| --env             | Your target environment. It can be either `Dev`, `QA` or `Prod`                                    |
+| --account         | ID of the account that you wish to migrate                                                         |
+| --secret-scope    | Scope at which the secret has to be created. It can be `project`, `org` or `account`               |
+| --connector-scope | Scope at which the connector has to be created. It can be `project`, `org` or `account`            |
+| --template-scope  | Scope at which the templates has to be created. It can be `project`, `org` or `account`            |
+| --workflow-scope  | Scope at which the workflow as template has to be created. It can be `project`, `org` or `account` |
+| --org             | Identifier of the target org                                                                       |
+| --project         | Identifier of the target project                                                                   |
+| --app             | Application ID from current gen                                                                    |
+| --workflows       | Workflow Ids as comma separated values(ex. workflow1,workflow2,workflow3)                          |
+| --debug           | If debug level logs need to be printed                                                             |
+| --json            | Formatted the logs as JSON                                                                         |
 
 If not all the required flags are provided we will fall back to prompt based technique to capture all the required details.
 

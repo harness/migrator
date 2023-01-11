@@ -128,3 +128,10 @@ func CreateEntity(url string, auth string, body RequestBody) {
 		}
 	}
 }
+
+func getOrDefault(value string, defaultValue string) string {
+	if len(value) == 0 {
+		return defaultValue
+	}
+	return value
+}

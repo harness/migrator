@@ -21,6 +21,8 @@ var migrationReq = struct {
 	Account           string `survey:"account"`
 	SecretScope       string `survey:"secretScope"`
 	ConnectorScope    string `survey:"connectorScope"`
+	WorkflowScope     string `survey:"workflowScope"`
+	TemplateScope     string `survey:"templateScope"`
 	OrgIdentifier     string `survey:"org"`
 	ProjectIdentifier string `survey:"project"`
 	AppId             string `survey:"appId"`
@@ -33,9 +35,11 @@ var migrationReq = struct {
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	inputs := Inputs{
 		Defaults: Defaults{
-			Secret:        EntityDefaults{Scope: migrationReq.SecretScope},
-			SecretManager: EntityDefaults{Scope: migrationReq.SecretScope},
-			Connector:     EntityDefaults{Scope: migrationReq.ConnectorScope},
+			Secret:        EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
+			SecretManager: EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
+			Connector:     EntityDefaults{Scope: getOrDefault(migrationReq.ConnectorScope, Project)},
+			Template:      EntityDefaults{Scope: getOrDefault(migrationReq.TemplateScope, Project)},
+			Workflow:      EntityDefaults{Scope: getOrDefault(migrationReq.WorkflowScope, Project)},
 		},
 	}
 	destination := DestinationDetails{ProjectIdentifier: migrationReq.ProjectIdentifier, OrgIdentifier: migrationReq.OrgIdentifier}
@@ -74,6 +78,12 @@ func PromptDefaultInputs() bool {
 		promptConfirm = true
 		migrationReq.ConnectorScope = SelectInput("Scope for connectors:", scopes, Project)
 	}
+
+	if len(migrationReq.TemplateScope) == 0 {
+		promptConfirm = true
+		migrationReq.TemplateScope = SelectInput("Scope for templates:", scopes, Project)
+	}
+
 	return promptConfirm
 }
 
@@ -214,6 +224,10 @@ func migrateWorkflows(*cli.Context) error {
 		migrationReq.WorkflowIds = TextInput("Provide the workflows that you wish to import as template as comma separated values(e.g. workflow1,workflow2)")
 	}
 
+	if len(migrationReq.WorkflowScope) == 0 {
+		migrationReq.WorkflowScope = SelectInput("Scope for workflows:", scopes, Project)
+	}
+
 	promptConfirm = PromptOrgAndProject() || promptConfirm
 
 	logMigrationDetails()
@@ -287,14 +301,24 @@ func main() {
 				Destination: &migrationReq.Account,
 			},
 			&cli.StringFlag{
-				Name:        "secret",
+				Name:        "secret-scope",
 				Usage:       "`scope` to create secrets in. Possible values - account, org, project",
 				Destination: &migrationReq.SecretScope,
 			},
 			&cli.StringFlag{
-				Name:        "connector",
+				Name:        "connector-scope",
 				Usage:       "`scope` to create connectors in. Possible values - account, org, project",
 				Destination: &migrationReq.ConnectorScope,
+			},
+			&cli.StringFlag{
+				Name:        "workflow-scope",
+				Usage:       "`scope` to create workflows in. Possible values - account, org, project",
+				Destination: &migrationReq.WorkflowScope,
+			},
+			&cli.StringFlag{
+				Name:        "template-scope",
+				Usage:       "`scope` to create templates in. Possible values - account, org, project",
+				Destination: &migrationReq.TemplateScope,
 			},
 			&cli.StringFlag{
 				Name:        "org",
