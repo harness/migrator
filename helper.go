@@ -14,15 +14,17 @@ import (
 )
 
 const (
-	Prod string = "Prod"
-	QA          = "QA"
-	Dev         = "Dev"
+	Prod  string = "Prod"
+	QA           = "QA"
+	Dev          = "Dev"
+	Prod3        = "Prod3"
 )
 
 var urlMap = map[string]string{
-	Prod: "https://app.harness.io/gateway/ng-migration",
-	QA:   "https://qa.harness.io/gateway/ng-migration",
-	Dev:  "https://localhost:9080",
+	Prod:  "https://app.harness.io/gateway/ng-migration",
+	QA:    "https://qa.harness.io/gateway/ng-migration",
+	Dev:   "https://localhost:9080",
+	Prod3: "https://app3.harness.io/gateway/ng-migration",
 }
 
 func TextInput(question string) string {

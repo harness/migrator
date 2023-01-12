@@ -51,7 +51,7 @@ func PromptDefaultInputs() bool {
 
 	if len(migrationReq.Environment) == 0 {
 		promptConfirm = true
-		migrationReq.Environment = SelectInput("Which environment?", []string{"Dev", "QA", "Prod"}, Dev)
+		migrationReq.Environment = SelectInput("Which environment?", []string{Dev, QA, Prod, Prod3}, Dev)
 	}
 
 	// Check if auth is provided. If not provided then request for one

@@ -69,7 +69,7 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade workflows --app APP_ID --workflows 
 
 | Flag              | Details                                                                                            |
 |-------------------|----------------------------------------------------------------------------------------------------|
-| --env             | Your target environment. It can be either `Dev`, `QA` or `Prod`                                    |
+| --env             | Your target environment. It can be either `Dev`, `QA`, `Prod` or `Prod3`                           |
 | --account         | ID of the account that you wish to migrate                                                         |
 | --secret-scope    | Scope at which the secret has to be created. It can be `project`, `org` or `account`               |
 | --connector-scope | Scope at which the connector has to be created. It can be `project`, `org` or `account`            |
