@@ -85,4 +85,4 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade workflows --app APP_ID --workflows 
 If not all the required flags are provided we will fall back to prompt based technique to capture all the required details.
 
 ## Contact
-If you face any issues please reach out on `#migrate-entities-from-cg-to-ng` channel on Slack.
+If you face any issues please reach out on the maintainer(s): Deepak Parthurya, Brett Zane, Rohan Gupta
