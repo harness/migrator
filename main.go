@@ -129,6 +129,7 @@ func main() {
 		Version:              Version,
 		Usage:                "Upgrade Harness CD from Current Gen to Next Gen!",
 		EnableBashCompletion: true,
+		Suggest:              true,
 		Commands: []*cli.Command{
 			{
 				Name:  "app",
