@@ -7,6 +7,7 @@ type Filter struct {
 	Type        ImportType `json:"importType"`
 	AppId       string     `json:"appId"`
 	WorkflowIds []string   `json:"workflowIds"`
+	PipelineIds []string   `json:"pipelineIds"`
 }
 
 type DestinationDetails struct {
