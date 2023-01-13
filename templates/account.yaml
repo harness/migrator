@@ -1,0 +1,8 @@
+env: Dev
+api-key: <PAT>
+account: kmpySmUISimoRrJL6NL73w
+project: demo
+org: default
+secret-scope: project
+connector-scope: project
+template-scope: project

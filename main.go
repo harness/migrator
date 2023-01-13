@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v2/altsrc"
 	"os"
 )
 
@@ -25,6 +26,7 @@ var migrationReq = struct {
 	AppId             string `survey:"appId"`
 	WorkflowIds       string `survey:"workflowIds"`
 	PipelineIds       string `survey:"pipelineIds"`
+	File              string `survey:"load"`
 	Debug             bool   `survey:"debug"`
 	Json              bool   `survey:"json"`
 	AllowInsecureReq  bool   `survey:"insecure"`
@@ -83,6 +85,89 @@ func init() {
 }
 
 func main() {
+	globalFlags := []cli.Flag{
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "env",
+			Usage:       "possible values - Prod, QA, Dev",
+			Destination: &migrationReq.Environment,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "account",
+			Usage:       "`ACCOUNT` that you wish to migrate",
+			Destination: &migrationReq.Account,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "api-key",
+			Usage:       "`API_KEY` to authenticate & authorise the migration.",
+			Destination: &migrationReq.Auth,
+			EnvVars:     []string{"HARNESS_MIGRATOR_AUTH"},
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "secret-scope",
+			Usage:       "`SCOPE` to create secrets in. Possible values - account, org, project",
+			Destination: &migrationReq.SecretScope,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "connector-scope",
+			Usage:       "`SCOPE` to create connectors in. Possible values - account, org, project",
+			Destination: &migrationReq.ConnectorScope,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "workflow-scope",
+			Usage:       "`SCOPE` to create workflows in. Possible values - account, org, project",
+			Destination: &migrationReq.WorkflowScope,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "template-scope",
+			Usage:       "`SCOPE` to create templates in. Possible values - account, org, project",
+			Destination: &migrationReq.TemplateScope,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "org",
+			Usage:       "organisation `IDENTIFIER` in next gen",
+			Destination: &migrationReq.OrgIdentifier,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "project",
+			Usage:       "project `IDENTIFIER` in next gen",
+			Destination: &migrationReq.ProjectIdentifier,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "app",
+			Usage:       "`APP_ID` in current gen",
+			Destination: &migrationReq.AppId,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "workflows",
+			Usage:       "workflows as comma separated values `workflowId1,workflowId2`",
+			Destination: &migrationReq.WorkflowIds,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "pipelines",
+			Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
+			Destination: &migrationReq.WorkflowIds,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "load",
+			Usage:       "`FILE` to load flags from",
+			Destination: &migrationReq.File,
+		}),
+		altsrc.NewBoolFlag(&cli.BoolFlag{
+			Name:        "insecure",
+			Usage:       "allow insecure API requests. This is automatically set to true if environment is Dev",
+			Destination: &migrationReq.AllowInsecureReq,
+		}),
+		altsrc.NewBoolFlag(&cli.BoolFlag{
+			Name:        "debug",
+			Usage:       "print debug level logs",
+			Destination: &migrationReq.Debug,
+		}),
+		altsrc.NewBoolFlag(&cli.BoolFlag{
+			Name:        "json",
+			Usage:       "log as JSON instead of standard ASCII formatter",
+			Destination: &migrationReq.Json,
+		}),
+	}
 	app := &cli.App{
 		Name:                 "harness-upgrade",
 		Version:              Version,
@@ -112,78 +197,8 @@ func main() {
 				},
 			},
 		},
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "env",
-				Usage:       "possible values - Prod, QA, Dev",
-				Destination: &migrationReq.Environment,
-			},
-			&cli.StringFlag{
-				Name:        "account",
-				Usage:       "`ACCOUNT` that you wish to migrate",
-				Destination: &migrationReq.Account,
-			},
-			&cli.StringFlag{
-				Name:        "secret-scope",
-				Usage:       "`SCOPE` to create secrets in. Possible values - account, org, project",
-				Destination: &migrationReq.SecretScope,
-			},
-			&cli.StringFlag{
-				Name:        "connector-scope",
-				Usage:       "`SCOPE` to create connectors in. Possible values - account, org, project",
-				Destination: &migrationReq.ConnectorScope,
-			},
-			&cli.StringFlag{
-				Name:        "workflow-scope",
-				Usage:       "`SCOPE` to create workflows in. Possible values - account, org, project",
-				Destination: &migrationReq.WorkflowScope,
-			},
-			&cli.StringFlag{
-				Name:        "template-scope",
-				Usage:       "`SCOPE` to create templates in. Possible values - account, org, project",
-				Destination: &migrationReq.TemplateScope,
-			},
-			&cli.StringFlag{
-				Name:        "org",
-				Usage:       "organisation `IDENTIFIER` in next gen",
-				Destination: &migrationReq.OrgIdentifier,
-			},
-			&cli.StringFlag{
-				Name:        "project",
-				Usage:       "project `IDENTIFIER` in next gen",
-				Destination: &migrationReq.ProjectIdentifier,
-			},
-			&cli.StringFlag{
-				Name:        "app",
-				Usage:       "`APP_ID` in current gen",
-				Destination: &migrationReq.AppId,
-			},
-			&cli.StringFlag{
-				Name:        "workflows",
-				Usage:       "workflows as comma separated values `workflowId1,workflowId2`",
-				Destination: &migrationReq.WorkflowIds,
-			},
-			&cli.StringFlag{
-				Name:        "pipelines",
-				Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
-				Destination: &migrationReq.WorkflowIds,
-			},
-			&cli.BoolFlag{
-				Name:        "insecure",
-				Usage:       "allow insecure API requests. This is automatically set to true if environment is Dev",
-				Destination: &migrationReq.AllowInsecureReq,
-			},
-			&cli.BoolFlag{
-				Name:        "debug",
-				Usage:       "print debug level logs",
-				Destination: &migrationReq.Debug,
-			},
-			&cli.BoolFlag{
-				Name:        "json",
-				Usage:       "log as JSON instead of standard ASCII formatter",
-				Destination: &migrationReq.Json,
-			},
-		},
+		Before: altsrc.InitInputSourceWithContext(globalFlags, altsrc.NewYamlSourceFromFlagFunc("load")),
+		Flags:  globalFlags,
 		Action: func(context *cli.Context) error {
 			return cliWrapper(migrateAccountLevelEntities, context)
 		},

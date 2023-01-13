@@ -1,0 +1,11 @@
+env: Dev
+api-key: <PAT>
+account: kmpySmUISimoRrJL6NL73w
+app: qGIv5p1gQqCrdbrsQT2Tig
+pipelines: "iQmdMl50ROK2XMAQujqmeA,1rOHou5yRJ613iwBXsDjnA,XUDPQH6mRGquxa7-Sutuwg,lSkeH8O4R32KUSJmml9pDA,ILA50kgJQKa3j3s35-h55Q"
+project: demo
+org: default
+secret-scope: project
+connector-scope: project
+template-scope: project
+workflow-scope: project

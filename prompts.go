@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"net/http"
-	"os"
 )
 
 func PromptDefaultInputs() bool {
@@ -15,7 +14,6 @@ func PromptDefaultInputs() bool {
 	}
 
 	// Check if auth is provided. If not provided then request for one
-	migrationReq.Auth = os.Getenv("HARNESS_MIGRATOR_AUTH")
 	if len(migrationReq.Auth) == 0 {
 		migrationReq.Auth = TextInput("The environment variable 'HARNESS_MIGRATOR_AUTH' is not set. What is the api key?")
 	}

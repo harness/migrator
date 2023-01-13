@@ -7,6 +7,7 @@ import (
 )
 
 func migrateAccountLevelEntities(*cli.Context) error {
+	log.Info("Migrating all account level entities like secret managers, secrets, connectors.")
 	promptConfirm := PromptDefaultInputs()
 	// Based on the scopes of entities determine the destination details
 	promptConfirm = PromptOrgAndProject([]string{migrationReq.SecretScope, migrationReq.ConnectorScope}) || promptConfirm
