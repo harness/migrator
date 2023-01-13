@@ -6,6 +6,8 @@ const (
 	Connector                = "CONNECTOR"
 	Application              = "APPLICATION"
 	Workflow                 = "WORKFLOW"
+	Pipeline                 = "PIPELINE"
+	Template                 = "TEMPLATE"
 )
 
 const (

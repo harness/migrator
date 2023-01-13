@@ -27,6 +27,7 @@ var migrationReq = struct {
 	ProjectIdentifier string `survey:"project"`
 	AppId             string `survey:"appId"`
 	WorkflowIds       string `survey:"workflowIds"`
+	PipelineIds       string `survey:"pipelineIds"`
 	Debug             bool   `survey:"debug"`
 	Json              bool   `survey:"json"`
 	AllowInsecureReq  bool   `survey:"insecure"`
@@ -225,6 +226,7 @@ func migrateWorkflows(*cli.Context) error {
 	}
 
 	if len(migrationReq.WorkflowScope) == 0 {
+		promptConfirm = true
 		migrationReq.WorkflowScope = SelectInput("Scope for workflows:", scopes, Project)
 	}
 
@@ -247,6 +249,46 @@ func migrateWorkflows(*cli.Context) error {
 		AppId:       migrationReq.AppId,
 	}))
 	log.Info("Imported the workflows.")
+
+	return nil
+}
+
+func migratePipelines(*cli.Context) error {
+	promptConfirm := PromptDefaultInputs()
+	if len(migrationReq.AppId) == 0 {
+		promptConfirm = true
+		migrationReq.AppId = TextInput("Please provide the application ID of the app containing the pipeline -")
+	}
+
+	if len(migrationReq.WorkflowScope) == 0 {
+		promptConfirm = true
+		migrationReq.WorkflowScope = SelectInput("Scope for workflow to be migrated as templates:", scopes, Project)
+	}
+
+	if len(migrationReq.PipelineIds) == 0 {
+		promptConfirm = true
+		migrationReq.PipelineIds = TextInput("Provide the pipelines that you wish to import as template as comma separated values(e.g. pipeline1,pipeline2)")
+	}
+
+	promptConfirm = PromptOrgAndProject() || promptConfirm
+
+	logMigrationDetails()
+
+	if promptConfirm {
+		confirm := ConfirmInput("Do you want to proceed with pipeline migration?")
+		if !confirm {
+			log.Fatal("Aborting...")
+		}
+	}
+
+	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
+	// Migrating the app
+	log.Info("Importing the pipelines....")
+	CreateEntity(url, migrationReq.Auth, getReqBody(Pipeline, Filter{
+		PipelineIds: strings.Split(migrationReq.PipelineIds, ","),
+		AppId:       migrationReq.AppId,
+	}))
+	log.Info("Imported the pipelines.")
 
 	return nil
 }
@@ -276,16 +318,23 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:  "app",
-				Usage: "Import an app into a existing project by providing the `appId`",
+				Usage: "Import an app into an existing project by providing the `appId`",
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateApp, context)
 				},
 			},
 			{
 				Name:  "workflows",
-				Usage: "Import workflows as stage or pipeline templates into a existing project by providing the `appId` & `workflowIds`",
+				Usage: "Import workflows as stage or pipeline templates by providing the `appId` & `workflowIds`",
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateWorkflows, context)
+				},
+			},
+			{
+				Name:  "pipelines",
+				Usage: "Import pipelines into an existing project by providing the `appId` & `pipelineIds`",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migratePipelines, context)
 				},
 			},
 		},
@@ -338,6 +387,11 @@ func main() {
 			&cli.StringFlag{
 				Name:        "workflows",
 				Usage:       "workflows as comma separated values `workflowId1,workflowId2`",
+				Destination: &migrationReq.WorkflowIds,
+			},
+			&cli.StringFlag{
+				Name:        "pipelines",
+				Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
 				Destination: &migrationReq.WorkflowIds,
 			},
 			&cli.BoolFlag{
