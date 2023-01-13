@@ -56,47 +56,6 @@ func logMigrationDetails() {
 	}).Info("Migration details")
 }
 
-func migrateAccountLevelEntities(*cli.Context) error {
-	promptConfirm := PromptDefaultInputs()
-	// Based on the scopes of entities determine the destination details
-	promptConfirm = PromptOrgAndProject([]string{migrationReq.SecretScope, migrationReq.ConnectorScope}) || promptConfirm
-	logMigrationDetails()
-
-	// We confirm if they wish to proceed or not
-	if promptConfirm {
-		confirm := ConfirmInput("Do you wish to proceed importing all secret managers, secrets & connectors?")
-		if !confirm {
-			os.Exit(1)
-		}
-	}
-
-	// Finally Make the API calls to create all entities
-	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
-
-	// Create Secret Managers
-	log.Info("Importing all secret managers from CG to NG...")
-	CreateEntity(url, migrationReq.Auth, getReqBody(SecretManager, Filter{
-		Type: All,
-	}))
-	log.Info("Imported all secret managers.")
-
-	// Create Secrets
-	log.Info("Importing all secrets from CG to NG...")
-	CreateEntity(url, migrationReq.Auth, getReqBody(Secret, Filter{
-		Type: All,
-	}))
-	log.Info("Imported all secrets.")
-
-	// Create Connectors
-	log.Info("Importing all connectors from CG to NG....")
-	CreateEntity(url, migrationReq.Auth, getReqBody(Connector, Filter{
-		Type: All,
-	}))
-	log.Info("Imported all connectors.")
-
-	return nil
-}
-
 func cliWrapper(fn cliFnWrapper, ctx *cli.Context) error {
 	if migrationReq.Debug {
 		log.SetLevel(log.DebugLevel)
@@ -161,42 +120,42 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:        "account",
-				Usage:       "`id` of the account that you wish to migrate",
+				Usage:       "`ACCOUNT` that you wish to migrate",
 				Destination: &migrationReq.Account,
 			},
 			&cli.StringFlag{
 				Name:        "secret-scope",
-				Usage:       "`scope` to create secrets in. Possible values - account, org, project",
+				Usage:       "`SCOPE` to create secrets in. Possible values - account, org, project",
 				Destination: &migrationReq.SecretScope,
 			},
 			&cli.StringFlag{
 				Name:        "connector-scope",
-				Usage:       "`scope` to create connectors in. Possible values - account, org, project",
+				Usage:       "`SCOPE` to create connectors in. Possible values - account, org, project",
 				Destination: &migrationReq.ConnectorScope,
 			},
 			&cli.StringFlag{
 				Name:        "workflow-scope",
-				Usage:       "`scope` to create workflows in. Possible values - account, org, project",
+				Usage:       "`SCOPE` to create workflows in. Possible values - account, org, project",
 				Destination: &migrationReq.WorkflowScope,
 			},
 			&cli.StringFlag{
 				Name:        "template-scope",
-				Usage:       "`scope` to create templates in. Possible values - account, org, project",
+				Usage:       "`SCOPE` to create templates in. Possible values - account, org, project",
 				Destination: &migrationReq.TemplateScope,
 			},
 			&cli.StringFlag{
 				Name:        "org",
-				Usage:       "organisation `identifier` in next gen",
+				Usage:       "organisation `IDENTIFIER` in next gen",
 				Destination: &migrationReq.OrgIdentifier,
 			},
 			&cli.StringFlag{
 				Name:        "project",
-				Usage:       "project `identifier` in next gen",
+				Usage:       "project `IDENTIFIER` in next gen",
 				Destination: &migrationReq.ProjectIdentifier,
 			},
 			&cli.StringFlag{
 				Name:        "app",
-				Usage:       "application `id` in current gen",
+				Usage:       "`APP_ID` in current gen",
 				Destination: &migrationReq.AppId,
 			},
 			&cli.StringFlag{
