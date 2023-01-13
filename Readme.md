@@ -58,7 +58,7 @@ harness-upgrade --api-key apiKey
 ```
 
 ## Migrating with a single command
-Using the step-by-step guide is recommended way to get start with upgrade, but filling the prompts everytime can feel tedious. If you wish to provide all or a few inputs you can pass them using the flags. If required arguments are not provided we will prompt for the inputs.  
+Using the step-by-step guide is the recommended way to get started with upgrade, but filling the prompts everytime can be tedious. If you wish to provide all or a few inputs you can pass them using the flags. If required arguments are not provided we will prompt for the inputs.  
 
 ### To migrate all account level entities
 
