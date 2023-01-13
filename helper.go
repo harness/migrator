@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
 	"os"
@@ -136,4 +137,14 @@ func getOrDefault(value string, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+func ContainsAny[E comparable](source []E, values []E) bool {
+	for i := range values {
+		v := values[i]
+		if slices.Contains(source, v) {
+			return true
+		}
+	}
+	return false
 }

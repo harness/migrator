@@ -79,6 +79,7 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade workflows --app APP_ID --workflows 
 | --project         | Identifier of the target project                                                                   |
 | --app             | Application ID from current gen                                                                    |
 | --workflows       | Workflow Ids as comma separated values(ex. workflow1,workflow2,workflow3)                          |
+| --pipelines       | Pipeline Ids as comma separated values(ex. pipeline1,pipeline2,pipeline3)                          |
 | --debug           | If debug level logs need to be printed                                                             |
 | --json            | Formatted the logs as JSON                                                                         |
 

@@ -1,13 +1,10 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"net/http"
 	"os"
-	"strings"
 )
 
 var Version = "development"
@@ -47,68 +44,12 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	return RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter}
 }
 
-func PromptDefaultInputs() bool {
-	promptConfirm := false
-
-	if len(migrationReq.Environment) == 0 {
-		promptConfirm = true
-		migrationReq.Environment = SelectInput("Which environment?", []string{Dev, QA, Prod, Prod3}, Dev)
-	}
-
-	// Check if auth is provided. If not provided then request for one
-	migrationReq.Auth = os.Getenv("HARNESS_MIGRATOR_AUTH")
-	if len(migrationReq.Auth) == 0 {
-		migrationReq.Auth = TextInput("The environment variable 'HARNESS_MIGRATOR_AUTH' is not set. What is the api key?")
-	}
-
-	if migrationReq.Environment == "Dev" || migrationReq.AllowInsecureReq {
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-
-	if len(migrationReq.Account) == 0 {
-		promptConfirm = true
-		migrationReq.Account = TextInput("Account that you wish to migrate:")
-	}
-
-	if len(migrationReq.SecretScope) == 0 {
-		promptConfirm = true
-		migrationReq.SecretScope = SelectInput("Scope for secrets & secret managers:", scopes, Project)
-	}
-
-	if len(migrationReq.ConnectorScope) == 0 {
-		promptConfirm = true
-		migrationReq.ConnectorScope = SelectInput("Scope for connectors:", scopes, Project)
-	}
-
-	if len(migrationReq.TemplateScope) == 0 {
-		promptConfirm = true
-		migrationReq.TemplateScope = SelectInput("Scope for templates:", scopes, Project)
-	}
-
-	return promptConfirm
-}
-
-func PromptOrgAndProject() bool {
-	promptConfirm := false
-	promptOrg := len(migrationReq.OrgIdentifier) == 0
-	promptProject := len(migrationReq.ProjectIdentifier) == 0
-
-	if promptOrg {
-		promptConfirm = true
-		migrationReq.OrgIdentifier = TextInput("Which Org?")
-	}
-	if promptProject {
-		promptConfirm = true
-		migrationReq.ProjectIdentifier = TextInput("Which Project?")
-	}
-	return promptConfirm
-}
-
 func logMigrationDetails() {
 	log.WithFields(log.Fields{
 		"Account":           migrationReq.Account,
 		"SecretScope":       migrationReq.SecretScope,
 		"ConnectorScope":    migrationReq.ConnectorScope,
+		"TemplateScope":     migrationReq.TemplateScope,
 		"AppID":             migrationReq.AppId,
 		"OrgIdentifier":     migrationReq.OrgIdentifier,
 		"ProjectIdentifier": migrationReq.ProjectIdentifier,
@@ -117,26 +58,8 @@ func logMigrationDetails() {
 
 func migrateAccountLevelEntities(*cli.Context) error {
 	promptConfirm := PromptDefaultInputs()
-
-	promptOrg := false
-	promptProject := false
 	// Based on the scopes of entities determine the destination details
-	if migrationReq.SecretScope == Project || migrationReq.ConnectorScope == Project {
-		promptOrg = len(migrationReq.OrgIdentifier) == 0
-		promptProject = len(migrationReq.ProjectIdentifier) == 0
-	} else if migrationReq.SecretScope == Org || migrationReq.ConnectorScope == Org {
-		promptOrg = len(migrationReq.OrgIdentifier) == 0
-	}
-
-	if promptOrg {
-		promptConfirm = true
-		migrationReq.OrgIdentifier = TextInput("Which Org?")
-	}
-	if promptProject {
-		promptConfirm = true
-		migrationReq.ProjectIdentifier = TextInput("Which Project?")
-	}
-
+	promptConfirm = PromptOrgAndProject([]string{migrationReq.SecretScope, migrationReq.ConnectorScope}) || promptConfirm
 	logMigrationDetails()
 
 	// We confirm if they wish to proceed or not
@@ -182,115 +105,6 @@ func cliWrapper(fn cliFnWrapper, ctx *cli.Context) error {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
 	return fn(ctx)
-}
-
-func migrateApp(*cli.Context) error {
-	promptConfirm := PromptDefaultInputs()
-	if len(migrationReq.AppId) == 0 {
-		promptConfirm = true
-		migrationReq.AppId = TextInput("Please provide the application ID of the app that you wish to import -")
-	}
-
-	promptConfirm = PromptOrgAndProject() || promptConfirm
-
-	logMigrationDetails()
-
-	if promptConfirm {
-		confirm := ConfirmInput("Do you want to proceed with app migration?")
-		if !confirm {
-			log.Fatal("Aborting...")
-		}
-	}
-
-	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
-	// Migrating the app
-	log.Info("Importing the application....")
-	CreateEntity(url, migrationReq.Auth, getReqBody(Application, Filter{
-		AppId: migrationReq.AppId,
-	}))
-	log.Info("Imported the application.")
-
-	return nil
-}
-
-func migrateWorkflows(*cli.Context) error {
-	promptConfirm := PromptDefaultInputs()
-	if len(migrationReq.AppId) == 0 {
-		promptConfirm = true
-		migrationReq.AppId = TextInput("Please provide the application ID of the app containing the workflows -")
-	}
-
-	if len(migrationReq.WorkflowIds) == 0 {
-		promptConfirm = true
-		migrationReq.WorkflowIds = TextInput("Provide the workflows that you wish to import as template as comma separated values(e.g. workflow1,workflow2)")
-	}
-
-	if len(migrationReq.WorkflowScope) == 0 {
-		promptConfirm = true
-		migrationReq.WorkflowScope = SelectInput("Scope for workflows:", scopes, Project)
-	}
-
-	promptConfirm = PromptOrgAndProject() || promptConfirm
-
-	logMigrationDetails()
-
-	if promptConfirm {
-		confirm := ConfirmInput("Do you want to proceed with workflows migration?")
-		if !confirm {
-			log.Fatal("Aborting...")
-		}
-	}
-
-	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
-	// Migrating the app
-	log.Info("Importing the workflows....")
-	CreateEntity(url, migrationReq.Auth, getReqBody(Workflow, Filter{
-		WorkflowIds: strings.Split(migrationReq.WorkflowIds, ","),
-		AppId:       migrationReq.AppId,
-	}))
-	log.Info("Imported the workflows.")
-
-	return nil
-}
-
-func migratePipelines(*cli.Context) error {
-	promptConfirm := PromptDefaultInputs()
-	if len(migrationReq.AppId) == 0 {
-		promptConfirm = true
-		migrationReq.AppId = TextInput("Please provide the application ID of the app containing the pipeline -")
-	}
-
-	if len(migrationReq.WorkflowScope) == 0 {
-		promptConfirm = true
-		migrationReq.WorkflowScope = SelectInput("Scope for workflow to be migrated as templates:", scopes, Project)
-	}
-
-	if len(migrationReq.PipelineIds) == 0 {
-		promptConfirm = true
-		migrationReq.PipelineIds = TextInput("Provide the pipelines that you wish to import as template as comma separated values(e.g. pipeline1,pipeline2)")
-	}
-
-	promptConfirm = PromptOrgAndProject() || promptConfirm
-
-	logMigrationDetails()
-
-	if promptConfirm {
-		confirm := ConfirmInput("Do you want to proceed with pipeline migration?")
-		if !confirm {
-			log.Fatal("Aborting...")
-		}
-	}
-
-	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
-	// Migrating the app
-	log.Info("Importing the pipelines....")
-	CreateEntity(url, migrationReq.Auth, getReqBody(Pipeline, Filter{
-		PipelineIds: strings.Split(migrationReq.PipelineIds, ","),
-		AppId:       migrationReq.AppId,
-	}))
-	log.Info("Imported the pipelines.")
-
-	return nil
 }
 
 func init() {
