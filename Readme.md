@@ -91,7 +91,7 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --pipelines PIPELINE_I
 
 ### To create a project
 ```shell
-HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG --name PROJECT_NAME --identifier PROJECT_IDENTIFIER project create
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG project --name PROJECT_NAME --identifier PROJECT_IDENTIFIER create
 ```
 
 ## Migrating by providing the flags from a file
