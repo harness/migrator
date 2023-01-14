@@ -22,7 +22,7 @@ func migrateAccountLevelEntities(*cli.Context) error {
 	}
 
 	// Finally Make the API calls to create all entities
-	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
+	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/v2", migrationReq.Account)
 
 	// Create Secret Managers
 	log.Info("Importing all secret managers from CG to NG...")

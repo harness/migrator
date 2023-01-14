@@ -6,6 +6,27 @@ import (
 )
 
 func PromptDefaultInputs() bool {
+	promptConfirm := PromptEnvDetails()
+
+	if len(migrationReq.SecretScope) == 0 {
+		promptConfirm = true
+		migrationReq.SecretScope = SelectInput("Scope for secrets & secret managers:", scopes, Project)
+	}
+
+	if len(migrationReq.ConnectorScope) == 0 {
+		promptConfirm = true
+		migrationReq.ConnectorScope = SelectInput("Scope for connectors:", scopes, Project)
+	}
+
+	if len(migrationReq.TemplateScope) == 0 {
+		promptConfirm = true
+		migrationReq.TemplateScope = SelectInput("Scope for templates:", scopes, Project)
+	}
+
+	return promptConfirm
+}
+
+func PromptEnvDetails() bool {
 	promptConfirm := false
 
 	if len(migrationReq.Environment) == 0 {
@@ -26,22 +47,6 @@ func PromptDefaultInputs() bool {
 		promptConfirm = true
 		migrationReq.Account = TextInput("Account that you wish to migrate:")
 	}
-
-	if len(migrationReq.SecretScope) == 0 {
-		promptConfirm = true
-		migrationReq.SecretScope = SelectInput("Scope for secrets & secret managers:", scopes, Project)
-	}
-
-	if len(migrationReq.ConnectorScope) == 0 {
-		promptConfirm = true
-		migrationReq.ConnectorScope = SelectInput("Scope for connectors:", scopes, Project)
-	}
-
-	if len(migrationReq.TemplateScope) == 0 {
-		promptConfirm = true
-		migrationReq.TemplateScope = SelectInput("Scope for templates:", scopes, Project)
-	}
-
 	return promptConfirm
 }
 

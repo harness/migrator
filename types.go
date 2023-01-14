@@ -31,6 +31,19 @@ type Inputs struct {
 	Defaults Defaults `json:"defaults"`
 }
 
+type ProjectDetails struct {
+	OrgIdentifier string   `json:"orgIdentifier"`
+	Identifier    string   `json:"identifier"`
+	Name          string   `json:"name"`
+	Color         string   `json:"color"`
+	Modules       []string `json:"modules"`
+	Description   string   `json:"description"`
+}
+
+type ProjectCreateBody struct {
+	Project ProjectDetails `json:"project"`
+}
+
 type RequestBody struct {
 	DestinationDetails DestinationDetails `json:"destinationDetails"`
 	EntityType         EntityType         `json:"entityType"`

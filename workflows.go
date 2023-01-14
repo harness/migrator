@@ -34,7 +34,7 @@ func migrateWorkflows(*cli.Context) error {
 		}
 	}
 
-	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
+	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/v2", migrationReq.Account)
 	// Migrating the app
 	log.Info("Importing the workflows....")
 	CreateEntity(url, migrationReq.Auth, getReqBody(Workflow, Filter{
