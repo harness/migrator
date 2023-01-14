@@ -21,11 +21,28 @@ const (
 	Prod3        = "Prod3"
 )
 
-var urlMap = map[string]string{
-	Prod:  "https://app.harness.io/gateway/ng-migration",
-	QA:    "https://qa.harness.io/gateway/ng-migration",
-	Dev:   "https://localhost:9080",
-	Prod3: "https://app3.harness.io/gateway/ng-migration",
+const (
+	MIGRATOR string = "Migrator"
+	NG              = "NextGen"
+)
+
+var urlMap = map[string]map[string]string{
+	Prod: {
+		MIGRATOR: "https://app.harness.io/gateway/ng-migration",
+		NG:       "https://app.harness.io/gateway/ng",
+	},
+	QA: {
+		MIGRATOR: "https://qa.harness.io/gateway/ng-migration",
+		NG:       "https://qa.harness.io/gateway/ng",
+	},
+	Dev: {
+		MIGRATOR: "https://localhost:9080",
+		NG:       "https://localhost:8181/ng",
+	},
+	Prod3: {
+		MIGRATOR: "https://app3.harness.io/gateway/ng-migration",
+		NG:       "https://app3.harness.io/gateway/ng",
+	},
 }
 
 func TextInput(question string) string {
@@ -98,8 +115,16 @@ func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
 	return respBody, nil
 }
 
-func GetUrl(environment string, path string, accountId string) string {
-	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment], path, accountId)
+func GetUrl(environment string, service string, path string, accountId string) string {
+	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment][service], path, accountId)
+}
+
+func MakeAPICall(url string, auth string, body interface{}) ([]byte, error) {
+	resp, err := PostReq(url, auth, body)
+	if err != nil {
+		log.Fatalln("There was error. Exiting...", err)
+	}
+	return resp, err
 }
 
 func CreateEntity(url string, auth string, body RequestBody) {

@@ -34,7 +34,7 @@ func migratePipelines(*cli.Context) error {
 		}
 	}
 
-	url := GetUrl(migrationReq.Environment, "save/v2", migrationReq.Account)
+	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/v2", migrationReq.Account)
 	// Migrating the pipelines
 	log.Info("Importing the pipelines....")
 	CreateEntity(url, migrationReq.Auth, getReqBody(Pipeline, Filter{

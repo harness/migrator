@@ -40,6 +40,11 @@ To migrate pipelines
 harness-upgrade pipelines
 ```
 
+To create project
+```shell
+harness-upgrade project create
+```
+
 We use API keys created in NextGen to make API calls. The token can be provided in the step-by-step guide in the prompt or as below
 
 ```shell
@@ -82,6 +87,11 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --workflows WORKFLOW_I
 
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --pipelines PIPELINE_IDS --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV pipelines 
+```
+
+### To create a project
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG project --name PROJECT_NAME --identifier PROJECT_IDENTIFIER create
 ```
 
 ## Migrating by providing the flags from a file

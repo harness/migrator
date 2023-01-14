@@ -30,6 +30,7 @@ var migrationReq = struct {
 	Debug             bool   `survey:"debug"`
 	Json              bool   `survey:"json"`
 	AllowInsecureReq  bool   `survey:"insecure"`
+	ProjectName       string `survey:"projectName"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -194,6 +195,31 @@ func main() {
 				Usage: "Import pipelines into an existing project by providing the `appId` & `pipelineIds`",
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migratePipelines, context)
+				},
+			},
+			{
+				Name:  "project",
+				Usage: "Project specific commands like create, delete, list etc.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "name",
+						Usage:       "`NAME` for the project",
+						Destination: &migrationReq.ProjectName,
+					},
+					&cli.StringFlag{
+						Name:        "identifier",
+						Usage:       "`IDENTIFIER` for the project",
+						Destination: &migrationReq.ProjectIdentifier,
+					},
+				},
+				Subcommands: []*cli.Command{
+					{
+						Name:  "create",
+						Usage: "Create a project",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(createProject, context)
+						},
+					},
 				},
 			},
 		},
