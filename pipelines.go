@@ -23,7 +23,7 @@ func migratePipelines(*cli.Context) error {
 		migrationReq.PipelineIds = TextInput("Provide the pipelines that you wish to import as template as comma separated values(e.g. pipeline1,pipeline2)")
 	}
 
-	promptConfirm = PromptOrgAndProject([]string{migrationReq.WorkflowScope, migrationReq.SecretScope, migrationReq.ConnectorScope, migrationReq.TemplateScope}) || promptConfirm
+	promptConfirm = PromptOrgAndProject([]string{Project}) || promptConfirm
 
 	logMigrationDetails()
 

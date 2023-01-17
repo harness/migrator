@@ -12,7 +12,7 @@ func migrateApp(*cli.Context) error {
 		migrationReq.AppId = TextInput("Please provide the application ID of the app that you wish to import -")
 	}
 
-	promptConfirm = PromptOrgAndProject([]string{migrationReq.SecretScope, migrationReq.ConnectorScope, migrationReq.TemplateScope}) || promptConfirm
+	promptConfirm = PromptOrgAndProject([]string{Project}) || promptConfirm
 
 	logMigrationDetails()
 
