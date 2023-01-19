@@ -1,5 +1,22 @@
 # Harness Upgrade
-CLI to help customers, CSMs and developers with migrating their current gen harness account to next gen
+
+Harness has developed a tool to help user's migrate from Harness CD Current Gen to CD Next Generation. The tool can migrate specific Harness resources or bulk migration of resources. 
+
+### Who is the Tool intended for?
+
+- CLI to help customers, CSMs and developers with migrating their current gen harness account to next gen
+
+### Key Components that can be migrated 
+
+1. Pipelines
+2. Workflows
+3. Service (Service Definition - Manifests, variables included)
+5. Environments (Overrides included)
+6. Infrastructure Definition
+7. Connectors
+8. Secrets
+9. Templates 
+
 
 ## Installation
 Download the latest release from GitHub releases. We support MacOS(`darwim & amd64`), Linux(`linux + (amd64/arm64)`) and Windows(`windows+amd64`). Please download the right assets. Extract the file anywhere.
