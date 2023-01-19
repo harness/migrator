@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jedib0t/go-pretty/v6/table"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 	"io"
@@ -138,6 +139,24 @@ func CreateEntity(url string, auth string, body RequestBody) {
 	if err != nil {
 		log.Fatalln("There was error while parsing the response from server. Exiting...")
 	}
+
+	if len(respBody.Resource.Stats) > 0 {
+		var rows []table.Row
+		for k, v := range respBody.Resource.Stats {
+			rows = append(rows, table.Row{k, v.SuccessfullyMigrated, v.AlreadyMigrated})
+		}
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{"", "Successfully Migrated", "Already Migrated"})
+		t.AppendRows(rows)
+		t.AppendSeparator()
+		t.SetStyle(table.StyleLight)
+		t.SortBy([]table.SortBy{
+			{Number: 1, Mode: table.Asc},
+		})
+		t.Render()
+	}
+
 	if len(respBody.Resource.Errors) == 0 {
 		return
 	}
