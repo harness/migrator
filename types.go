@@ -64,11 +64,13 @@ type UpgradeError struct {
 }
 
 type MigrationStats struct {
+	SuccessfullyMigrated int64 `json:"successfullyMigrated"`
+	AlreadyMigrated      int64 `json:"alreadyMigrated"`
 }
 
 type Resource struct {
-	Stats  MigrationStats `json:"stats"`
-	Errors []UpgradeError `json:"errors"`
+	Stats  map[string]MigrationStats `json:"stats"`
+	Errors []UpgradeError            `json:"errors"`
 }
 
 type MigrationResponseBody struct {
