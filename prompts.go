@@ -2,7 +2,10 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 func PromptDefaultInputs() bool {
@@ -39,6 +42,10 @@ func PromptEnvDetails() bool {
 		migrationReq.Auth = TextInput("The environment variable 'HARNESS_MIGRATOR_AUTH' is not set. What is the api key?")
 	}
 
+	PromptUrlNG()
+
+	PromptUrlCG()
+
 	if migrationReq.Environment == "Dev" || migrationReq.AllowInsecureReq {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
@@ -63,5 +70,43 @@ func PromptOrgAndProject(scope []string) bool {
 		promptConfirm = true
 		migrationReq.ProjectIdentifier = TextInput("Which Project?")
 	}
+	return promptConfirm
+}
+
+func PromptUrlNG() bool {
+	promptConfirm := false
+	if len(migrationReq.UrlNG) == 0 {
+		promptConfirm = true
+		migrationReq.UrlNG = TextInput("Please specify NG project URL :")
+	}
+
+	u, err := url.Parse(migrationReq.UrlNG)
+	if err != nil {
+		fmt.Println("Invalid URL")
+	}
+	fragment := u.Fragment
+
+	migrationReq.Account = strings.Split(fragment, "/")[2]
+	migrationReq.OrgIdentifier = strings.Split(fragment, "/")[5]
+	migrationReq.ProjectIdentifier = strings.Split(fragment, "/")[7]
+	migrationReq.ProjectName = strings.Split(fragment, "/")[7]
+
+	return promptConfirm
+}
+
+func PromptUrlCG() bool {
+	promptConfirm := false
+	if len(migrationReq.UrlCG) == 0 {
+		promptConfirm = true
+		migrationReq.UrlCG = TextInput("Please specify CG application URL :")
+	}
+
+	u, err := url.Parse(migrationReq.UrlCG)
+	if err != nil {
+		fmt.Println("Invalid URL")
+	}
+	fragment := u.Fragment
+	migrationReq.AppId = strings.Split(fragment, "/")[4]
+
 	return promptConfirm
 }
