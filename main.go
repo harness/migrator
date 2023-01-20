@@ -146,7 +146,7 @@ func main() {
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "pipelines",
 			Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
-			Destination: &migrationReq.WorkflowIds,
+			Destination: &migrationReq.PipelineIds,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "load",
@@ -176,6 +176,20 @@ func main() {
 		EnableBashCompletion: true,
 		Suggest:              true,
 		Commands: []*cli.Command{
+			{
+				Name:  "account-summary",
+				Usage: "Get a summary of an account",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(getAccountSummary, context)
+				},
+			},
+			{
+				Name:  "application-summary",
+				Usage: "Get a summary of an app",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(getAppSummary, context)
+				},
+			},
 			{
 				Name:  "app",
 				Usage: "Import an app into an existing project by providing the `appId`",
