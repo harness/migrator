@@ -91,10 +91,8 @@ func PromptUrlNG() bool {
 			promptConfirm = true
 			migrationReq.UrlNG = TextInput("Incorrect NG url! Please specify NG project URL :")
 		} else {
-			u, err := url.Parse(migrationReq.UrlNG)
-			if err != nil {
-				continue
-			}
+			u, _ := url.Parse(migrationReq.UrlNG)
+
 			fragment := u.Fragment
 			migrationReq.Account = strings.Split(fragment, "/")[2]
 			migrationReq.OrgIdentifier = strings.Split(fragment, "/")[5]
@@ -125,10 +123,8 @@ func PromptUrlCG() bool {
 			promptConfirm = true
 			migrationReq.UrlCG = TextInput("Incorrect CG url! Please specify CG application URL :")
 		} else {
-			u, err := url.Parse(migrationReq.UrlCG)
-			if err != nil {
-				continue
-			}
+			u, _ := url.Parse(migrationReq.UrlCG)
+
 			fragment := u.Fragment
 			migrationReq.AppId = strings.Split(fragment, "/")[4]
 			break
