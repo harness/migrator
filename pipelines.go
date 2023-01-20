@@ -41,7 +41,7 @@ func migratePipelines(*cli.Context) error {
 	// Migrating the pipelines
 	log.Info("Importing the pipelines....")
 	var pipelineIds []string
-	if len(migrationReq.WorkflowIds) > 0 {
+	if len(migrationReq.PipelineIds) > 0 {
 		pipelineIds = strings.Split(migrationReq.PipelineIds, ",")
 	}
 	CreateEntity(url, migrationReq.Auth, getReqBody(Pipeline, Filter{
