@@ -112,7 +112,6 @@ func PromptUrlNG() bool {
 
 func PromptUrlCG() bool {
 	promptConfirm := false
-	//https://app.harness.io/#/account/8INL1LHjRmmrZQKdYtlvKA/app/9Wgyf62rSr-Gyu4emIMhww/details
 	re := regexp.MustCompile(`https:\/\/app\.harness\.io\/#\/account\/[a-zA-Z0-9-]+\/app\/[a-zA-Z0-9-]+/.*`)
 	if len(migrationReq.UrlCG) == 0 {
 		promptConfirm = true
