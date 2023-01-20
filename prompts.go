@@ -2,10 +2,12 @@ package main
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func PromptDefaultInputs() bool {
@@ -75,38 +77,68 @@ func PromptOrgAndProject(scope []string) bool {
 
 func PromptUrlNG() bool {
 	promptConfirm := false
+	re := regexp.MustCompile(`https:\/\/app\.harness\.io/ng/#/account/([a-zA-Z0-9]+)/home/orgs/([a-zA-Z0-9]+)/projects/([a-zA-Z0-9]+)/.*`)
 	if len(migrationReq.UrlNG) == 0 {
 		promptConfirm = true
 		migrationReq.UrlNG = TextInput("Please specify NG project URL :")
 	}
+	for {
+		u, err := url.Parse(migrationReq.UrlNG)
+		if err != nil {
+			promptConfirm = true
+			migrationReq.UrlNG = TextInput("Incorrect NG url! Please specify NG project URL :")
+		}
 
-	u, err := url.Parse(migrationReq.UrlNG)
-	if err != nil {
-		fmt.Println("Invalid URL")
+		if !re.MatchString(u.String()) {
+			promptConfirm = true
+			migrationReq.UrlNG = TextInput("Incorrect NG url! Please specify NG project URL :")
+		} else {
+			u, err := url.Parse(migrationReq.UrlNG)
+			if err != nil {
+				log.Error(err)
+				break
+			}
+			fragment := u.Fragment
+			migrationReq.Account = strings.Split(fragment, "/")[2]
+			migrationReq.OrgIdentifier = strings.Split(fragment, "/")[5]
+			migrationReq.ProjectIdentifier = strings.Split(fragment, "/")[7]
+			migrationReq.ProjectName = strings.Split(fragment, "/")[7]
+			break
+		}
 	}
-	fragment := u.Fragment
-
-	migrationReq.Account = strings.Split(fragment, "/")[2]
-	migrationReq.OrgIdentifier = strings.Split(fragment, "/")[5]
-	migrationReq.ProjectIdentifier = strings.Split(fragment, "/")[7]
-	migrationReq.ProjectName = strings.Split(fragment, "/")[7]
 
 	return promptConfirm
 }
 
 func PromptUrlCG() bool {
 	promptConfirm := false
+	//https://app.harness.io/#/account/8INL1LHjRmmrZQKdYtlvKA/app/9Wgyf62rSr-Gyu4emIMhww/details
+	re := regexp.MustCompile(`https:\/\/app\.harness\.io\/#\/account\/[a-zA-Z0-9-]+\/app\/[a-zA-Z0-9-]+/.*`)
 	if len(migrationReq.UrlCG) == 0 {
 		promptConfirm = true
 		migrationReq.UrlCG = TextInput("Please specify CG application URL :")
 	}
+	for {
+		u, err := url.Parse(migrationReq.UrlCG)
+		if err != nil {
+			promptConfirm = true
+			migrationReq.UrlCG = TextInput("Incorrect CG url! Please specify CG application URL :")
+		}
 
-	u, err := url.Parse(migrationReq.UrlCG)
-	if err != nil {
-		fmt.Println("Invalid URL")
+		if !re.MatchString(u.String()) {
+			promptConfirm = true
+			migrationReq.UrlCG = TextInput("Incorrect CG url! Please specify CG application URL :")
+		} else {
+			u, err := url.Parse(migrationReq.UrlCG)
+			if err != nil {
+				log.Error(err)
+				break
+			}
+			fragment := u.Fragment
+			migrationReq.AppId = strings.Split(fragment, "/")[4]
+			break
+		}
 	}
-	fragment := u.Fragment
-	migrationReq.AppId = strings.Split(fragment, "/")[4]
 
 	return promptConfirm
 }
