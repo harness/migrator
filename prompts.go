@@ -75,7 +75,7 @@ func PromptOrgAndProject(scope []string) bool {
 
 func PromptUrlNG() bool {
 	promptConfirm := false
-	re := regexp.MustCompile(`https:\/\/app\.harness\.io/ng/#/account/([a-zA-Z0-9]+)/home/orgs/([a-zA-Z0-9]+)/projects/([a-zA-Z0-9]+)/.*`)
+	re := regexp.MustCompile(`https:\/\/app\.harness\.io/ng/#/account/([a-zA-Z0-9]+)/.*/orgs/([a-zA-Z0-9_]+)/projects/([a-zA-Z0-9_]+)/.*`)
 	if len(migrationReq.UrlNG) == 0 {
 		promptConfirm = true
 		migrationReq.UrlNG = TextInput("Please specify NG project URL :")
@@ -109,7 +109,7 @@ func PromptUrlNG() bool {
 
 func PromptUrlCG() bool {
 	promptConfirm := false
-	re := regexp.MustCompile(`https:\/\/app\.harness\.io\/#\/account\/[a-zA-Z0-9-]+\/app\/[a-zA-Z0-9-]+/.*`)
+	re := regexp.MustCompile(`https:\/\/app\.harness\.io\/#\/account\/[a-zA-Z0-9-]+\/app\/[a-zA-Z0-9-_]+/.*`)
 	if len(migrationReq.UrlCG) == 0 {
 		promptConfirm = true
 		migrationReq.UrlCG = TextInput("Please specify CG application URL :")
