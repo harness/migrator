@@ -19,8 +19,11 @@ func migratePipelines(*cli.Context) error {
 	}
 
 	if len(migrationReq.PipelineIds) == 0 {
-		promptConfirm = true
-		migrationReq.PipelineIds = TextInput("Provide the pipelines that you wish to import as template as comma separated values(e.g. pipeline1,pipeline2)")
+		allPipelinesConfirm := ConfirmInput("No pipelines provided. This defaults to migrating all pipelines within the application. Do you want to proceed?")
+		if !allPipelinesConfirm {
+			promptConfirm = true
+			migrationReq.PipelineIds = TextInput("Provide the pipelines that you wish to import as template as comma separated values(e.g. pipeline1,pipeline2)")
+		}
 	}
 
 	promptConfirm = PromptOrgAndProject([]string{Project}) || promptConfirm
@@ -37,8 +40,12 @@ func migratePipelines(*cli.Context) error {
 	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/v2", migrationReq.Account)
 	// Migrating the pipelines
 	log.Info("Importing the pipelines....")
+	var pipelineIds []string
+	if len(migrationReq.PipelineIds) > 0 {
+		pipelineIds = strings.Split(migrationReq.PipelineIds, ",")
+	}
 	CreateEntity(url, migrationReq.Auth, getReqBody(Pipeline, Filter{
-		PipelineIds: strings.Split(migrationReq.PipelineIds, ","),
+		PipelineIds: pipelineIds,
 		AppId:       migrationReq.AppId,
 	}))
 	log.Info("Imported the pipelines.")

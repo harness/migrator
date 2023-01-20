@@ -1,18 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jedib0t/go-pretty/v6/table"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
-	"io"
-	"net/http"
 	"os"
-	"strconv"
 )
 
 const (
@@ -83,45 +78,12 @@ func ConfirmInput(question string) bool {
 	return confirm
 }
 
-func PostReq(reqUrl string, auth string, body interface{}) ([]byte, error) {
-	postBody, _ := json.Marshal(body)
-	requestBody := bytes.NewBuffer(postBody)
-	log.WithFields(log.Fields{
-		"body": string(postBody),
-	}).Debug("The request body")
-	req, err := http.NewRequest("POST", reqUrl, requestBody)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", auth)
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, errors.New("received non 200 response code. The response code was " + strconv.Itoa(resp.StatusCode))
-	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(resp.Body)
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	log.WithFields(log.Fields{
-		"body": string(respBody),
-	}).Debug("The response body")
-	return respBody, nil
-}
-
 func GetUrl(environment string, service string, path string, accountId string) string {
 	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment][service], path, accountId)
 }
 
 func MakeAPICall(url string, auth string, body interface{}) ([]byte, error) {
-	resp, err := PostReq(url, auth, body)
+	resp, err := Post(url, auth, body)
 	if err != nil {
 		log.Fatalln("There was error. Exiting...", err)
 	}
@@ -129,7 +91,7 @@ func MakeAPICall(url string, auth string, body interface{}) ([]byte, error) {
 }
 
 func CreateEntity(url string, auth string, body RequestBody) {
-	resp, err := PostReq(url, auth, body)
+	resp, err := Post(url, auth, body)
 	if err != nil {
 		log.Fatalln("There was error while migrating. Exiting...", err)
 	}
