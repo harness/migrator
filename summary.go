@@ -140,8 +140,7 @@ func renderMultipleSummaries(title string, count int64, summaries []SubSummary) 
 			t.AppendSeparator()
 			t.SetStyle(table.StyleLight)
 			t.SetColumnConfigs([]table.ColumnConfig{
-				{Number: 1, AutoMerge: true, AlignHeader: text.AlignCenter},
-				{Number: 2, AutoMerge: true},
+				{Number: 1, AlignHeader: text.AlignCenter},
 			})
 		}
 	}
@@ -163,8 +162,7 @@ func renderSummaryWithCount(title string, count int64, data map[string]int64) {
 		t.AppendSeparator()
 		t.SetStyle(table.StyleLight)
 		t.SetColumnConfigs([]table.ColumnConfig{
-			{Number: 1, AutoMerge: true, AlignHeader: text.AlignCenter},
-			{Number: 2, AutoMerge: true},
+			{Number: 1, AlignHeader: text.AlignCenter},
 		})
 		t.Render()
 	}
@@ -183,8 +181,7 @@ func renderTable(title string, data map[string]int64) {
 		t.AppendRows(rows)
 		t.AppendSeparator()
 		t.SetColumnConfigs([]table.ColumnConfig{
-			{Number: 1, AutoMerge: true, AlignHeader: text.AlignCenter},
-			{Number: 2, AutoMerge: true},
+			{Number: 1, AlignHeader: text.AlignCenter},
 		})
 		t.SetStyle(table.StyleLight)
 		t.Render()
