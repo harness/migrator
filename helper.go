@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -78,16 +77,17 @@ func ConfirmInput(question string) bool {
 	return confirm
 }
 
-func GetUrl(environment string, service string, path string, accountId string) string {
-	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment][service], path, accountId)
+func GetUrlWithQueryParams(environment string, service string, endpoint string, queryParams map[string]string) string {
+	params := ""
+	for k, v := range queryParams {
+		params = params + k + "=" + v + "&"
+	}
+
+	return fmt.Sprintf("%s/api/ng-migration/%s?%s", urlMap[environment][service], endpoint, params)
 }
 
-func MakeAPICall(url string, auth string, body interface{}) ([]byte, error) {
-	resp, err := Post(url, auth, body)
-	if err != nil {
-		log.Fatalln("There was error. Exiting...", err)
-	}
-	return resp, err
+func GetUrl(environment string, service string, path string, accountId string) string {
+	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment][service], path, accountId)
 }
 
 func CreateEntity(url string, auth string, body RequestBody) {
@@ -96,15 +96,9 @@ func CreateEntity(url string, auth string, body RequestBody) {
 		log.Fatalln("There was error while migrating. Exiting...", err)
 	}
 
-	respBody := MigrationResponseBody{}
-	err = json.Unmarshal(resp, &respBody)
-	if err != nil {
-		log.Fatalln("There was error while parsing the response from server. Exiting...")
-	}
-
-	if len(respBody.Resource.Stats) > 0 {
+	if len(resp.Resource.Stats) > 0 {
 		var rows []table.Row
-		for k, v := range respBody.Resource.Stats {
+		for k, v := range resp.Resource.Stats {
 			rows = append(rows, table.Row{k, v.SuccessfullyMigrated, v.AlreadyMigrated})
 		}
 		t := table.NewWriter()
@@ -119,12 +113,12 @@ func CreateEntity(url string, auth string, body RequestBody) {
 		t.Render()
 	}
 
-	if len(respBody.Resource.Errors) == 0 {
+	if len(resp.Resource.Errors) == 0 {
 		return
 	}
 	log.Info("Here are the errors while migrating - ")
-	for i := range respBody.Resource.Errors {
-		e := respBody.Resource.Errors[i]
+	for i := range resp.Resource.Errors {
+		e := resp.Resource.Errors[i]
 		if len(e.Entity.Id) > 0 {
 			log.WithFields(log.Fields{
 				"type":  e.Entity.Type,

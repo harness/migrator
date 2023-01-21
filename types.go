@@ -69,11 +69,43 @@ type MigrationStats struct {
 }
 
 type Resource struct {
-	Stats  map[string]MigrationStats `json:"stats"`
-	Errors []UpgradeError            `json:"errors"`
+	RequestId       string                    `json:"requestId"`
+	Stats           map[string]MigrationStats `json:"stats"`
+	Errors          []UpgradeError            `json:"errors"`
+	Status          string                    `json:"status"`
+	ResponsePayload SummaryResponse           `json:"responsePayload"`
 }
 
-type MigrationResponseBody struct {
-	Resource Resource    `json:"resource"`
-	Messages interface{} `json:"responseMessages"`
+type ResponseBody struct {
+	Code     string             `json:"code"`
+	Message  string             `json:"message"`
+	Status   string             `json:"status"`
+	Data     interface{}        `json:"data"`
+	Resource Resource           `json:"resource"`
+	Messages []ResponseMessages `json:"responseMessages"`
+}
+
+type ResponseMessages struct {
+	Code         string      `json:"code"`
+	Level        string      `json:"level"`
+	Message      string      `json:"message"`
+	Exception    interface{} `json:"exception"`
+	FailureTypes interface{} `json:"failureTypes"`
+}
+
+type SummaryResponse struct {
+	Summary map[string]EntitySummary `json:"summary"`
+}
+
+type EntitySummary struct {
+	Name                     string           `json:"name"`
+	Count                    int64            `json:"count"`
+	TypeSummary              map[string]int64 `json:"typeSummary"`
+	StepTypeSummary          map[string]int64 `json:"stepTypeSummary"`
+	KindSummary              map[string]int64 `json:"kindSummary"`
+	StoreSummary             map[string]int64 `json:"storeSummary"`
+	DeploymentTypeSummary    map[string]int64 `json:"deploymentTypeSummary"`
+	ArtifactTypeSummary      map[string]int64 `json:"artifactTypeSummary"`
+	CloudProviderTypeSummary map[string]int64 `json:"cloudProviderTypeSummary"`
+	Expressions              []string         `json:"expressions"`
 }
