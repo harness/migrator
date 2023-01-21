@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/briandowns/spinner"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"os"
@@ -38,6 +40,9 @@ func handleSummary(url string) error {
 		log.Fatal("Failed to fetch account summary")
 	}
 	reqId := resp.Resource.RequestId
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	s.Suffix = " Processing"
+	s.Start()
 	for {
 		time.Sleep(time.Second)
 		url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "discover/summary/async-result", map[string]string{
@@ -46,15 +51,15 @@ func handleSummary(url string) error {
 		})
 		resp, err := Get(url, migrationReq.Auth)
 		if err != nil {
+			s.Stop()
 			log.Fatal("Failed to fetch account summary")
 		}
 		if resp.Resource.Status == "ERROR" {
+			s.Stop()
 			log.Fatal("Failed to fetch account summary")
 		}
-		if resp.Resource.Status == "PROCESSING" {
-			print("Please wait we are processing the request...")
-		}
 		if resp.Resource.Status == "DONE" {
+			s.Stop()
 			renderSummary(resp.Resource.ResponsePayload.Summary)
 			break
 		}
@@ -72,20 +77,40 @@ func renderSummary(summary map[string]EntitySummary) {
 	for k, v := range summary {
 		switch k {
 		case Infrastructure:
-			renderTableWithCount(k, v.Count, v.DeploymentTypeSummary)
-			renderTableWithCount(k, v.Count, v.CloudProviderTypeSummary)
+			renderMultipleSummaries(k, v.Count, []SubSummary{{
+				Title: "Deployment Types",
+				Data:  v.DeploymentTypeSummary,
+			}, {
+				Title: "Cloud Providers",
+				Data:  v.CloudProviderTypeSummary,
+			}})
 		case Workflow:
-			renderTableWithCount(k, v.Count, v.TypeSummary)
-			renderTableWithCount(k, v.Count, v.StepTypeSummary)
+			renderMultipleSummaries(k, v.Count, []SubSummary{{
+				Title: "Workflow Types",
+				Data:  v.TypeSummary,
+			}, {
+				Title: "Steps",
+				Data:  v.StepTypeSummary,
+			}})
 		case Service:
-			renderTableWithCount(k, v.Count, v.DeploymentTypeSummary)
-			renderTableWithCount(k, v.Count, v.ArtifactTypeSummary)
+			renderMultipleSummaries(k, v.Count, []SubSummary{{
+				Title: "Service Types",
+				Data:  v.DeploymentTypeSummary,
+			}, {
+				Title: "Artifact Types",
+				Data:  v.ArtifactTypeSummary,
+			}})
 		case ApplicationManifest:
-			renderTableWithCount(k, v.Count, v.KindSummary)
-			renderTableWithCount(k, v.Count, v.StoreSummary)
+			renderMultipleSummaries(k, v.Count, []SubSummary{{
+				Title: "Types",
+				Data:  v.KindSummary,
+			}, {
+				Title: "Store",
+				Data:  v.StoreSummary,
+			}})
 		case Connector:
 			delete(v.TypeSummary, "STRING")
-			renderTableWithCount(k, v.Count, v.TypeSummary)
+			renderSummaryWithCount(k, v.Count, v.TypeSummary)
 		case Account:
 		case Application:
 		case Pipeline:
@@ -93,23 +118,51 @@ func renderSummary(summary map[string]EntitySummary) {
 		case Environment:
 		case WorkflowExecution:
 		default:
-			renderTableWithCount(k, v.Count, v.TypeSummary)
+			renderSummaryWithCount(k, v.Count, v.TypeSummary)
 		}
 	}
 }
 
-func renderTableWithCount(title string, count int64, data map[string]int64) {
+func renderMultipleSummaries(title string, count int64, summaries []SubSummary) {
+	//rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
+	t := table.NewWriter()
+	t.AppendHeader(table.Row{fmt.Sprintf("%s (%d)", title, count)})
+	for _, summary := range summaries {
+		if len(summary.Data) > 0 {
+			var rows []table.Row
+			for k, v := range summary.Data {
+				rows = append(rows, table.Row{k, v})
+			}
+			t.SetOutputMirror(os.Stdout)
+			t.AppendRow(table.Row{summary.Title})
+			t.AppendRows(rows)
+			t.AppendSeparator()
+			t.SetStyle(table.StyleLight)
+			t.SetColumnConfigs([]table.ColumnConfig{
+				{Number: 1, AutoMerge: true},
+				{Number: 2, AutoMerge: true, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+			})
+		}
+	}
+	t.Render()
+}
+
+func renderSummaryWithCount(title string, count int64, data map[string]int64) {
 	if len(data) > 0 {
+		t := table.NewWriter()
+		t.AppendHeader(table.Row{fmt.Sprintf("%s (%d)", title, count)})
 		var rows []table.Row
 		for k, v := range data {
 			rows = append(rows, table.Row{k, v})
 		}
-		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{fmt.Sprintf("%s (%d)", title, count), ""})
 		t.AppendRows(rows)
 		t.AppendSeparator()
 		t.SetStyle(table.StyleLight)
+		t.SetColumnConfigs([]table.ColumnConfig{
+			{Number: 1, AutoMerge: true},
+			{Number: 2, AutoMerge: true, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+		})
 		t.SortBy([]table.SortBy{
 			{Number: 1, Mode: table.Asc},
 		})
@@ -125,13 +178,22 @@ func renderTable(title string, data map[string]int64) {
 		}
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{title, ""})
+		t.AppendHeader(table.Row{title})
 		t.AppendRows(rows)
 		t.AppendSeparator()
+		t.SetColumnConfigs([]table.ColumnConfig{
+			{Number: 1, AutoMerge: true},
+			{Number: 2, AutoMerge: true, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+		})
 		t.SetStyle(table.StyleLight)
 		t.SortBy([]table.SortBy{
 			{Number: 1, Mode: table.Asc},
 		})
 		t.Render()
 	}
+}
+
+type SubSummary struct {
+	Title string
+	Data  map[string]int64
 }
