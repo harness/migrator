@@ -13,8 +13,6 @@ import (
 
 func GetAccountSummary(*cli.Context) error {
 	_ = PromptEnvDetails()
-	logMigrationDetails()
-
 	url := GetUrl(migrationReq.Environment, MIGRATOR, "discover/summary/async", migrationReq.Account)
 	return handleSummary(url)
 }
@@ -109,6 +107,7 @@ func renderSummary(summary map[string]EntitySummary) {
 				Data:  v.StoreSummary,
 			}})
 		case Connector:
+			v.Count = v.Count - v.TypeSummary["STRING"]
 			delete(v.TypeSummary, "STRING")
 			renderSummaryWithCount(k, v.Count, v.TypeSummary)
 		case Account:
@@ -124,9 +123,10 @@ func renderSummary(summary map[string]EntitySummary) {
 }
 
 func renderMultipleSummaries(title string, count int64, summaries []SubSummary) {
-	//rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
+	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
 	t := table.NewWriter()
-	t.AppendHeader(table.Row{fmt.Sprintf("%s (%d)", title, count)})
+	header := fmt.Sprintf("%s (%d)", title, count)
+	t.AppendHeader(table.Row{header, header}, rowConfigAutoMerge)
 	for _, summary := range summaries {
 		if len(summary.Data) > 0 {
 			var rows []table.Row
@@ -134,13 +134,14 @@ func renderMultipleSummaries(title string, count int64, summaries []SubSummary) 
 				rows = append(rows, table.Row{k, v})
 			}
 			t.SetOutputMirror(os.Stdout)
-			t.AppendRow(table.Row{summary.Title})
+			t.AppendRow(table.Row{summary.Title, summary.Title}, rowConfigAutoMerge)
+			t.AppendSeparator()
 			t.AppendRows(rows)
 			t.AppendSeparator()
 			t.SetStyle(table.StyleLight)
 			t.SetColumnConfigs([]table.ColumnConfig{
-				{Number: 1, AutoMerge: true},
-				{Number: 2, AutoMerge: true, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+				{Number: 1, AutoMerge: true, AlignHeader: text.AlignCenter},
+				{Number: 2, AutoMerge: true},
 			})
 		}
 	}
@@ -148,9 +149,11 @@ func renderMultipleSummaries(title string, count int64, summaries []SubSummary) 
 }
 
 func renderSummaryWithCount(title string, count int64, data map[string]int64) {
+	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
 	if len(data) > 0 {
 		t := table.NewWriter()
-		t.AppendHeader(table.Row{fmt.Sprintf("%s (%d)", title, count)})
+		header := fmt.Sprintf("%s (%d)", title, count)
+		t.AppendHeader(table.Row{header, header}, rowConfigAutoMerge)
 		var rows []table.Row
 		for k, v := range data {
 			rows = append(rows, table.Row{k, v})
@@ -160,17 +163,15 @@ func renderSummaryWithCount(title string, count int64, data map[string]int64) {
 		t.AppendSeparator()
 		t.SetStyle(table.StyleLight)
 		t.SetColumnConfigs([]table.ColumnConfig{
-			{Number: 1, AutoMerge: true},
-			{Number: 2, AutoMerge: true, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-		})
-		t.SortBy([]table.SortBy{
-			{Number: 1, Mode: table.Asc},
+			{Number: 1, AutoMerge: true, AlignHeader: text.AlignCenter},
+			{Number: 2, AutoMerge: true},
 		})
 		t.Render()
 	}
 }
 
 func renderTable(title string, data map[string]int64) {
+	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
 	if len(data) > 0 {
 		var rows []table.Row
 		for k, v := range data {
@@ -178,17 +179,14 @@ func renderTable(title string, data map[string]int64) {
 		}
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{title})
+		t.AppendHeader(table.Row{title, title}, rowConfigAutoMerge)
 		t.AppendRows(rows)
 		t.AppendSeparator()
 		t.SetColumnConfigs([]table.ColumnConfig{
-			{Number: 1, AutoMerge: true},
-			{Number: 2, AutoMerge: true, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+			{Number: 1, AutoMerge: true, AlignHeader: text.AlignCenter},
+			{Number: 2, AutoMerge: true},
 		})
 		t.SetStyle(table.StyleLight)
-		t.SortBy([]table.SortBy{
-			{Number: 1, Mode: table.Asc},
-		})
 		t.Render()
 	}
 }
