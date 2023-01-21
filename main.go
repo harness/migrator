@@ -86,6 +86,7 @@ func init() {
 }
 
 func main() {
+	CheckGithubForReleases()
 	globalFlags := []cli.Flag{
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "env",
