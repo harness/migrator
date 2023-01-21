@@ -111,6 +111,16 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --pipelines PIPELINE_I
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG project --name PROJECT_NAME --identifier PROJECT_IDENTIFIER create
 ```
 
+### To get account summary
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV account-summary
+```
+
+### To get application summary
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --app APP_ID --env ENV application-summary
+```
+
 ## Migrating by providing the flags from a file
 If you wish to provide the flags from a file you can use the `--load` to load flags from a file. You can find templates for various options in the `templates/` directory.
 

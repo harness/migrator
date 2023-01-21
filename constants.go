@@ -1,13 +1,18 @@
 package main
 
 const (
-	SecretManager EntityType = "SECRET_MANAGER"
-	Secret                   = "SECRET"
-	Connector                = "CONNECTOR"
-	Application              = "APPLICATION"
-	Workflow                 = "WORKFLOW"
-	Pipeline                 = "PIPELINE"
-	Template                 = "TEMPLATE"
+	SecretManager       EntityType = "SECRET_MANAGER"
+	Secret                         = "SECRET"
+	Service                        = "SERVICE"
+	Connector                      = "CONNECTOR"
+	Application                    = "APPLICATION"
+	Workflow                       = "WORKFLOW"
+	WorkflowExecution              = "WORKFLOW_EXECUTION"
+	Pipeline                       = "PIPELINE"
+	Infrastructure                 = "INFRA"
+	Environment                    = "ENVIRONMENT"
+	ApplicationManifest            = "MANIFEST"
+	Template                       = "TEMPLATE"
 )
 
 const (
