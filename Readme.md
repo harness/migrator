@@ -122,7 +122,7 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --app APP_ID -
 ```
 ### Using URL to parse details
 ```shell
-harness-upgrade --source-app https://app.harness.io/\#/account/8INL1LHjRmmrZQKdYtlvKA/app/9Wgyf62rSr-Gyu4emIMhww/details --destination-project https://app.harness.io/ng/\#/account/8INL1LHjRmmrZQKdYtlvKA/home/orgs/default/projects/test/details
+harness-upgrade --source-app <CURRENT_GEN_APP_URL> --destination-project <NG_PROJECT_URL>
 ```
 
 ## Migrating by providing the flags from a file
