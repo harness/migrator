@@ -89,6 +89,7 @@ func init() {
 }
 
 func main() {
+	CheckGithubForReleases()
 	globalFlags := []cli.Flag{
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "env",
@@ -193,14 +194,14 @@ func main() {
 				Name:  "account-summary",
 				Usage: "Get a summary of an account",
 				Action: func(context *cli.Context) error {
-					return cliWrapper(getAccountSummary, context)
+					return cliWrapper(GetAccountSummary, context)
 				},
 			},
 			{
 				Name:  "application-summary",
 				Usage: "Get a summary of an app",
 				Action: func(context *cli.Context) error {
-					return cliWrapper(getAppSummary, context)
+					return cliWrapper(GetAppSummary, context)
 				},
 			},
 			{

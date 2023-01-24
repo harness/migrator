@@ -36,7 +36,7 @@ func createProject(*cli.Context) error {
 
 	log.Info("Creating the project....")
 
-	_, err := MakeAPICall(url, migrationReq.Auth, ProjectCreateBody{
+	_, err := Post(url, migrationReq.Auth, ProjectCreateBody{
 		Project: ProjectDetails{
 			OrgIdentifier: migrationReq.OrgIdentifier,
 			Identifier:    migrationReq.ProjectIdentifier,
