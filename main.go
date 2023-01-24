@@ -96,13 +96,13 @@ func main() {
 			Destination: &migrationReq.Environment,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:        "urlNG",
-			Usage:       "`UrlNG` project url in next gen",
+			Name:        "destination-project",
+			Usage:       "`destination-project` destination project url in next gen",
 			Destination: &migrationReq.UrlNG,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:        "urlCG",
-			Usage:       "`UrlCG` application url in current gen",
+			Name:        "source-app",
+			Usage:       "`source-app` source application url in current gen",
 			Destination: &migrationReq.UrlCG,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{

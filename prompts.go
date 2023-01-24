@@ -4,9 +4,10 @@ import (
 	"crypto/tls"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func PromptDefaultInputs() bool {
@@ -43,13 +44,22 @@ func PromptEnvDetails() bool {
 		migrationReq.Auth = TextInput("The environment variable 'HARNESS_MIGRATOR_AUTH' is not set. What is the api key?")
 	}
 
-
-	if migrationReq.Environment == "Prod"{
-		PromptUrlNG()
-		PromptUrlCG()
+	if migrationReq.Environment == "Prod" && len(migrationReq.UrlCG) != 0 && len(migrationReq.UrlNG) != 0 {
+		if !ParseNGUrl() {
+			if len(migrationReq.Account) == 0 {
+				promptConfirm = true
+				migrationReq.Account = TextInput("Account that you wish to migrate:")
+			}
+			PromptOrgAndProject([]string{migrationReq.SecretScope, migrationReq.ConnectorScope, migrationReq.TemplateScope})
+		}
+		if !ParseCGUrl() {
+			if len(migrationReq.AppId) == 0 {
+				promptConfirm = true
+				migrationReq.AppId = TextInput("AppId that you wish to migrate:")
+			}
+		}
 	}
-	
-	
+
 	if migrationReq.Environment == "Dev" || migrationReq.AllowInsecureReq {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
@@ -77,63 +87,46 @@ func PromptOrgAndProject(scope []string) bool {
 	return promptConfirm
 }
 
-func PromptUrlNG() bool {
-	promptConfirm := false
-	re := regexp.MustCompile(`https:\/\/app\.harness\.io/ng/#/account/([a-zA-Z0-9]+)/.*/orgs/([a-zA-Z0-9_]+)/projects/([a-zA-Z0-9_]+)/.*`)
-	if len(migrationReq.UrlNG) == 0 {
-		promptConfirm = true
-		migrationReq.UrlNG = TextInput("Please specify NG project URL :")
-	}
-	for {
-		u, err := url.Parse(migrationReq.UrlNG)
-		if err != nil {
-			promptConfirm = true
-			migrationReq.UrlNG = TextInput("Incorrect NG url! Please specify NG project URL :")
-		}
-
-		if !re.MatchString(u.String()) {
-			promptConfirm = true
-			migrationReq.UrlNG = TextInput("Incorrect NG url! Please specify NG project URL :")
-		} else {
-			u, _ := url.Parse(migrationReq.UrlNG)
-
-			fragment := u.Fragment
-			migrationReq.Account = strings.Split(fragment, "/")[2]
-			migrationReq.OrgIdentifier = strings.Split(fragment, "/")[5]
-			migrationReq.ProjectIdentifier = strings.Split(fragment, "/")[7]
-			migrationReq.ProjectName = strings.Split(fragment, "/")[7]
-			break
-		}
+func ParseNGUrl() bool {
+	re := regexp.MustCompile(`https:\/\/.*\.harness\.io/ng/#/account/([a-zA-Z0-9-]+)/.*/orgs/([a-zA-Z0-9_]+)/projects/([a-zA-Z0-9_]+)/.*`)
+	u, err := url.Parse(migrationReq.UrlNG)
+	if err != nil {
+		log.Warning(err)
+		return false
 	}
 
-	return promptConfirm
+	if !re.MatchString(u.String()) {
+		log.Warning("NG URL did not match the expected format, skipping...")
+		return false
+	} else {
+		u, _ := url.Parse(migrationReq.UrlNG)
+		fragment := u.Fragment
+
+		migrationReq.Account = strings.Split(fragment, "/")[2]
+		migrationReq.OrgIdentifier = strings.Split(fragment, "/")[5]
+		migrationReq.ProjectIdentifier = strings.Split(fragment, "/")[7]
+		migrationReq.ProjectName = strings.Split(fragment, "/")[7]
+		return true
+	}
+
 }
 
-func PromptUrlCG() bool {
-	promptConfirm := false
-	re := regexp.MustCompile(`https:\/\/app\.harness\.io\/#\/account\/[a-zA-Z0-9-]+\/app\/[a-zA-Z0-9-_]+/.*`)
-	if len(migrationReq.UrlCG) == 0 {
-		promptConfirm = true
-		migrationReq.UrlCG = TextInput("Please specify CG application URL :")
-	}
-	for {
-		u, err := url.Parse(migrationReq.UrlCG)
-		if err != nil {
-			promptConfirm = true
-			migrationReq.UrlCG = TextInput("Incorrect CG url! Please specify CG application URL :")
-		}
-
-		if !re.MatchString(u.String()) {
-			promptConfirm = true
-			migrationReq.UrlCG = TextInput("Incorrect CG url! Please specify CG application URL :")
-		} else {
-			u, _ := url.Parse(migrationReq.UrlCG)
-
-			fragment := u.Fragment
-			migrationReq.AppId = strings.Split(fragment, "/")[4]
-			break
-		}
+func ParseCGUrl() bool {
+	re := regexp.MustCompile(`https:\/\/.*\.harness\.io\/#\/account\/[a-zA-Z0-9-]+\/app\/[a-zA-Z0-9-_]+/.*`)
+	u, err := url.Parse(migrationReq.UrlCG)
+	if err != nil {
+		log.Warning(err)
+		return false
 	}
 
-	return promptConfirm
+	if !re.MatchString(u.String()) {
+		log.Warning("CG URL did not match the expected format, skipping...")
+		return false
+	} else {
+		u, _ := url.Parse(migrationReq.UrlCG)
+		fragment := u.Fragment
+
+		migrationReq.AppId = strings.Split(fragment, "/")[4]
+		return true
+	}
 }
