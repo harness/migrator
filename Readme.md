@@ -120,6 +120,10 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV acco
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --app APP_ID --env ENV application-summary
 ```
+### Using URL to parse details
+```shell
+harness-upgrade --source-app https://app.harness.io/\#/account/8INL1LHjRmmrZQKdYtlvKA/app/9Wgyf62rSr-Gyu4emIMhww/details --destination-project https://app.harness.io/ng/\#/account/8INL1LHjRmmrZQKdYtlvKA/home/orgs/default/projects/test/details
+```
 
 ## Migrating by providing the flags from a file
 If you wish to provide the flags from a file you can use the `--load` to load flags from a file. You can find templates for various options in the `templates/` directory.
@@ -140,22 +144,24 @@ harness-upgrade pipelines --load 'templates/pipelines.yaml'
 
 ## All the Flags
 
-| Flag              | Details                                                                                                                |
-|-------------------|------------------------------------------------------------------------------------------------------------------------|
-| --env             | Your target environment. It can be either `Dev`, `QA`, `Prod` or `Prod3`                                               |
-| --account         | `ACCOUNT_ID` of the account that you wish to migrate                                                                   |
-| --api-key         | `API_KEY` to authenticate & authorise the migration. You may also use the `HARNESS_MIGRATOR_AUTH` env variable instead |
-| --secret-scope    | Scope at which the secret has to be created. It can be `project`, `org` or `account`                                   |
-| --connector-scope | Scope at which the connector has to be created. It can be `project`, `org` or `account`                                |
-| --template-scope  | Scope at which the templates has to be created. It can be `project`, `org` or `account`                                |
-| --workflow-scope  | Scope at which the workflow as template has to be created. It can be `project`, `org` or `account`                     |
-| --org             | Identifier of the target org                                                                                           |
-| --project         | Identifier of the target project                                                                                       |
-| --app             | Application ID from current gen                                                                                        |
-| --workflows       | Workflow Ids as comma separated values(ex. `workflow1,workflow2,workflow3`)                                            |
-| --pipelines       | Pipeline Ids as comma separated values(ex. `pipeline1,pipeline2,pipeline3`)                                            |
-| --debug           | If debug level logs need to be printed                                                                                 |
-| --json            | Formatted the logs as JSON                                                                                             |
+| Flag                  | Details                                                                                                                    |
+|-----------------------|------------------------------------------------------------------------------------------------------------------------|
+| --env                 | Your target environment. It can be either `Dev`, `QA`, `Prod` or `Prod3`                                               |
+| --account             | `ACCOUNT_ID` of the account that you wish to migrate                                                                   |
+| --api-key             | `API_KEY` to authenticate & authorise the migration. You may also use the `HARNESS_MIGRATOR_AUTH` env variable instead |
+| --secret-scope        | Scope at which the secret has to be created. It can be `project`, `org` or `account`                                   |
+| --connector-scope     | Scope at which the connector has to be created. It can be `project`, `org` or `account`                                |
+| --template-scope      | Scope at which the templates has to be created. It can be `project`, `org` or `account`                                |
+| --workflow-scope      | Scope at which the workflow as template has to be created. It can be `project`, `org` or `account`                     |
+| --org                 | Identifier of the target org                                                                                           |
+| --project             | Identifier of the target project                                                                                       |
+| --app                 | Application ID from current gen                                                                                        |
+| --workflows           | Workflow Ids as comma separated values(ex. `workflow1,workflow2,workflow3`)                                            |
+| --pipelines           | Pipeline Ids as comma separated values(ex. `pipeline1,pipeline2,pipeline3`)                                            |
+| --debug               | If debug level logs need to be printed                                                                                 |
+| --json                | Formatted the logs as JSON                                                                                             |
+| --destination-project | URL of the project where we want to migrate                                                                            |
+| --source-app          | URL of the application from which we will migrate the entities                                                         |
 
 If not all the required flags are provided we will fall back to prompt based technique to capture all the required details.
 
