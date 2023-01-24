@@ -126,6 +126,11 @@ func ParseCGUrl() bool {
 		u, _ := url.Parse(migrationReq.UrlCG)
 		fragment := u.Fragment
 
+		acc := strings.Split(fragment, "/")[2]
+		if acc != migrationReq.Account {
+			log.Warning("CG URL account did not match the NG account provided, skipping...")
+			return false
+		}
 		migrationReq.AppId = strings.Split(fragment, "/")[4]
 		return true
 	}
