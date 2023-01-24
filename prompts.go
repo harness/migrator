@@ -44,8 +44,10 @@ func PromptEnvDetails() bool {
 		migrationReq.Auth = TextInput("The environment variable 'HARNESS_MIGRATOR_AUTH' is not set. What is the api key?")
 	}
 
-	ParseNGUrl()
-	ParseCGUrl()
+	if len(migrationReq.UrlNG) != 0 && len(migrationReq.UrlCG) != 0 {
+		ParseNGUrl()
+		ParseCGUrl()
+	}
 
 	if migrationReq.Environment == "Dev" || migrationReq.AllowInsecureReq {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
