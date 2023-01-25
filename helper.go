@@ -11,7 +11,7 @@ import (
 
 const (
 	Prod  string = "Prod"
-           	QA           = "QA"
+        QA           = "QA"
 	Dev          = "Dev"
 	Prod3        = "Prod3"
 )
