@@ -1,0 +1,7 @@
+env: Prod
+api-key: <api-key>
+destination-project: https://app.harness.io/ng/#/account/8INL1LHjRmmrZQKdYtlvKA/home/orgs/default/projects/test/details
+source-app: https://app.harness.io/#/account/8INL1LHjRmmrZQKdYtlvKA/app/9Wgyf62rSr-Gyu4emIMhww/details
+secret-scope: project 
+connector-scope: project 
+template-scope: project 

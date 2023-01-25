@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
-	"os"
 )
 
 var Version = "development"
@@ -31,6 +32,8 @@ var migrationReq = struct {
 	Json              bool   `survey:"json"`
 	AllowInsecureReq  bool   `survey:"insecure"`
 	ProjectName       string `survey:"projectName"`
+	UrlNG             string `survey:"urlNG"`
+	UrlCG             string `survey:"urlCG"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -92,6 +95,16 @@ func main() {
 			Name:        "env",
 			Usage:       "possible values - Prod, QA, Dev",
 			Destination: &migrationReq.Environment,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "destination-project",
+			Usage:       "`destination-project` destination project url in next gen",
+			Destination: &migrationReq.UrlNG,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "source-app",
+			Usage:       "`source-app` source application url in current gen",
+			Destination: &migrationReq.UrlCG,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "account",
