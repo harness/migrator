@@ -6,7 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
-	"os"
 	"path"
 	"path/filepath"
 )
@@ -135,19 +134,11 @@ func bulkCreateProject(*cli.Context) error {
 		if err != nil {
 			return err
 		}
-		f, err := os.Create(path.Join(absolutePath, result.ProjectIdentifier+".yaml"))
+		err = WriteToFile(path.Join(absolutePath, result.ProjectIdentifier+".yaml"), yamlContent)
 		if err != nil {
 			log.Fatal(err)
 			return err
 		}
-
-		defer f.Close()
-		_, err = f.Write(yamlContent)
-		if err != nil {
-			log.Fatal(err)
-			return err
-		}
-
 		log.Infof("Application %s was exported to file %s.yaml", result.AppName, result.ProjectIdentifier)
 	}
 

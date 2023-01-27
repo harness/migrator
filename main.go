@@ -34,6 +34,8 @@ var migrationReq = struct {
 	ProjectName       string `survey:"projectName"`
 	UrlNG             string `survey:"urlNG"`
 	UrlCG             string `survey:"urlCG"`
+	DryRun            bool   `survey:"dryRun"`
+	FileExtensions    string `survey:"fileExtensions"`
 	ExportFolderPath  string `survey:"export"`
 }{}
 
@@ -224,6 +226,27 @@ func main() {
 				Usage: "Import pipelines into an existing project by providing the `appId` & `pipelineIds`",
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migratePipelines, context)
+				},
+			},
+			{
+				Name:  "expressions",
+				Usage: "looks for harness CG expressions in current directory & sub directories from current folder & replaces them with equivalent NG expressions",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "dry-run",
+						Usage:       "if set will only list found expressions without actually replacing anything",
+						Destination: &migrationReq.DryRun,
+					},
+					&cli.StringFlag{
+						Name:        "extensions",
+						Usage:       "provide comma separated file extensions to look for expressions in. defaults to json, yaml & yml extensions",
+						Value:       "json,yaml,yml",
+						DefaultText: "json,yaml,yml",
+						Destination: &migrationReq.FileExtensions,
+					},
+				},
+				Action: func(context *cli.Context) error {
+					return cliWrapper(ReplaceCurrentGenExpressionsWithNextGen, context)
 				},
 			},
 			{

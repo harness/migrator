@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -164,4 +165,44 @@ func MkDir(path string) error {
 		}
 	}
 	return nil
+}
+
+func EndsWith(str string, suffixes []string) bool {
+	for _, suffix := range suffixes {
+		if strings.HasSuffix(str, suffix) {
+			return true
+		}
+	}
+	return false
+}
+
+func Set(str []string) []string {
+	var result []string
+	dict := make(map[string]bool)
+	for _, val := range str {
+		dict[val] = true
+	}
+	for k, _ := range dict {
+		result = append(result, k)
+	}
+	return result
+}
+
+func WriteToFile(absFilePath string, content []byte) error {
+	f, err := os.Create(absFilePath)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+	_, err = f.Write(content)
+	return err
+}
+
+func ReadFile(absFilePath string) (string, error) {
+	d, err := os.ReadFile(absFilePath)
+	if err != nil {
+		return "", err
+	}
+	return string(d), err
 }

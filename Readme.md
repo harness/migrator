@@ -11,11 +11,11 @@ Harness has developed a tool to help user's migrate from Harness CD Current Gen 
 1. Pipelines
 2. Workflows
 3. Service (Service Definition - Manifests, variables included)
-5. Environments (Overrides included)
-6. Infrastructure Definition
-7. Connectors
-8. Secrets
-9. Templates 
+4. Environments (Overrides included)
+5. Infrastructure Definition
+6. Connectors
+7. Secrets
+8. Templates 
 
 
 ## Installation
@@ -148,6 +148,23 @@ harness-upgrade workflows --load 'templates/workflows.yaml'
 
 # To migrate the pipelines
 harness-upgrade pipelines --load 'templates/pipelines.yaml'
+```
+
+## Replace First Gen expressions with Next Gen
+
+The command replaces current gen expressions found in all files in current & subdirectories. By default, we only process the files with following file extensions `yml`, `yaml` & `json`.  
+```shell
+harness-upgrade expressions 
+```
+
+To provide custom files extensions
+```shell
+harness-upgrade expressions --extensions yml,txt,xml
+```
+
+Do a dry run on the files without replacing any CG expressions
+```shell
+harness-upgrade expressions --dry-run
 ```
 
 ## Global Flags
