@@ -99,16 +99,24 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --or
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --workflows WORKFLOW_IDS --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV workflows 
 ```
+> If you do not provide use `--workflows` flag it will migrate all workflows in the app
 
 ### To migrate pipelines
 
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --pipelines PIPELINE_IDS --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV pipelines 
 ```
+> If you do not provide use `--pipelines` flag it will migrate all pipelines in the app
 
 ### To create a project
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG project --name PROJECT_NAME --identifier PROJECT_IDENTIFIER create
+```
+
+### To create projects in bulk
+The following command creates a corresponding project for every app in the account. It then exports a YAML file for every project to the specified export path(defaults to current dir) specified. 
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE project --export FOLDER_PATH create-bulk
 ```
 
 ### To get account summary
@@ -142,9 +150,9 @@ harness-upgrade workflows --load 'templates/workflows.yaml'
 harness-upgrade pipelines --load 'templates/pipelines.yaml'
 ```
 
-## All the Flags
+## Global Flags
 
-| Flag                  | Details                                                                                                                    |
+| Flag                  | Details                                                                                                                |
 |-----------------------|------------------------------------------------------------------------------------------------------------------------|
 | --env                 | Your target environment. It can be either `Dev`, `QA`, `Prod` or `Prod3`                                               |
 | --account             | `ACCOUNT_ID` of the account that you wish to migrate                                                                   |
@@ -158,10 +166,10 @@ harness-upgrade pipelines --load 'templates/pipelines.yaml'
 | --app                 | Application ID from current gen                                                                                        |
 | --workflows           | Workflow Ids as comma separated values(ex. `workflow1,workflow2,workflow3`)                                            |
 | --pipelines           | Pipeline Ids as comma separated values(ex. `pipeline1,pipeline2,pipeline3`)                                            |
-| --debug               | If debug level logs need to be printed                                                                                 |
-| --json                | Formatted the logs as JSON                                                                                             |
 | --destination-project | URL of the project where we want to migrate                                                                            |
 | --source-app          | URL of the application from which we will migrate the entities                                                         |
+| --debug               | If debug level logs need to be printed                                                                                 |
+| --json                | Formatted the logs as JSON                                                                                             |
 
 If not all the required flags are provided we will fall back to prompt based technique to capture all the required details.
 
