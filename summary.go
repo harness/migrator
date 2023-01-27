@@ -86,7 +86,7 @@ func getResourceData(data interface{}) (resource Resource, err error) {
 }
 
 func renderSummary(summary map[string]EntitySummary) {
-	renderTable("Summary", map[string]int64{
+	renderTable("Summary", map[string]interface{}{
 		"Pipelines":    summary[Pipeline].Count,
 		"Applications": summary[Application].Count,
 		"Secrets":      summary[Secret].Count,
@@ -188,7 +188,7 @@ func renderSummaryWithCount(title string, count int64, data map[string]int64) {
 	}
 }
 
-func renderTable(title string, data map[string]int64) {
+func renderTable(title string, data map[string]interface{}) {
 	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
 	if len(data) > 0 {
 		var rows []table.Row
