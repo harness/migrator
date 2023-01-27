@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -97,9 +98,14 @@ func CreateEntity(url string, auth string, body RequestBody) {
 		log.Fatalln("There was error while migrating. Exiting...", err)
 	}
 
-	if len(resp.Resource.Stats) > 0 {
+	resource, err := getResourceData(resp.Resource)
+	if err != nil {
+		log.Fatalln("There was error while migrating. Exiting...", err)
+	}
+
+	if len(resource.Stats) > 0 {
 		var rows []table.Row
-		for k, v := range resp.Resource.Stats {
+		for k, v := range resource.Stats {
 			rows = append(rows, table.Row{k, v.SuccessfullyMigrated, v.AlreadyMigrated})
 		}
 		t := table.NewWriter()
@@ -114,12 +120,12 @@ func CreateEntity(url string, auth string, body RequestBody) {
 		t.Render()
 	}
 
-	if len(resp.Resource.Errors) == 0 {
+	if len(resource.Errors) == 0 {
 		return
 	}
 	log.Info("Here are the errors while migrating - ")
-	for i := range resp.Resource.Errors {
-		e := resp.Resource.Errors[i]
+	for i := range resource.Errors {
+		e := resource.Errors[i]
 		if len(e.Entity.Id) > 0 {
 			log.WithFields(log.Fields{
 				"type":  e.Entity.Type,
@@ -148,4 +154,14 @@ func ContainsAny[E comparable](source []E, values []E) bool {
 		}
 	}
 	return false
+}
+
+func MkDir(path string) error {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(path, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
