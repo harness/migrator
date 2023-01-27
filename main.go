@@ -34,6 +34,7 @@ var migrationReq = struct {
 	ProjectName       string `survey:"projectName"`
 	UrlNG             string `survey:"urlNG"`
 	UrlCG             string `survey:"urlCG"`
+	ExportFolderPath  string `survey:"export"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -239,6 +240,13 @@ func main() {
 						Usage:       "`IDENTIFIER` for the project",
 						Destination: &migrationReq.ProjectIdentifier,
 					},
+					&cli.StringFlag{
+						Name:        "export",
+						Usage:       "`FOLDER_PATH` of where the files need to be exported to",
+						Value:       ".",
+						DefaultText: ".",
+						Destination: &migrationReq.ExportFolderPath,
+					},
 				},
 				Subcommands: []*cli.Command{
 					{
@@ -246,6 +254,13 @@ func main() {
 						Usage: "Create a project",
 						Action: func(context *cli.Context) error {
 							return cliWrapper(createProject, context)
+						},
+					},
+					{
+						Name:  "create-bulk",
+						Usage: "Creates all apps as projects",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(bulkCreateProject, context)
 						},
 					},
 				},

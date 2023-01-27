@@ -40,6 +40,18 @@ type ProjectDetails struct {
 	Description   string   `json:"description"`
 }
 
+type BulkProjectResult struct {
+	AppName           string       `json:"appName"`
+	AppId             string       `json:"appId"`
+	ProjectIdentifier string       `json:"projectIdentifier"`
+	ProjectName       string       `json:"projectName"`
+	Error             UpgradeError `json:"error"`
+}
+
+type BulkCreateBody struct {
+	Org string `json:"orgIdentifier"`
+}
+
 type ProjectCreateBody struct {
 	Project ProjectDetails `json:"project"`
 }
@@ -81,7 +93,7 @@ type ResponseBody struct {
 	Message  string             `json:"message"`
 	Status   string             `json:"status"`
 	Data     interface{}        `json:"data"`
-	Resource Resource           `json:"resource"`
+	Resource interface{}        `json:"resource"`
 	Messages []ResponseMessages `json:"responseMessages"`
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -34,10 +35,12 @@ func handleSummary(url string) error {
 	if err != nil {
 		log.Fatal("Failed to fetch account summary")
 	}
-	if len(resp.Resource.RequestId) == 0 {
+	resource, err := getResourceData(resp.Resource)
+	if err != nil || len(resource.RequestId) == 0 {
 		log.Fatal("Failed to fetch account summary")
+		return err
 	}
-	reqId := resp.Resource.RequestId
+	reqId := resource.RequestId
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	s.Suffix = " Processing"
 	s.Start()
@@ -52,17 +55,34 @@ func handleSummary(url string) error {
 			s.Stop()
 			log.Fatal("Failed to fetch account summary")
 		}
-		if resp.Resource.Status == "ERROR" {
+		resource, err = getResourceData(resp.Resource)
+		if err != nil {
 			s.Stop()
 			log.Fatal("Failed to fetch account summary")
 		}
-		if resp.Resource.Status == "DONE" {
+		if resource.Status == "ERROR" {
 			s.Stop()
-			renderSummary(resp.Resource.ResponsePayload.Summary)
+			log.Fatal("Failed to fetch account summary")
+		}
+		if resource.Status == "DONE" {
+			s.Stop()
+			renderSummary(resource.ResponsePayload.Summary)
 			break
 		}
 	}
 	return nil
+}
+
+func getResourceData(data interface{}) (resource Resource, err error) {
+	byteData, err := json.Marshal(data)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(byteData, &resource)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func renderSummary(summary map[string]EntitySummary) {
