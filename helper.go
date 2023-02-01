@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/jedib0t/go-pretty/v6/table"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 )
@@ -91,53 +90,6 @@ func GetUrlWithQueryParams(environment string, service string, endpoint string, 
 
 func GetUrl(environment string, service string, path string, accountId string) string {
 	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment][service], path, accountId)
-}
-
-func CreateEntity(url string, auth string, body RequestBody) {
-	resp, err := Post(url, auth, body)
-	if err != nil {
-		log.Fatalln("There was error while migrating. Exiting...", err)
-	}
-
-	resource, err := getResourceData(resp.Resource)
-	if err != nil {
-		log.Fatalln("There was error while migrating. Exiting...", err)
-	}
-
-	if len(resource.Stats) > 0 {
-		var rows []table.Row
-		for k, v := range resource.Stats {
-			rows = append(rows, table.Row{k, v.SuccessfullyMigrated, v.AlreadyMigrated})
-		}
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{"", "Successfully Migrated", "Already Migrated"})
-		t.AppendRows(rows)
-		t.AppendSeparator()
-		t.SetStyle(table.StyleLight)
-		t.SortBy([]table.SortBy{
-			{Number: 1, Mode: table.Asc},
-		})
-		t.Render()
-	}
-
-	if len(resource.Errors) == 0 {
-		return
-	}
-	log.Info("Here are the errors while migrating - ")
-	for i := range resource.Errors {
-		e := resource.Errors[i]
-		if len(e.Entity.Id) > 0 {
-			log.WithFields(log.Fields{
-				"type":  e.Entity.Type,
-				"appId": e.Entity.AppId,
-				"id":    e.Entity.Id,
-				"name":  e.Entity.Name,
-			}).Error(e.Message)
-		} else {
-			log.Error(e.Message)
-		}
-	}
 }
 
 func getOrDefault(value string, defaultValue string) string {

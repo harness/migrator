@@ -37,14 +37,13 @@ func migratePipelines(*cli.Context) error {
 		}
 	}
 
-	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/v2", migrationReq.Account)
 	// Migrating the pipelines
 	log.Info("Importing the pipelines....")
 	var pipelineIds []string
 	if len(migrationReq.PipelineIds) > 0 {
 		pipelineIds = strings.Split(migrationReq.PipelineIds, ",")
 	}
-	CreateEntity(url, migrationReq.Auth, getReqBody(Pipeline, Filter{
+	CreateEntities(getReqBody(Pipeline, Filter{
 		PipelineIds: pipelineIds,
 		AppId:       migrationReq.AppId,
 	}))

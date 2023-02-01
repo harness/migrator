@@ -85,7 +85,7 @@ type Resource struct {
 	Stats           map[string]MigrationStats `json:"stats"`
 	Errors          []UpgradeError            `json:"errors"`
 	Status          string                    `json:"status"`
-	ResponsePayload SummaryResponse           `json:"responsePayload"`
+	ResponsePayload interface{}               `json:"responsePayload"`
 }
 
 type ResponseBody struct {
@@ -103,6 +103,11 @@ type ResponseMessages struct {
 	Message      string      `json:"message"`
 	Exception    interface{} `json:"exception"`
 	FailureTypes interface{} `json:"failureTypes"`
+}
+
+type SaveSummary struct {
+	Stats  map[string]MigrationStats `json:"stats"`
+	Errors []UpgradeError            `json:"errors"`
 }
 
 type SummaryResponse struct {

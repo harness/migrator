@@ -21,26 +21,23 @@ func migrateAccountLevelEntities(*cli.Context) error {
 		}
 	}
 
-	// Finally Make the API calls to create all entities
-	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/v2", migrationReq.Account)
-
 	// Create Secret Managers
 	log.Info("Importing all secret managers from CG to NG...")
-	CreateEntity(url, migrationReq.Auth, getReqBody(SecretManager, Filter{
+	CreateEntities(getReqBody(SecretManager, Filter{
 		Type: All,
 	}))
 	log.Info("Imported all secret managers.")
 
 	// Create Secrets
 	log.Info("Importing all secrets from CG to NG...")
-	CreateEntity(url, migrationReq.Auth, getReqBody(Secret, Filter{
+	CreateEntities(getReqBody(Secret, Filter{
 		Type: All,
 	}))
 	log.Info("Imported all secrets.")
 
 	// Create Connectors
 	log.Info("Importing all connectors from CG to NG....")
-	CreateEntity(url, migrationReq.Auth, getReqBody(Connector, Filter{
+	CreateEntities(getReqBody(Connector, Filter{
 		Type: All,
 	}))
 	log.Info("Imported all connectors.")
