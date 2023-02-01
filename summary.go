@@ -35,7 +35,7 @@ func handleSummary(url string) error {
 	if err != nil {
 		log.Fatal("Failed to fetch account summary")
 	}
-	resource, err := getResourceData(resp.Resource)
+	resource, err := getResource(resp.Resource)
 	if err != nil || len(resource.RequestId) == 0 {
 		log.Fatal("Failed to fetch account summary")
 		return err
@@ -55,7 +55,7 @@ func handleSummary(url string) error {
 			s.Stop()
 			log.Fatal("Failed to fetch account summary")
 		}
-		resource, err = getResourceData(resp.Resource)
+		resource, err := getResource(resp.Resource)
 		if err != nil {
 			s.Stop()
 			log.Fatal("Failed to fetch account summary")
@@ -66,19 +66,36 @@ func handleSummary(url string) error {
 		}
 		if resource.Status == "DONE" {
 			s.Stop()
-			renderSummary(resource.ResponsePayload.Summary)
+			summary, err := getSummary(resource)
+			if err != nil {
+				s.Stop()
+				log.Fatal("Failed to fetch account summary")
+			}
+			renderSummary(summary.Summary)
 			break
 		}
 	}
 	return nil
 }
 
-func getResourceData(data interface{}) (resource Resource, err error) {
+func getResource(data interface{}) (resource Resource, err error) {
 	byteData, err := json.Marshal(data)
 	if err != nil {
 		return
 	}
 	err = json.Unmarshal(byteData, &resource)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func getSummary(resource Resource) (summary SummaryResponse, err error) {
+	byteData, err := json.Marshal(resource.ResponsePayload)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(byteData, &summary)
 	if err != nil {
 		return
 	}

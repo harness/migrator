@@ -23,10 +23,9 @@ func migrateApp(*cli.Context) error {
 		}
 	}
 
-	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/v2", migrationReq.Account)
 	// Migrating the app
 	log.Info("Importing the application....")
-	CreateEntity(url, migrationReq.Auth, getReqBody(Application, Filter{
+	CreateEntities(getReqBody(Application, Filter{
 		AppId: migrationReq.AppId,
 	}))
 	log.Info("Imported the application.")
