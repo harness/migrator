@@ -46,6 +46,7 @@ var ExpressionsMap = map[string]string{
 	"artifact.metadata.repository":     "<+artifact.repository>",
 	"artifact.metadata.repositoryName": "<+artifact.repositoryName>",
 	"artifact.metadata.url":            "<+artifact.url>",
+	"artifact.buildNo":                 "<+artifact.tag>",
 
 	// Rollback Artifact Expressions
 	"rollbackArtifact.metadata.image":          "<+rollbackArtifact.image>",
@@ -60,6 +61,7 @@ var ExpressionsMap = map[string]string{
 	"rollbackArtifact.metadata.repository":     "<+rollbackArtifact.repository>",
 	"rollbackArtifact.metadata.repositoryName": "<+rollbackArtifact.repositoryName>",
 	"rollbackArtifact.metadata.url":            "<+rollbackArtifact.url>",
+	"rollbackArtifact.buildNo":                 "<+rollbackArtifact.tag>",
 
 	// Application Expressions
 	"app.name":        "<+project.name>",
@@ -73,11 +75,32 @@ var ExpressionsMap = map[string]string{
 }
 
 var DynamicExpressions = map[string]interface{}{
-	"serviceVariable": func(key string) string {
-		return "<+serviceVariable." + key + ">"
+	"workflow.variables": func(key string) string {
+		return "<+stage.variables.." + key + ">"
 	},
-	"service.artifacts.primary": func(key string) string {
-		return "<+primary." + key + ">"
+	"pipeline.variables": func(key string) string {
+		return "<+pipeline.variables." + key + ">"
+	},
+	"serviceVariable": func(key string) string {
+		return "<+serviceVariables." + key + ">"
+	},
+	"serviceVariables": func(key string) string {
+		return "<+serviceVariables." + key + ">"
+	},
+	"service.variables": func(key string) string {
+		return "<+serviceVariables." + key + ">"
+	},
+	"environmentVariable": func(key string) string {
+		return "<+env.variables." + key + ">"
+	},
+	"environmentVariables": func(key string) string {
+		return "<+env.variables." + key + ">"
+	},
+	"secrets": func(key string) string {
+		return "<+secrets.getValue(\"" + key + "\")>"
+	},
+	"app.defaults": func(key string) string {
+		return "<+variable." + key + ">"
 	},
 }
 
