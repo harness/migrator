@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type GithubRelease struct {
@@ -38,17 +39,44 @@ func CheckGithubForReleases() {
 	if err != nil {
 		return
 	}
-	version := Version
+	// The newest release includes both release & pre-release
+	var latest GithubRelease
+	// Latest stable stable
+	var latestStableRelease GithubRelease
+	isPreRelease := strings.Contains(Version, "beta")
+
 	for _, v := range releases {
-		if !v.Prerelease {
-			version = v.TagName
-			break
+		if len(latest.TagName) == 0 {
+			latest = v
+		}
+		if !v.Prerelease && len(latestStableRelease.TagName) == 0 {
+			latestStableRelease = v
 		}
 	}
-	if version != Version {
-		blue := color.New(color.FgBlue).SprintFunc()
-		green := color.New(color.FgGreen).SprintFunc()
-		red := color.New(color.FgRed).SprintFunc()
-		fmt.Printf("[%s] A new release of harness-upgrade available: %s -> %s\n", blue("notice"), red(Version), green(version))
+	if Version == latest.TagName {
+		return
 	}
+	if !isPreRelease && latestStableRelease.TagName == Version {
+		return
+	}
+	if !latest.Prerelease {
+		printUpgradeMessage(Version, latest.TagName)
+		return
+	}
+	if isPreRelease {
+		printUpgradeMessage(Version, latest.TagName)
+		return
+	}
+	if !isPreRelease && latestStableRelease.TagName != Version {
+		printUpgradeMessage(Version, latestStableRelease.TagName)
+	}
+}
+
+func printUpgradeMessage(from string, to string) {
+	blue := color.New(color.FgHiBlue).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgHiRed).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	fmt.Printf("[%s] A new release of harness-upgrade available: %s -> %s\n", blue("notice"), red(from), green(to))
+	fmt.Printf("%s\n", yellow("https://github.com/harness/migrator/releases/tag/"+to))
 }
