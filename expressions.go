@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"os"
@@ -44,6 +46,7 @@ var ExpressionsMap = map[string]string{
 	"artifact.metadata.repository":     "<+artifact.repository>",
 	"artifact.metadata.repositoryName": "<+artifact.repositoryName>",
 	"artifact.metadata.url":            "<+artifact.url>",
+	"artifact.buildNo":                 "<+artifact.tag>",
 
 	// Rollback Artifact Expressions
 	"rollbackArtifact.metadata.image":          "<+rollbackArtifact.image>",
@@ -58,6 +61,7 @@ var ExpressionsMap = map[string]string{
 	"rollbackArtifact.metadata.repository":     "<+rollbackArtifact.repository>",
 	"rollbackArtifact.metadata.repositoryName": "<+rollbackArtifact.repositoryName>",
 	"rollbackArtifact.metadata.url":            "<+rollbackArtifact.url>",
+	"rollbackArtifact.buildNo":                 "<+rollbackArtifact.tag>",
 
 	// Application Expressions
 	"app.name":        "<+project.name>",
@@ -70,6 +74,36 @@ var ExpressionsMap = map[string]string{
 	"httpUrl":          "<+httpUrl>",
 }
 
+var DynamicExpressions = map[string]interface{}{
+	"workflow.variables": func(key string) string {
+		return "<+stage.variables.." + key + ">"
+	},
+	"pipeline.variables": func(key string) string {
+		return "<+pipeline.variables." + key + ">"
+	},
+	"serviceVariable": func(key string) string {
+		return "<+serviceVariables." + key + ">"
+	},
+	"serviceVariables": func(key string) string {
+		return "<+serviceVariables." + key + ">"
+	},
+	"service.variables": func(key string) string {
+		return "<+serviceVariables." + key + ">"
+	},
+	"environmentVariable": func(key string) string {
+		return "<+env.variables." + key + ">"
+	},
+	"environmentVariables": func(key string) string {
+		return "<+env.variables." + key + ">"
+	},
+	"secrets": func(key string) string {
+		return "<+secrets.getValue(\"" + key + "\")>"
+	},
+	"app.defaults": func(key string) string {
+		return "<+variable." + key + ">"
+	},
+}
+
 func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
 	extensions := strings.Split(migrationReq.FileExtensions, ",")
 	for i, ext := range extensions {
@@ -77,13 +111,14 @@ func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
 	}
 
 	foundExpressionsMap := make(map[string][]string)
+	var allExpressions []string
 
 	// Fetch all expressions per file
 	err = filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() && EndsWith(info.Name(), extensions) {
+		if !info.IsDir() && EndsWith(info.Name(), extensions) && info.Mode().Type() != os.ModeSymlink {
 			content, err := ReadFile(path)
 			if err != nil {
 				return err
@@ -91,6 +126,7 @@ func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
 			foundExpressions := Set(FindAllExpressions(content))
 			if len(foundExpressions) > 0 {
 				foundExpressionsMap[path] = foundExpressions
+				allExpressions = Set(append(allExpressions, foundExpressions...))
 			}
 		}
 		return nil
@@ -110,6 +146,7 @@ func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
 	for path, expList := range foundExpressionsMap {
 		data[path] = strings.Join(expList, ", ")
 	}
+	renderSupportedExpressionsTable(allExpressions)
 	renderTable("Files containing expressions", data)
 
 	if migrationReq.DryRun {
@@ -118,17 +155,28 @@ func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
 	}
 
 	// We are going to do an actual replacement
+	notReplacedMap := make(map[string][]string)
 	for path, expList := range foundExpressionsMap {
 		content, err := ReadFile(path)
 		if err != nil {
 			return err
 		}
-		str := ReplaceAllExpressions(content, expList)
+		str, notReplaced := ReplaceAllExpressions(content, expList)
+		if len(notReplaced) > 0 {
+			notReplacedMap[path] = notReplaced
+		}
 		err = WriteToFile(path, []byte(str))
 		if err != nil {
 			return err
 		}
 		log.Infof("Replaced expressions from %s", path)
+	}
+	data = make(map[string]interface{})
+	for path, expList := range notReplacedMap {
+		data[path] = strings.Join(expList, ", ")
+	}
+	if len(data) > 0 {
+		renderTable("Expressions not replaced", data)
 	}
 	return
 }
@@ -138,13 +186,74 @@ func FindAllExpressions(str string) []string {
 	return r.FindAllString(str, -1)
 }
 
-func ReplaceAllExpressions(str string, expressions []string) string {
+func ReplaceAllExpressions(str string, expressions []string) (string, []string) {
+	var notReplaced []string
 	for _, exp := range expressions {
 		temp := exp[2 : len(exp)-1]
 		val, ok := ExpressionsMap[temp]
 		if ok {
 			str = strings.ReplaceAll(str, exp, val)
+		} else if len(getDynamicExpressionKey(temp)) > 0 {
+			newVal := getDynamicExpressionValue(temp)
+			str = strings.ReplaceAll(str, exp, newVal)
+		} else {
+			notReplaced = append(notReplaced, exp)
 		}
 	}
-	return str
+	return str, notReplaced
+}
+
+func renderSupportedExpressionsTable(data []string) {
+	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
+	title := "Equivalent Expressions"
+	if len(data) > 0 {
+		var rows []table.Row
+		for _, exp := range data {
+			temp := exp[2 : len(exp)-1]
+			val, ok := ExpressionsMap[temp]
+			check := "Yes"
+			if !ok {
+				dynamic := getDynamicExpressionKey(temp)
+				if len(dynamic) > 0 {
+					val = getDynamicExpressionValue(temp)
+				}
+				if len(dynamic) == 0 {
+					check = "No"
+				}
+			}
+			rows = append(rows, table.Row{exp, check, val})
+		}
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{title, title, title}, rowConfigAutoMerge)
+		t.AppendSeparator()
+		t.AppendHeader(table.Row{"First Gen", "Supported?", "Next Gen"})
+		t.AppendSeparator()
+		t.AppendRows(rows)
+		t.AppendSeparator()
+		t.SetColumnConfigs([]table.ColumnConfig{
+			{Number: 1, AlignHeader: text.AlignCenter},
+		})
+		t.SortBy([]table.SortBy{
+			{Number: 1, Mode: table.Asc},
+		})
+		t.SetStyle(table.StyleLight)
+		t.Render()
+	}
+
+}
+
+func getDynamicExpressionValue(key string) string {
+	k := getDynamicExpressionKey(key)
+	dynamic := strings.Replace(key, k+".", "", 1)
+	return DynamicExpressions[k].(func(string2 string) string)(dynamic)
+}
+
+func getDynamicExpressionKey(key string) string {
+	for exp, _ := range DynamicExpressions {
+		if strings.HasPrefix(key, exp) {
+			return exp
+		}
+	}
+	return ""
 }
