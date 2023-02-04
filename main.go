@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli/v2/altsrc"
 )
 
-var Version = "development"
+var Version = "v0.1.0"
 
 type cliFnWrapper func(ctx *cli.Context) error
 
