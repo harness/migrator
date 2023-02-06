@@ -25,6 +25,7 @@ var migrationReq = struct {
 	OrgIdentifier     string `survey:"org"`
 	ProjectIdentifier string `survey:"project"`
 	AppId             string `survey:"appId"`
+	AllAppEntities    bool   `survey:"all"`
 	WorkflowIds       string `survey:"workflowIds"`
 	PipelineIds       string `survey:"pipelineIds"`
 	File              string `survey:"load"`
@@ -212,6 +213,13 @@ func main() {
 				Usage: "Import an app into an existing project by providing the `appId`",
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateApp, context)
+				},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if set will migrate all workflows & pipelines",
+						Destination: &migrationReq.AllAppEntities,
+					},
 				},
 			},
 			{

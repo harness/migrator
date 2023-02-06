@@ -12,6 +12,11 @@ func migrateApp(*cli.Context) error {
 		migrationReq.AppId = TextInput("Please provide the application ID of the app that you wish to import -")
 	}
 
+	if len(migrationReq.WorkflowScope) == 0 {
+		promptConfirm = true
+		migrationReq.WorkflowScope = SelectInput("Scope for workflows:", scopes, Project)
+	}
+
 	promptConfirm = PromptOrgAndProject([]string{Project}) || promptConfirm
 
 	logMigrationDetails()
@@ -25,9 +30,20 @@ func migrateApp(*cli.Context) error {
 
 	// Migrating the app
 	log.Info("Importing the application....")
+	log.Info("Importing the services, environments, infra, manifests...")
 	CreateEntities(getReqBody(Application, Filter{
 		AppId: migrationReq.AppId,
 	}))
+	if migrationReq.AllAppEntities {
+		log.Info("Importing all the workflows...")
+		CreateEntities(getReqBody(Workflow, Filter{
+			AppId: migrationReq.AppId,
+		}))
+		log.Info("Importing all the pipelines...")
+		CreateEntities(getReqBody(Pipeline, Filter{
+			AppId: migrationReq.AppId,
+		}))
+	}
 	log.Info("Imported the application.")
 
 	return nil
