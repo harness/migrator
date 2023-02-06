@@ -217,7 +217,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:        "all",
-						Usage:       "if set will migration all workflows & pipelines",
+						Usage:       "if set will migrate all workflows & pipelines",
 						Destination: &migrationReq.AllAppEntities,
 					},
 				},
