@@ -47,6 +47,11 @@ To migrate an application
 harness-upgrade app
 ```
 
+To migrate an application and all the workflows & pipelines
+```shell
+harness-upgrade app --all
+```
+
 To migrate workflows
 ```shell
 harness-upgrade workflows
@@ -141,13 +146,16 @@ If you wish to provide the flags from a file you can use the `--load` to load fl
 harness-upgrade --load 'templates/account.yaml'
 
 # To migrate the app
-harness-upgrade app --load 'templates/app.yaml'
+harness-upgrade --load templates/app.yaml app
+
+# To migrate the app along with all workflows & pipelines
+harness-upgrade --load templates/app.yaml app --all
 
 # To migrate the workflows
-harness-upgrade workflows --load 'templates/workflows.yaml'
+harness-upgrade --load templates/workflows.yaml workflows
 
 # To migrate the pipelines
-harness-upgrade pipelines --load 'templates/pipelines.yaml'
+harness-upgrade --load templates/pipelines.yaml pipelines
 ```
 
 ## Replace First Gen expressions with Next Gen
