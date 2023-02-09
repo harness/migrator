@@ -99,21 +99,32 @@ func renderSaveSummary(saveSummary SaveSummary) {
 		t.Render()
 	}
 
-	if len(saveSummary.Errors) == 0 {
-		return
-	}
-	log.Info("Here are the errors while migrating - ")
-	for i := range saveSummary.Errors {
-		e := saveSummary.Errors[i]
-		if len(e.Entity.Id) > 0 {
-			log.WithFields(log.Fields{
-				"type":  e.Entity.Type,
-				"appId": e.Entity.AppId,
-				"id":    e.Entity.Id,
-				"name":  e.Entity.Name,
-			}).Error(e.Message)
-		} else {
-			log.Error(e.Message)
+	if len(saveSummary.SkipDetails) > 0 {
+		log.Info("Here are the details of entities that got skipped while migrating - ")
+		for i := range saveSummary.SkipDetails {
+			w := saveSummary.SkipDetails[i]
+			logWithDetails(log.WarnLevel, w.Entity, w.Reason)
 		}
+	}
+
+	if len(saveSummary.Errors) > 0 {
+		log.Info("Here are the errors while migrating - ")
+		for i := range saveSummary.Errors {
+			e := saveSummary.Errors[i]
+			logWithDetails(log.ErrorLevel, e.Entity, e.Message)
+		}
+	}
+}
+
+func logWithDetails(level log.Level, entity CurrentGenEntity, message string) {
+	if len(entity.Id) > 0 {
+		log.WithFields(log.Fields{
+			"type":  entity.Type,
+			"appId": entity.AppId,
+			"id":    entity.Id,
+			"name":  entity.Name,
+		}).Log(level, message)
+	} else {
+		log.Error(message)
 	}
 }
