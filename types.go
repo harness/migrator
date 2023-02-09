@@ -70,6 +70,11 @@ type CurrentGenEntity struct {
 	AppId string `json:"appId"`
 }
 
+type SkipDetail struct {
+	Entity CurrentGenEntity `json:"cgBasicInfo"`
+	Reason string           `json:"reason"`
+}
+
 type UpgradeError struct {
 	Message string           `json:"message"`
 	Entity  CurrentGenEntity `json:"entity"`
@@ -106,8 +111,9 @@ type ResponseMessages struct {
 }
 
 type SaveSummary struct {
-	Stats  map[string]MigrationStats `json:"stats"`
-	Errors []UpgradeError            `json:"errors"`
+	Stats       map[string]MigrationStats `json:"stats"`
+	Errors      []UpgradeError            `json:"errors"`
+	SkipDetails []SkipDetail              `json:"skipDetails"`
 }
 
 type SummaryResponse struct {
