@@ -120,15 +120,21 @@ type SummaryResponse struct {
 	Summary map[string]EntitySummary `json:"summary"`
 }
 
+type SummaryDetails struct {
+	Count  int64  `json:"count"`
+	Status string `json:"status"`
+}
+
 type EntitySummary struct {
-	Name                     string           `json:"name"`
-	Count                    int64            `json:"count"`
-	TypeSummary              map[string]int64 `json:"typeSummary"`
-	StepTypeSummary          map[string]int64 `json:"stepTypeSummary"`
-	KindSummary              map[string]int64 `json:"kindSummary"`
-	StoreSummary             map[string]int64 `json:"storeSummary"`
-	DeploymentTypeSummary    map[string]int64 `json:"deploymentTypeSummary"`
-	ArtifactTypeSummary      map[string]int64 `json:"artifactTypeSummary"`
-	CloudProviderTypeSummary map[string]int64 `json:"cloudProviderTypeSummary"`
-	Expressions              []string         `json:"expressions"`
+	Name                     string                    `json:"name"`
+	Count                    int64                     `json:"count"`
+	TypeSummary              map[string]int64          `json:"typeSummary"`
+	StepTypeSummary          map[string]int64          `json:"stepTypeSummary"`
+	StepsSummary             map[string]SummaryDetails `json:"stepsSummary"`
+	KindSummary              map[string]int64          `json:"kindSummary"`
+	StoreSummary             map[string]int64          `json:"storeSummary"`
+	DeploymentTypeSummary    map[string]int64          `json:"deploymentTypeSummary"`
+	ArtifactTypeSummary      map[string]int64          `json:"artifactTypeSummary"`
+	CloudProviderTypeSummary map[string]int64          `json:"cloudProviderTypeSummary"`
+	Expressions              []string                  `json:"expressions"`
 }

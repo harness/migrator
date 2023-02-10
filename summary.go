@@ -112,36 +112,40 @@ func renderSummary(summary map[string]EntitySummary) {
 	for k, v := range summary {
 		switch k {
 		case Infrastructure:
-			renderMultipleSummaries(k, v.Count, []SubSummary{{
+			renderMultipleSummaries(k, 2, v.Count, []SubSummary{{
 				Title: "Deployment Types",
-				Data:  v.DeploymentTypeSummary,
+				Data:  mapToArray(v.DeploymentTypeSummary),
 			}, {
 				Title: "Cloud Providers",
-				Data:  v.CloudProviderTypeSummary,
+				Data:  mapToArray(v.CloudProviderTypeSummary),
 			}})
 		case Workflow:
-			renderMultipleSummaries(k, v.Count, []SubSummary{{
+			var data [][]interface{}
+			for k, v := range v.StepsSummary {
+				data = append(data, []interface{}{k, v.Count, v.Status})
+			}
+			renderMultipleSummaries(k, 3, v.Count, []SubSummary{{
 				Title: "Workflow Types",
-				Data:  v.TypeSummary,
+				Data:  mapToArrayWithDefaultStatus(v.TypeSummary, "SUPPORTED"),
 			}, {
 				Title: "Steps",
-				Data:  v.StepTypeSummary,
+				Data:  data,
 			}})
 		case Service:
-			renderMultipleSummaries(k, v.Count, []SubSummary{{
+			renderMultipleSummaries(k, 2, v.Count, []SubSummary{{
 				Title: "Service Types",
-				Data:  v.DeploymentTypeSummary,
+				Data:  mapToArray(v.DeploymentTypeSummary),
 			}, {
 				Title: "Artifact Types",
-				Data:  v.ArtifactTypeSummary,
+				Data:  mapToArray(v.ArtifactTypeSummary),
 			}})
 		case ApplicationManifest:
-			renderMultipleSummaries(k, v.Count, []SubSummary{{
+			renderMultipleSummaries(k, 2, v.Count, []SubSummary{{
 				Title: "Types",
-				Data:  v.KindSummary,
+				Data:  mapToArray(v.KindSummary),
 			}, {
 				Title: "Store",
-				Data:  v.StoreSummary,
+				Data:  mapToArray(v.StoreSummary),
 			}})
 		case Connector:
 			v.Count = v.Count - v.TypeSummary["STRING"]
@@ -159,19 +163,19 @@ func renderSummary(summary map[string]EntitySummary) {
 	}
 }
 
-func renderMultipleSummaries(title string, count int64, summaries []SubSummary) {
+func renderMultipleSummaries(title string, cols int, count int64, summaries []SubSummary) {
 	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
 	t := table.NewWriter()
 	header := fmt.Sprintf("%s (%d)", title, count)
-	t.AppendHeader(table.Row{header, header}, rowConfigAutoMerge)
+	t.AppendHeader(makeArray(cols, header), rowConfigAutoMerge)
 	for _, summary := range summaries {
 		if len(summary.Data) > 0 {
 			var rows []table.Row
-			for k, v := range summary.Data {
-				rows = append(rows, table.Row{k, v})
+			for _, v := range summary.Data {
+				rows = append(rows, v)
 			}
 			t.SetOutputMirror(os.Stdout)
-			t.AppendRow(table.Row{summary.Title, summary.Title}, rowConfigAutoMerge)
+			t.AppendRow(makeArray(cols, summary.Title), rowConfigAutoMerge)
 			t.AppendSeparator()
 			t.AppendRows(rows)
 			t.AppendSeparator()
@@ -225,7 +229,31 @@ func renderTable(title string, data map[string]interface{}) {
 	}
 }
 
+func mapToArray(dict map[string]int64) [][]interface{} {
+	var data [][]interface{}
+	for k, v := range dict {
+		data = append(data, []interface{}{k, v})
+	}
+	return data
+}
+
+func mapToArrayWithDefaultStatus(dict map[string]int64, status string) [][]interface{} {
+	var data [][]interface{}
+	for k, v := range dict {
+		data = append(data, []interface{}{k, v, status})
+	}
+	return data
+}
+
 type SubSummary struct {
 	Title string
-	Data  map[string]int64
+	Data  [][]interface{}
+}
+
+func makeArray(size int, defaultValue interface{}) []interface{} {
+	var data []interface{}
+	for i := 0; i < size; i++ {
+		data = append(data, defaultValue)
+	}
+	return data
 }
