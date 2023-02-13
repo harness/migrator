@@ -129,12 +129,14 @@ type EntitySummary struct {
 	Name                     string                    `json:"name"`
 	Count                    int64                     `json:"count"`
 	TypeSummary              map[string]int64          `json:"typeSummary"`
+	TypesSummary             map[string]SummaryDetails `json:"typesSummary"`
 	StepTypeSummary          map[string]int64          `json:"stepTypeSummary"`
 	StepsSummary             map[string]SummaryDetails `json:"stepsSummary"`
 	KindSummary              map[string]int64          `json:"kindSummary"`
 	StoreSummary             map[string]int64          `json:"storeSummary"`
 	DeploymentTypeSummary    map[string]int64          `json:"deploymentTypeSummary"`
-	ArtifactTypeSummary      map[string]int64          `json:"artifactTypeSummary"`
+	DeploymentsSummary       map[string]SummaryDetails `json:"deploymentsSummary"`
+	ArtifactsSummary         map[string]SummaryDetails `json:"artifactsSummary"`
 	CloudProviderTypeSummary map[string]int64          `json:"cloudProviderTypeSummary"`
 	Expressions              []string                  `json:"expressions"`
 }
