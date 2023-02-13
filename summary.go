@@ -120,24 +120,20 @@ func renderSummary(summary map[string]EntitySummary) {
 				Data:  mapToArray(v.CloudProviderTypeSummary),
 			}})
 		case Workflow:
-			var data [][]interface{}
-			for k, v := range v.StepsSummary {
-				data = append(data, []interface{}{k, v.Count, v.Status})
-			}
 			renderMultipleSummaries(k, 3, v.Count, []SubSummary{{
 				Title: "Workflow Types",
 				Data:  mapToArrayWithDefaultStatus(v.TypeSummary, "SUPPORTED"),
 			}, {
 				Title: "Steps",
-				Data:  data,
+				Data:  toArray(v.StepsSummary),
 			}})
 		case Service:
-			renderMultipleSummaries(k, 2, v.Count, []SubSummary{{
+			renderMultipleSummaries(k, 3, v.Count, []SubSummary{{
 				Title: "Service Types",
-				Data:  mapToArray(v.DeploymentTypeSummary),
+				Data:  toArray(v.DeploymentsSummary),
 			}, {
 				Title: "Artifact Types",
-				Data:  mapToArray(v.ArtifactTypeSummary),
+				Data:  toArray(v.ArtifactsSummary),
 			}})
 		case ApplicationManifest:
 			renderMultipleSummaries(k, 2, v.Count, []SubSummary{{
@@ -148,9 +144,10 @@ func renderSummary(summary map[string]EntitySummary) {
 				Data:  mapToArray(v.StoreSummary),
 			}})
 		case Connector:
-			v.Count = v.Count - v.TypeSummary["STRING"]
+			v.Count = v.Count - v.TypesSummary["STRING"].Count
 			delete(v.TypeSummary, "STRING")
-			renderSummaryWithCount(k, v.Count, v.TypeSummary)
+			delete(v.TypesSummary, "STRING")
+			renderSummaryWithCountAndStatus(k, v.Count, v.TypesSummary)
 		case Account:
 		case Application:
 		case Pipeline:
@@ -197,6 +194,27 @@ func renderSummaryWithCount(title string, count int64, data map[string]int64) {
 		var rows []table.Row
 		for k, v := range data {
 			rows = append(rows, table.Row{k, v})
+		}
+		t.SetOutputMirror(os.Stdout)
+		t.AppendRows(rows)
+		t.AppendSeparator()
+		t.SetStyle(table.StyleLight)
+		t.SetColumnConfigs([]table.ColumnConfig{
+			{Number: 1, AlignHeader: text.AlignCenter},
+		})
+		t.Render()
+	}
+}
+
+func renderSummaryWithCountAndStatus(title string, count int64, data map[string]SummaryDetails) {
+	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
+	if len(data) > 0 {
+		t := table.NewWriter()
+		header := fmt.Sprintf("%s (%d)", title, count)
+		t.AppendHeader(table.Row{header, header, header}, rowConfigAutoMerge)
+		var rows []table.Row
+		for k, v := range data {
+			rows = append(rows, table.Row{k, v.Count, v.Status})
 		}
 		t.SetOutputMirror(os.Stdout)
 		t.AppendRows(rows)
@@ -256,4 +274,11 @@ func makeArray(size int, defaultValue interface{}) []interface{} {
 		data = append(data, defaultValue)
 	}
 	return data
+}
+
+func toArray(summaries map[string]SummaryDetails) (data [][]interface{}) {
+	for k, v := range summaries {
+		data = append(data, []interface{}{k, v.Count, v.Status})
+	}
+	return
 }
