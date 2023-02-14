@@ -103,11 +103,17 @@ func getSummary(resource Resource) (summary SummaryResponse, err error) {
 }
 
 func renderSummary(summary map[string]EntitySummary) {
+	if len(summary["ACCOUNT"].Name) > 0 {
+		fmt.Printf("Account Name - %s\n\n", summary["ACCOUNT"].Name)
+	}
 	renderTable("Summary", map[string]interface{}{
-		"Pipelines":    summary[Pipeline].Count,
 		"Applications": summary[Application].Count,
-		"Secrets":      summary[Secret].Count,
+		"Pipelines":    summary[Pipeline].Count,
+		"Workflows":    summary[Workflow].Count,
 		"Environments": summary[Environment].Count,
+		"Services":     summary[Service].Count,
+		"Connectors":   summary[Connector].Count,
+		"Secrets":      summary[Secret].Count,
 	})
 	for k, v := range summary {
 		switch k {

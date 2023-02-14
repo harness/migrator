@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func Post(reqUrl string, auth string, body interface{}) (respBodyObj ResponseBody, err error) {
@@ -21,7 +22,7 @@ func Post(reqUrl string, auth string, body interface{}) (respBodyObj ResponseBod
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", auth)
+	req.Header.Set(AuthHeaderKey(auth), auth)
 	return handleResp(req)
 }
 
@@ -31,7 +32,7 @@ func Get(reqUrl string, auth string) (respBodyObj ResponseBody, err error) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", auth)
+	req.Header.Set(AuthHeaderKey(auth), auth)
 	return handleResp(req)
 }
 
@@ -65,4 +66,11 @@ func handleResp(req *http.Request) (respBodyObj ResponseBody, err error) {
 	}
 
 	return respBodyObj, nil
+}
+
+func AuthHeaderKey(auth string) string {
+	if strings.HasPrefix(auth, "Bearer ") {
+		return "Authorization"
+	}
+	return "x-api-key"
 }
