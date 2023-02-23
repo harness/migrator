@@ -5,6 +5,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -105,6 +106,8 @@ var DynamicExpressions = map[string]interface{}{
 }
 
 func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
+	loadYamlFromFile(migrationReq.CustomExpressionsFile)
+
 	extensions := strings.Split(migrationReq.FileExtensions, ",")
 	for i, ext := range extensions {
 		extensions[i] = "." + ext
@@ -256,4 +259,24 @@ func getDynamicExpressionKey(key string) string {
 		}
 	}
 	return ""
+}
+
+func loadYamlFromFile(filePath string) {
+	filePath = strings.TrimSpace(filePath)
+	if len(filePath) == 0 {
+		return
+	}
+	yFile, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	data := make(map[string]string)
+	err = yaml.Unmarshal(yFile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for k, v := range data {
+		ExpressionsMap[k] = v
+	}
+	log.Infof("Successfully loaded %d custom expressions from the file", len(data))
 }

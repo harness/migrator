@@ -160,7 +160,7 @@ harness-upgrade --load templates/pipelines.yaml pipelines
 
 ## Replace First Gen expressions with Next Gen
 
-The command replaces current gen expressions found in all files in current & subdirectories. By default, we only process the files with following file extensions `yml`, `yaml` & `json`.  
+The command replaces first gen expressions found in all files in current & subdirectories. By default, we only process the files with following file extensions `yml`, `yaml` & `json`.  
 ```shell
 harness-upgrade expressions 
 ```
@@ -173,6 +173,17 @@ harness-upgrade expressions --extensions yml,txt,xml
 Do a dry run on the files without replacing any CG expressions
 ```shell
 harness-upgrade expressions --dry-run
+```
+
+To provide custom expressions or override default expressions
+```shell
+harness-upgrade expressions --override /path/to/file.yaml
+```
+
+The above command expects a yaml file whose contents are simple key values of first-gen expressions & string to replace that expression with. A sample override file would look like this - 
+```yaml
+appName: <+org.name>
+service.name: <+project.name>
 ```
 
 ## Global Flags

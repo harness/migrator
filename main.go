@@ -15,39 +15,41 @@ type cliFnWrapper func(ctx *cli.Context) error
 
 // Note: All prompt responses will be added to this
 var migrationReq = struct {
-	Auth              string `survey:"auth"`
-	Environment       string `survey:"environment"`
-	Account           string `survey:"account"`
-	SecretScope       string `survey:"secretScope"`
-	ConnectorScope    string `survey:"connectorScope"`
-	WorkflowScope     string `survey:"workflowScope"`
-	TemplateScope     string `survey:"templateScope"`
-	OrgIdentifier     string `survey:"org"`
-	ProjectIdentifier string `survey:"project"`
-	AppId             string `survey:"appId"`
-	AllAppEntities    bool   `survey:"all"`
-	WorkflowIds       string `survey:"workflowIds"`
-	PipelineIds       string `survey:"pipelineIds"`
-	File              string `survey:"load"`
-	Debug             bool   `survey:"debug"`
-	Json              bool   `survey:"json"`
-	AllowInsecureReq  bool   `survey:"insecure"`
-	ProjectName       string `survey:"projectName"`
-	UrlNG             string `survey:"urlNG"`
-	UrlCG             string `survey:"urlCG"`
-	DryRun            bool   `survey:"dryRun"`
-	FileExtensions    string `survey:"fileExtensions"`
-	ExportFolderPath  string `survey:"export"`
+	Auth                  string `survey:"auth"`
+	Environment           string `survey:"environment"`
+	Account               string `survey:"account"`
+	SecretScope           string `survey:"secretScope"`
+	ConnectorScope        string `survey:"connectorScope"`
+	WorkflowScope         string `survey:"workflowScope"`
+	TemplateScope         string `survey:"templateScope"`
+	OrgIdentifier         string `survey:"org"`
+	ProjectIdentifier     string `survey:"project"`
+	AppId                 string `survey:"appId"`
+	AllAppEntities        bool   `survey:"all"`
+	WorkflowIds           string `survey:"workflowIds"`
+	PipelineIds           string `survey:"pipelineIds"`
+	File                  string `survey:"load"`
+	Debug                 bool   `survey:"debug"`
+	Json                  bool   `survey:"json"`
+	AllowInsecureReq      bool   `survey:"insecure"`
+	ProjectName           string `survey:"projectName"`
+	UrlNG                 string `survey:"urlNG"`
+	UrlCG                 string `survey:"urlCG"`
+	DryRun                bool   `survey:"dryRun"`
+	FileExtensions        string `survey:"fileExtensions"`
+	CustomExpressionsFile string `survey:"customExpressionsFile"`
+	ExportFolderPath      string `survey:"export"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	inputs := Inputs{
 		Defaults: Defaults{
-			Secret:        EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
-			SecretManager: EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
-			Connector:     EntityDefaults{Scope: getOrDefault(migrationReq.ConnectorScope, Project)},
-			Template:      EntityDefaults{Scope: getOrDefault(migrationReq.TemplateScope, Project)},
-			Workflow:      EntityDefaults{Scope: getOrDefault(migrationReq.WorkflowScope, Project)},
+			Secret:                EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
+			SecretManager:         EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
+			SecretManagerTemplate: EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
+			Connector:             EntityDefaults{Scope: getOrDefault(migrationReq.ConnectorScope, Project)},
+			Template:              EntityDefaults{Scope: getOrDefault(migrationReq.TemplateScope, Project)},
+			Workflow:              EntityDefaults{Scope: getOrDefault(migrationReq.WorkflowScope, Project)},
 		},
 	}
 	destination := DestinationDetails{ProjectIdentifier: migrationReq.ProjectIdentifier, OrgIdentifier: migrationReq.OrgIdentifier}
@@ -251,6 +253,11 @@ func main() {
 						Value:       "json,yaml,yml",
 						DefaultText: "json,yaml,yml",
 						Destination: &migrationReq.FileExtensions,
+					},
+					&cli.StringFlag{
+						Name:        "override",
+						Usage:       "provide a `FILE` to load custom expressions from",
+						Destination: &migrationReq.CustomExpressionsFile,
 					},
 				},
 				Action: func(context *cli.Context) error {
