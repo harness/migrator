@@ -20,11 +20,12 @@ type EntityDefaults struct {
 }
 
 type Defaults struct {
-	SecretManager EntityDefaults `json:"SECRET_MANAGER"`
-	Secret        EntityDefaults `json:"SECRET"`
-	Connector     EntityDefaults `json:"CONNECTOR"`
-	Workflow      EntityDefaults `json:"WORKFLOW"`
-	Template      EntityDefaults `json:"TEMPLATE"`
+	SecretManagerTemplate EntityDefaults `json:"SECRET_MANAGER_TEMPLATE"`
+	SecretManager         EntityDefaults `json:"SECRET_MANAGER"`
+	Secret                EntityDefaults `json:"SECRET"`
+	Connector             EntityDefaults `json:"CONNECTOR"`
+	Workflow              EntityDefaults `json:"WORKFLOW"`
+	Template              EntityDefaults `json:"TEMPLATE"`
 }
 
 type Inputs struct {
