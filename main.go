@@ -162,16 +162,6 @@ func main() {
 			Destination: &migrationReq.AppId,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:        "workflows",
-			Usage:       "workflows as comma separated values `workflowId1,workflowId2`",
-			Destination: &migrationReq.WorkflowIds,
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:        "pipelines",
-			Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
-			Destination: &migrationReq.PipelineIds,
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "load",
 			Usage:       "`FILE` to load flags from",
 			Destination: &migrationReq.File,
@@ -248,6 +238,11 @@ func main() {
 						Usage:       "create a pipeline for the workflows, this will create stage templates where possible & reuse the template to create the pipeline",
 						Destination: &migrationReq.AsPipelines,
 					},
+					altsrc.NewStringFlag(&cli.StringFlag{
+						Name:        "workflows",
+						Usage:       "workflows as comma separated values `workflowId1,workflowId2`",
+						Destination: &migrationReq.WorkflowIds,
+					}),
 				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateWorkflows, context)
@@ -256,6 +251,18 @@ func main() {
 			{
 				Name:  "pipelines",
 				Usage: "Import pipelines into an existing project by providing the `appId` & `pipelineIds`",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all pipelines in the app need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					altsrc.NewStringFlag(&cli.StringFlag{
+						Name:        "pipelines",
+						Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
+						Destination: &migrationReq.PipelineIds,
+					}),
+				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migratePipelines, context)
 				},
