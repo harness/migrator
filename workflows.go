@@ -18,7 +18,7 @@ func migrateWorkflows(*cli.Context) error {
 		migrationReq.WorkflowScope = SelectInput("Scope for workflows:", scopes, Project)
 	}
 
-	if len(migrationReq.WorkflowIds) == 0 {
+	if len(migrationReq.WorkflowIds) == 0 && !migrationReq.All {
 		allWorkflowConfirm := ConfirmInput("No workflows provided. This defaults to migrating all workflows within the application. Do you want to proceed?")
 		if !allWorkflowConfirm {
 			promptConfirm = true
@@ -26,7 +26,11 @@ func migrateWorkflows(*cli.Context) error {
 		}
 	}
 
-	promptConfirm = PromptOrgAndProject([]string{migrationReq.WorkflowScope, migrationReq.SecretScope, migrationReq.ConnectorScope, migrationReq.TemplateScope}) || promptConfirm
+	if migrationReq.AsPipelines {
+		migrationReq.PipelineScope = Project
+	}
+
+	promptConfirm = PromptOrgAndProject([]string{migrationReq.PipelineScope, migrationReq.WorkflowScope, migrationReq.SecretScope, migrationReq.ConnectorScope, migrationReq.TemplateScope}) || promptConfirm
 
 	logMigrationDetails()
 

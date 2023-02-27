@@ -16,7 +16,8 @@ type DestinationDetails struct {
 }
 
 type EntityDefaults struct {
-	Scope string `json:"scope"`
+	Scope              string `json:"scope"`
+	WorkflowAsPipeline bool   `json:"workflowAsPipeline"`
 }
 
 type Defaults struct {
