@@ -18,7 +18,7 @@ func migratePipelines(*cli.Context) error {
 		migrationReq.WorkflowScope = SelectInput("Scope for workflow to be migrated as templates:", scopes, Project)
 	}
 
-	if len(migrationReq.PipelineIds) == 0 {
+	if len(migrationReq.PipelineIds) == 0 && !migrationReq.All {
 		allPipelinesConfirm := ConfirmInput("No pipelines provided. This defaults to migrating all pipelines within the application. Do you want to proceed?")
 		if !allPipelinesConfirm {
 			promptConfirm = true

@@ -21,6 +21,7 @@ var migrationReq = struct {
 	SecretScope           string `survey:"secretScope"`
 	ConnectorScope        string `survey:"connectorScope"`
 	WorkflowScope         string `survey:"workflowScope"`
+	PipelineScope         string `survey:"pipelineScope"`
 	TemplateScope         string `survey:"templateScope"`
 	OrgIdentifier         string `survey:"org"`
 	ProjectIdentifier     string `survey:"project"`
@@ -39,6 +40,8 @@ var migrationReq = struct {
 	FileExtensions        string `survey:"fileExtensions"`
 	CustomExpressionsFile string `survey:"customExpressionsFile"`
 	ExportFolderPath      string `survey:"export"`
+	All                   bool   `survey:"all"`
+	AsPipelines           bool   `survey:"asPipelines"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -49,7 +52,7 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 			SecretManagerTemplate: EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
 			Connector:             EntityDefaults{Scope: getOrDefault(migrationReq.ConnectorScope, Project)},
 			Template:              EntityDefaults{Scope: getOrDefault(migrationReq.TemplateScope, Project)},
-			Workflow:              EntityDefaults{Scope: getOrDefault(migrationReq.WorkflowScope, Project)},
+			Workflow:              EntityDefaults{Scope: getOrDefault(migrationReq.WorkflowScope, Project), WorkflowAsPipeline: migrationReq.AsPipelines},
 		},
 	}
 	destination := DestinationDetails{ProjectIdentifier: migrationReq.ProjectIdentifier, OrgIdentifier: migrationReq.OrgIdentifier}
@@ -159,16 +162,6 @@ func main() {
 			Destination: &migrationReq.AppId,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:        "workflows",
-			Usage:       "workflows as comma separated values `workflowId1,workflowId2`",
-			Destination: &migrationReq.WorkflowIds,
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:        "pipelines",
-			Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
-			Destination: &migrationReq.PipelineIds,
-		}),
-		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "load",
 			Usage:       "`FILE` to load flags from",
 			Destination: &migrationReq.File,
@@ -211,6 +204,13 @@ func main() {
 				},
 			},
 			{
+				Name:  "account",
+				Usage: "Import secrets managers, secrets, connectors. This will not migrate services, environments, triggers, pipelines etc",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateAccountLevelEntities, context)
+				},
+			},
+			{
 				Name:  "app",
 				Usage: "Import an app into an existing project by providing the `appId`",
 				Action: func(context *cli.Context) error {
@@ -227,6 +227,23 @@ func main() {
 			{
 				Name:  "workflows",
 				Usage: "Import workflows as stage or pipeline templates by providing the `appId` & `workflowIds`",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all workflows in the app need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.BoolFlag{
+						Name:        "as-pipelines",
+						Usage:       "create a pipeline for the workflows, this will create stage templates where possible & reuse the template to create the pipeline",
+						Destination: &migrationReq.AsPipelines,
+					},
+					altsrc.NewStringFlag(&cli.StringFlag{
+						Name:        "workflows",
+						Usage:       "workflows as comma separated values `workflowId1,workflowId2`",
+						Destination: &migrationReq.WorkflowIds,
+					}),
+				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateWorkflows, context)
 				},
@@ -234,6 +251,18 @@ func main() {
 			{
 				Name:  "pipelines",
 				Usage: "Import pipelines into an existing project by providing the `appId` & `pipelineIds`",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all pipelines in the app need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					altsrc.NewStringFlag(&cli.StringFlag{
+						Name:        "pipelines",
+						Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
+						Destination: &migrationReq.PipelineIds,
+					}),
+				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migratePipelines, context)
 				},
@@ -306,9 +335,6 @@ func main() {
 		},
 		Before: altsrc.InitInputSourceWithContext(globalFlags, altsrc.NewYamlSourceFromFlagFunc("load")),
 		Flags:  globalFlags,
-		Action: func(context *cli.Context) error {
-			return cliWrapper(migrateAccountLevelEntities, context)
-		},
 	}
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
