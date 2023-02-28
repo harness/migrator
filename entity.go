@@ -30,6 +30,7 @@ func QueueCreateEntity(body RequestBody) (reqId string, err error) {
 		return
 	}
 	reqId = resource.RequestId
+	log.Infof("The request id is - %s", reqId)
 	return
 }
 

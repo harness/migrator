@@ -41,6 +41,7 @@ func handleSummary(url string) error {
 		return err
 	}
 	reqId := resource.RequestId
+	log.Infof("The request id is - %s", reqId)
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	s.Suffix = " Processing"
 	s.Start()

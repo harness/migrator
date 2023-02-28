@@ -14,7 +14,7 @@ Harness has developed a tool to help user's migrate from Harness CD Current Gen 
 4. Environments (Overrides included)
 5. Infrastructure Definition
 6. Connectors
-7. Secrets
+7. Secrets & Secret Managers
 8. Templates 
 
 
@@ -57,6 +57,15 @@ To migrate workflows
 harness-upgrade workflows
 ```
 
+> All workflows are created as stage templates in NextGen except for multi-service workflows
+
+To create pipelines out of workflows
+```shell
+harness-upgrade workflows --as-pipelines 
+```
+
+> Workflows will continue to be migrated to stage templates & the pipelines are created using these stage templates.
+
 To migrate pipelines
 ```shell
 harness-upgrade pipelines
@@ -90,7 +99,7 @@ Using the step-by-step guide is the recommended way to get started with upgrade,
 ### To migrate all account level entities
 
 ```shell
-HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --env ENV
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --env ENV account
 ```
 
 ### To migrate an application
@@ -102,14 +111,14 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --or
 ### To migrate workflows
 
 ```shell
-HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --workflows WORKFLOW_IDS --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV workflows 
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV workflows --workflows WORKFLOW_IDS
 ```
 > If you do not provide use `--workflows` flag it will migrate all workflows in the app
 
 ### To migrate pipelines
 
 ```shell
-HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --pipelines PIPELINE_IDS --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV pipelines 
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV pipelines --pipelines PIPELINE_IDS 
 ```
 > If you do not provide use `--pipelines` flag it will migrate all pipelines in the app
 
@@ -143,7 +152,7 @@ If you wish to provide the flags from a file you can use the `--load` to load fl
 
 ```shell
 # To migrate the account level entities
-harness-upgrade --load 'templates/account.yaml'
+harness-upgrade --load templates/account.yaml
 
 # To migrate the app
 harness-upgrade --load templates/app.yaml app
