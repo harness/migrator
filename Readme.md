@@ -132,7 +132,7 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --or
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --workflow-scope SCOPE --env ENV triggers --triggers TRIGGER_IDS 
 ```
-> If you do not provide use `--triggers` flag it will migrate all pipelines in the app
+> If you do not provide use `--triggers` flag it will migrate all triggers in the app
 
 ### To create a project
 ```shell
