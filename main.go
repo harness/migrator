@@ -29,6 +29,7 @@ var migrationReq = struct {
 	AllAppEntities        bool   `survey:"all"`
 	WorkflowIds           string `survey:"workflowIds"`
 	PipelineIds           string `survey:"pipelineIds"`
+	TriggerIds            string `survey:"triggerIds"`
 	File                  string `survey:"load"`
 	Debug                 bool   `survey:"debug"`
 	Json                  bool   `survey:"json"`
@@ -265,6 +266,25 @@ func main() {
 				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migratePipelines, context)
+				},
+			},
+			{
+				Name:  "triggers",
+				Usage: "Import triggers by providing the `appId` & `triggerIds`",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all triggers in the app need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					altsrc.NewStringFlag(&cli.StringFlag{
+						Name:        "triggers",
+						Usage:       "triggers as comma separated values `triggerId1,triggerId2`",
+						Destination: &migrationReq.TriggerIds,
+					}),
+				},
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateTriggers, context)
 				},
 			},
 			{

@@ -7,6 +7,7 @@ const (
 	Connector                      = "CONNECTOR"
 	Application                    = "APPLICATION"
 	Workflow                       = "WORKFLOW"
+	Trigger                        = "TRIGGER"
 	WorkflowExecution              = "WORKFLOW_EXECUTION"
 	Pipeline                       = "PIPELINE"
 	Infrastructure                 = "INFRA"

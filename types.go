@@ -6,6 +6,7 @@ type ImportType string
 type Filter struct {
 	Type        ImportType `json:"importType"`
 	AppId       string     `json:"appId"`
+	TriggerIds  []string   `json:"triggerIds"`
 	WorkflowIds []string   `json:"workflowIds"`
 	PipelineIds []string   `json:"pipelineIds"`
 }
