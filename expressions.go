@@ -13,6 +13,7 @@ import (
 )
 
 const ExpressionPattern = "\\$\\{[\\w-.\"()]+}"
+const SecretExpressionPattern = "\\$\\{secrets.getValue\\([^{}]+\\)}"
 
 var ExpressionsMap = map[string]string{
 	"infra.kubernetes.namespace": "<+infra.namespace>",
@@ -97,12 +98,24 @@ var DynamicExpressions = map[string]interface{}{
 	"environmentVariables": func(key string) string {
 		return "<+env.variables." + key + ">"
 	},
-	"secrets": func(key string) string {
-		return "<+secrets.getValue(\"" + key + "\")>"
+	"secrets.getValue(": func(key string) string {
+		return "<+secrets.getValue(\"" + getSecretKeyWithScope(key) + "\")>"
 	},
 	"app.defaults": func(key string) string {
 		return "<+variable." + key + ">"
 	},
+}
+
+func getSecretKeyWithScope(key string) string {
+	camelCase := ToCamelCase(key)
+	switch migrationReq.SecretScope {
+	case Account:
+		return Account + "." + camelCase
+	case Org:
+		return Org + "." + camelCase
+	default:
+		return camelCase
+	}
 }
 
 func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
@@ -185,8 +198,14 @@ func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
 }
 
 func FindAllExpressions(str string) []string {
+	// Generic expressions
 	r := regexp.MustCompile(ExpressionPattern)
-	return r.FindAllString(str, -1)
+	allExpressions := r.FindAllString(str, -1)
+
+	// Secret expressions
+	r = regexp.MustCompile(SecretExpressionPattern)
+	allExpressions = append(allExpressions, r.FindAllString(str, -1)...)
+	return allExpressions
 }
 
 func ReplaceAllExpressions(str string, expressions []string) (string, []string) {
@@ -248,7 +267,15 @@ func renderSupportedExpressionsTable(data []string) {
 
 func getDynamicExpressionValue(key string) string {
 	k := getDynamicExpressionKey(key)
-	dynamic := strings.Replace(key, k+".", "", 1)
+	var dynamic string
+	if strings.HasSuffix(k, "(") {
+		dynamic = strings.Replace(key, k, "", 1)
+		if strings.HasSuffix(dynamic, ")") {
+			dynamic = dynamic[0 : len(dynamic)-1]
+		}
+	} else {
+		dynamic = strings.Replace(key, k+".", "", 1)
+	}
 	return DynamicExpressions[k].(func(string2 string) string)(dynamic)
 }
 
