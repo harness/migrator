@@ -13,6 +13,7 @@ import (
 )
 
 const ExpressionPattern = "\\$\\{[\\w-.\"()]+}"
+const SecretExpressionPattern = "\\$\\{secrets.getValue\\([^{}]+\\)}"
 
 var ExpressionsMap = map[string]string{
 	"infra.kubernetes.namespace": "<+infra.namespace>",
@@ -197,8 +198,14 @@ func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
 }
 
 func FindAllExpressions(str string) []string {
+	// Generic expressions
 	r := regexp.MustCompile(ExpressionPattern)
-	return r.FindAllString(str, -1)
+	allExpressions := r.FindAllString(str, -1)
+
+	// Secret expressions
+	r = regexp.MustCompile(SecretExpressionPattern)
+	allExpressions = append(allExpressions, r.FindAllString(str, -1)...)
+	return allExpressions
 }
 
 func ReplaceAllExpressions(str string, expressions []string) (string, []string) {
