@@ -134,6 +134,8 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --or
 ```
 > If you do not provide use `--triggers` flag it will migrate all triggers in the app
 
+> Migrating Triggers is WIP. The current results requires considerable manual effort post migration
+
 ### To create a project
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG project --name PROJECT_NAME --identifier PROJECT_IDENTIFIER create
@@ -194,6 +196,11 @@ harness-upgrade expressions --extensions yml,txt,xml
 Do a dry run on the files without replacing any CG expressions
 ```shell
 harness-upgrade expressions --dry-run
+```
+
+Secrets referenced in these files are converted to camel case to align with the migrator. You can provide the scope of the secrets using the `--secret-scope` flag.
+```shell
+harness-upgrade --secret-scope account expressions
 ```
 
 To provide custom expressions or override default expressions

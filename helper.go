@@ -158,3 +158,43 @@ func ReadFile(absFilePath string) (string, error) {
 	}
 	return string(d), err
 }
+
+func ToCamelCase(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.ToLower(s)
+	if s == "" {
+		return s
+	}
+	n := strings.Builder{}
+	n.Grow(len(s))
+	capNext := false
+	for i, v := range []byte(s) {
+		vIsCap := v >= 'A' && v <= 'Z'
+		vIsLow := v >= 'a' && v <= 'z'
+		vIsNum := v >= '0' && v <= '9'
+		if vIsNum && i == 0 {
+			n.WriteByte('_')
+		}
+		if capNext {
+			if vIsLow {
+				v += 'A'
+				v -= 'a'
+			}
+		} else if i == 0 {
+			if vIsCap {
+				v += 'a'
+				v -= 'A'
+			}
+		}
+		if vIsCap || vIsLow {
+			n.WriteByte(v)
+			capNext = false
+		} else if vIsNum {
+			n.WriteByte(v)
+			capNext = true
+		} else {
+			capNext = v == '_' || v == ' ' || v == '-' || v == '.'
+		}
+	}
+	return n.String()
+}
