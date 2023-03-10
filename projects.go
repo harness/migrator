@@ -147,7 +147,7 @@ func bulkCreateProject(*cli.Context) error {
 }
 
 func bulkRemoveProject(*cli.Context) error {
-	promptConfirm := PromptDefaultInputs()
+	promptConfirm := PromptEnvDetails()
 	promptConfirm = PromptOrgAndProject([]string{Org}) || promptConfirm
 	names := Split(migrationReq.Names, ",")
 	identifiers := Split(migrationReq.Identifiers, ",")
