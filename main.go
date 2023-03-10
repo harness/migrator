@@ -339,15 +339,11 @@ func main() {
 					&cli.StringFlag{
 						Name:        "identifiers",
 						Usage:       "`IDENTIFIERS` of the projects",
-						Value:       ".",
-						DefaultText: ".",
 						Destination: &migrationReq.Identifiers,
 					},
 					&cli.StringFlag{
 						Name:        "names",
 						Usage:       "`NAMES` of the projects",
-						Value:       ".",
-						DefaultText: ".",
 						Destination: &migrationReq.Names,
 					},
 				},
