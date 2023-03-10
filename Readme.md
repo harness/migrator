@@ -147,6 +147,11 @@ The following command creates a corresponding project for every app in the accou
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE project --export FOLDER_PATH create-bulk
 ```
 
+If you wish to migrate all the above apps then run this - 
+```shell
+for f in /path/to/folder/*.yaml; do harness-upgrade --load $f app --all; done
+```
+
 ### To remove projects
 The following command removes projects from a given org in an account. You can provide the names or identifiers of the projects.
 
