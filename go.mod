@@ -1,4 +1,4 @@
-module migrator
+module harness-upgrade
 
 go 1.19
 

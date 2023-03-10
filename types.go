@@ -55,8 +55,12 @@ type BulkCreateBody struct {
 	Org string `json:"orgIdentifier"`
 }
 
-type ProjectCreateBody struct {
+type ProjectBody struct {
 	Project ProjectDetails `json:"project"`
+}
+
+type ProjectListBody struct {
+	Projects []ProjectDetails `json:"content"`
 }
 
 type RequestBody struct {

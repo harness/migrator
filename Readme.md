@@ -147,6 +147,19 @@ The following command creates a corresponding project for every app in the accou
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE project --export FOLDER_PATH create-bulk
 ```
 
+### To remove projects
+The following command removes projects from a given org in an account. You can provide the names or identifiers of the projects.
+
+To remove projects by name use `--names`
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG project --names name1,name2 rm
+```
+
+To remove projects by identifier use `--identifiers`
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG project --identifiers identifier1,identifier2 rm
+```
+
 ### To get account summary
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV account-summary
