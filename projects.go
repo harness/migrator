@@ -151,7 +151,6 @@ func bulkRemoveProject(*cli.Context) error {
 	promptConfirm = PromptOrgAndProject([]string{Org}) || promptConfirm
 	names := Split(migrationReq.Names, ",")
 	identifiers := Split(migrationReq.Identifiers, ",")
-	fmt.Println(names, identifiers)
 	if len(names) == 0 && len(identifiers) == 0 {
 		log.Fatal("No names or identifiers for the projects provided. Aborting")
 	}
