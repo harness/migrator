@@ -121,7 +121,7 @@ func getSecretKeyWithScope(key string) string {
 func ReplaceCurrentGenExpressionsWithNextGen(*cli.Context) (err error) {
 	loadYamlFromFile(migrationReq.CustomExpressionsFile)
 
-	extensions := strings.Split(migrationReq.FileExtensions, ",")
+	extensions := Split(migrationReq.FileExtensions, ",")
 	for i, ext := range extensions {
 		extensions[i] = "." + ext
 	}

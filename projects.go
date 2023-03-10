@@ -9,7 +9,6 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 func createProject(*cli.Context) error {
@@ -150,8 +149,9 @@ func bulkCreateProject(*cli.Context) error {
 func bulkRemoveProject(*cli.Context) error {
 	promptConfirm := PromptDefaultInputs()
 	promptConfirm = PromptOrgAndProject([]string{Org}) || promptConfirm
-	names := strings.Split(migrationReq.Names, ",")
-	identifiers := strings.Split(migrationReq.Identifiers, ",")
+	names := Split(migrationReq.Names, ",")
+	identifiers := Split(migrationReq.Identifiers, ",")
+	fmt.Println(names, identifiers)
 	if len(names) == 0 && len(identifiers) == 0 {
 		log.Fatal("No names or identifiers for the projects provided. Aborting")
 	}
@@ -178,6 +178,7 @@ func bulkRemoveProject(*cli.Context) error {
 				identifiers = append(identifiers, id)
 			}
 		}
+		log.Debugf("Valid identifers for the given names are - %s", identifiers)
 	}
 
 	for _, identifier := range identifiers {
@@ -219,7 +220,7 @@ func getProjects() []ProjectDetails {
 	var projectDetails []ProjectDetails
 
 	for _, p := range projects.Projects {
-		projectDetails = append(projectDetails, p)
+		projectDetails = append(projectDetails, p.Project)
 	}
 	return projectDetails
 }

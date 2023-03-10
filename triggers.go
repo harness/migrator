@@ -3,7 +3,6 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"strings"
 )
 
 func migrateTriggers(*cli.Context) error {
@@ -40,7 +39,7 @@ func migrateTriggers(*cli.Context) error {
 	// Migrating the triggers
 	var triggerIds []string
 	if len(migrationReq.TriggerIds) > 0 {
-		triggerIds = strings.Split(migrationReq.TriggerIds, ",")
+		triggerIds = Split(migrationReq.TriggerIds, ",")
 	}
 	log.Info("Importing the triggers....")
 	CreateEntities(getReqBody(Trigger, Filter{

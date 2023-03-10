@@ -60,7 +60,7 @@ type ProjectBody struct {
 }
 
 type ProjectListBody struct {
-	Projects []ProjectDetails `json:"content"`
+	Projects []ProjectBody `json:"content"`
 }
 
 type RequestBody struct {

@@ -3,7 +3,6 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"strings"
 )
 
 func migrateWorkflows(*cli.Context) error {
@@ -44,7 +43,7 @@ func migrateWorkflows(*cli.Context) error {
 	// Migrating the workflows
 	var workflowIds []string
 	if len(migrationReq.WorkflowIds) > 0 {
-		workflowIds = strings.Split(migrationReq.WorkflowIds, ",")
+		workflowIds = Split(migrationReq.WorkflowIds, ",")
 	}
 	log.Info("Importing the workflows....")
 	CreateEntities(getReqBody(Workflow, Filter{
