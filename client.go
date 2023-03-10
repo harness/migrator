@@ -36,6 +36,16 @@ func Get(reqUrl string, auth string) (respBodyObj ResponseBody, err error) {
 	return handleResp(req)
 }
 
+func Delete(reqUrl string, auth string) (respBodyObj ResponseBody, err error) {
+	req, err := http.NewRequest("DELETE", reqUrl, nil)
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set(AuthHeaderKey(auth), auth)
+	return handleResp(req)
+}
+
 func handleResp(req *http.Request) (respBodyObj ResponseBody, err error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)

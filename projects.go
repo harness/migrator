@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"path"
 	"path/filepath"
+	"strconv"
 )
 
 func createProject(*cli.Context) error {
@@ -40,7 +41,7 @@ func createProject(*cli.Context) error {
 
 	log.Info("Creating the project....")
 
-	_, err := Post(url, migrationReq.Auth, ProjectCreateBody{
+	_, err := Post(url, migrationReq.Auth, ProjectBody{
 		Project: ProjectDetails{
 			OrgIdentifier: migrationReq.OrgIdentifier,
 			Identifier:    migrationReq.ProjectIdentifier,
@@ -143,4 +144,91 @@ func bulkCreateProject(*cli.Context) error {
 	}
 
 	return nil
+}
+
+func bulkRemoveProject(*cli.Context) error {
+	promptConfirm := PromptDefaultInputs()
+	promptConfirm = PromptOrgAndProject([]string{Org}) || promptConfirm
+	names := Split(migrationReq.Names, ",")
+	identifiers := Split(migrationReq.Identifiers, ",")
+	if len(names) == 0 && len(identifiers) == 0 {
+		log.Fatal("No names or identifiers for the projects provided. Aborting")
+	}
+	if len(names) > 0 && len(identifiers) > 0 {
+		log.Fatal("Both names and identifiers for the projects provided. Aborting")
+	}
+
+	n := len(identifiers)
+	if len(names) > 0 {
+		n = len(names)
+	}
+	if promptConfirm {
+		confirm := ConfirmInput("Are you sure you want to proceed with deletion of " + strconv.Itoa(n) + " projects?")
+		if !confirm {
+			log.Fatal("Aborting...")
+		}
+	}
+
+	if len(names) > 0 {
+		projects := getProjects()
+		for _, name := range names {
+			id := findProjectIdByName(projects, name)
+			if len(id) > 0 {
+				identifiers = append(identifiers, id)
+			}
+		}
+		log.Debugf("Valid identifers for the given names are - %s", identifiers)
+	}
+
+	for _, identifier := range identifiers {
+		deleteProject(identifier)
+	}
+	log.Info("Finished operation for all given projects")
+	return nil
+}
+
+func deleteProject(projectId string) {
+	url := fmt.Sprintf("%s/api/projects/%s?accountIdentifier=%s&orgIdentifier=%s", urlMap[migrationReq.Environment][NG], projectId, migrationReq.Account, migrationReq.OrgIdentifier)
+
+	log.Infof("Deleting the project with identifier %s", projectId)
+
+	_, err := Delete(url, migrationReq.Auth)
+
+	if err == nil {
+		log.Infof("Successfully deleted the project - %s", projectId)
+	} else {
+		log.Errorf("Failed to delete the project - %s", projectId)
+	}
+}
+
+func getProjects() []ProjectDetails {
+	url := fmt.Sprintf("%s/api/projects?accountIdentifier=%s&orgIdentifier=%s&pageSize=1000", urlMap[migrationReq.Environment][NG], migrationReq.Account, migrationReq.OrgIdentifier)
+	resp, err := Get(url, migrationReq.Auth)
+	if err != nil || resp.Status != "SUCCESS" {
+		log.Fatal("Failed to fetch projects", err)
+	}
+	byteData, err := json.Marshal(resp.Data)
+	if err != nil {
+		log.Fatal("Failed to fetch projects", err)
+	}
+	var projects ProjectListBody
+	err = json.Unmarshal(byteData, &projects)
+	if err != nil {
+		log.Fatal("Failed to fetch projects", err)
+	}
+	var projectDetails []ProjectDetails
+
+	for _, p := range projects.Projects {
+		projectDetails = append(projectDetails, p.Project)
+	}
+	return projectDetails
+}
+
+func findProjectIdByName(projects []ProjectDetails, projectName string) string {
+	for _, p := range projects {
+		if p.Name == projectName {
+			return p.Identifier
+		}
+	}
+	return ""
 }

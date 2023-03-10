@@ -198,3 +198,14 @@ func ToCamelCase(s string) string {
 	}
 	return n.String()
 }
+
+func Split(str string, sep string) (result []string) {
+	if len(strings.TrimSpace(str)) == 0 {
+		return
+	}
+	result = strings.Split(str, sep)
+	for i, s := range result {
+		result[i] = strings.TrimSpace(s)
+	}
+	return
+}

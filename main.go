@@ -41,6 +41,8 @@ var migrationReq = struct {
 	FileExtensions        string `survey:"fileExtensions"`
 	CustomExpressionsFile string `survey:"customExpressionsFile"`
 	ExportFolderPath      string `survey:"export"`
+	Names                 string `survey:"names"`
+	Identifiers           string `survey:"identifiers"`
 	All                   bool   `survey:"all"`
 	AsPipelines           bool   `survey:"asPipelines"`
 }{}
@@ -334,6 +336,16 @@ func main() {
 						DefaultText: ".",
 						Destination: &migrationReq.ExportFolderPath,
 					},
+					&cli.StringFlag{
+						Name:        "identifiers",
+						Usage:       "`IDENTIFIERS` of the projects",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the projects",
+						Destination: &migrationReq.Names,
+					},
 				},
 				Subcommands: []*cli.Command{
 					{
@@ -348,6 +360,13 @@ func main() {
 						Usage: "Creates all apps as projects",
 						Action: func(context *cli.Context) error {
 							return cliWrapper(bulkCreateProject, context)
+						},
+					},
+					{
+						Name:  "rm",
+						Usage: "Remove projects",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(bulkRemoveProject, context)
 						},
 					},
 				},

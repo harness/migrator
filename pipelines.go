@@ -3,7 +3,6 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"strings"
 )
 
 func migratePipelines(*cli.Context) error {
@@ -41,7 +40,7 @@ func migratePipelines(*cli.Context) error {
 	log.Info("Importing the pipelines....")
 	var pipelineIds []string
 	if len(migrationReq.PipelineIds) > 0 {
-		pipelineIds = strings.Split(migrationReq.PipelineIds, ",")
+		pipelineIds = Split(migrationReq.PipelineIds, ",")
 	}
 	CreateEntities(getReqBody(Pipeline, Filter{
 		PipelineIds: pipelineIds,
