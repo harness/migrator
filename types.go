@@ -52,7 +52,8 @@ type BulkProjectResult struct {
 }
 
 type BulkCreateBody struct {
-	Org string `json:"orgIdentifier"`
+	Org                  string `json:"orgIdentifier"`
+	IdentifierCaseFormat string `json:"identifierCaseFormat"`
 }
 
 type ProjectBody struct {
