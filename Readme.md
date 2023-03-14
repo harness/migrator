@@ -252,8 +252,11 @@ service.name: <+project.name>
 | --source-app          | URL of the application from which we will migrate the entities                                                         |
 | --debug               | If debug level logs need to be printed                                                                                 |
 | --json                | Formatted the logs as JSON                                                                                             |
+| ---identifier-case    | Case format of identifiers. Possible values - `camelCase`, `lowerCase` (default: `camelCase`)                          |      
 
-If not all the required flags are provided we will fall back to prompt based technique to capture all the required details.
+If not all the required flags are provided we will fall back to prompt based technique to capture all the required
+details.
 
 ## Contact
+
 If you face any issues please reach out to us or feel free to create a GitHub issue.

@@ -30,6 +30,13 @@ type Defaults struct {
 	Template              EntityDefaults `json:"TEMPLATE"`
 }
 
+type IdentifierCaseFormat string
+
+const (
+	camelCase IdentifierCaseFormat = "CAMEL_CASE"
+	lowerCase                      = "LOWER_CASE"
+)
+
 type Inputs struct {
 	Defaults Defaults `json:"defaults"`
 }
@@ -64,10 +71,11 @@ type ProjectListBody struct {
 }
 
 type RequestBody struct {
-	DestinationDetails DestinationDetails `json:"destinationDetails"`
-	EntityType         EntityType         `json:"entityType"`
-	Filter             Filter             `json:"filter"`
-	Inputs             Inputs             `json:"inputs"`
+	DestinationDetails   DestinationDetails   `json:"destinationDetails"`
+	EntityType           EntityType           `json:"entityType"`
+	Filter               Filter               `json:"filter"`
+	Inputs               Inputs               `json:"inputs"`
+	IdentifierCaseFormat IdentifierCaseFormat `json:"identifierCaseFormat"`
 }
 
 type CurrentGenEntity struct {

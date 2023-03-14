@@ -45,6 +45,7 @@ var migrationReq = struct {
 	Identifiers           string `survey:"identifiers"`
 	All                   bool   `survey:"all"`
 	AsPipelines           bool   `survey:"asPipelines"`
+	IdentifierCaseFormat  string `survey:"identifierCaseFormat"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -59,7 +60,13 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 		},
 	}
 	destination := DestinationDetails{ProjectIdentifier: migrationReq.ProjectIdentifier, OrgIdentifier: migrationReq.OrgIdentifier}
-	return RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter}
+	format := camelCase
+	if "lowerCase" == migrationReq.IdentifierCaseFormat {
+		format = lowerCase
+	}
+	body := RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter,
+		IdentifierCaseFormat: format}
+	return body
 }
 
 func logMigrationDetails() {
@@ -183,6 +190,11 @@ func main() {
 			Name:        "json",
 			Usage:       "log as JSON instead of standard ASCII formatter",
 			Destination: &migrationReq.Json,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "identifier-case",
+			Usage:       "`CASE-FORMAT` of identifiers. Possible values - camelCase, lowerCase (default: camelCase)",
+			Destination: &migrationReq.IdentifierCaseFormat,
 		}),
 	}
 	app := &cli.App{

@@ -78,7 +78,8 @@ func bulkCreateProject(*cli.Context) error {
 	}
 
 	url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "projects/bulk", map[string]string{
-		"accountIdentifier": migrationReq.Account,
+		"accountIdentifier":    migrationReq.Account,
+		"identifierCaseFormat": migrationReq.IdentifierCaseFormat,
 	})
 
 	log.Info("Creating the projects....")
