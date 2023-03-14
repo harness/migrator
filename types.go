@@ -64,10 +64,11 @@ type ProjectListBody struct {
 }
 
 type RequestBody struct {
-	DestinationDetails DestinationDetails `json:"destinationDetails"`
-	EntityType         EntityType         `json:"entityType"`
-	Filter             Filter             `json:"filter"`
-	Inputs             Inputs             `json:"inputs"`
+	DestinationDetails   DestinationDetails `json:"destinationDetails"`
+	EntityType           EntityType         `json:"entityType"`
+	Filter               Filter             `json:"filter"`
+	Inputs               Inputs             `json:"inputs"`
+	IdentifierCaseFormat string             `json:"identifierCaseFormat"`
 }
 
 type CurrentGenEntity struct {
