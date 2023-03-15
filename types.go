@@ -52,7 +52,8 @@ type BulkProjectResult struct {
 }
 
 type BulkCreateBody struct {
-	Org string `json:"orgIdentifier"`
+	Org                  string `json:"orgIdentifier"`
+	IdentifierCaseFormat string `json:"identifierCaseFormat"`
 }
 
 type ProjectBody struct {
@@ -64,10 +65,11 @@ type ProjectListBody struct {
 }
 
 type RequestBody struct {
-	DestinationDetails DestinationDetails `json:"destinationDetails"`
-	EntityType         EntityType         `json:"entityType"`
-	Filter             Filter             `json:"filter"`
-	Inputs             Inputs             `json:"inputs"`
+	DestinationDetails   DestinationDetails `json:"destinationDetails"`
+	EntityType           EntityType         `json:"entityType"`
+	Filter               Filter             `json:"filter"`
+	Inputs               Inputs             `json:"inputs"`
+	IdentifierCaseFormat string             `json:"identifierCaseFormat"`
 }
 
 type CurrentGenEntity struct {
