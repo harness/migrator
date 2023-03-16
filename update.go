@@ -23,7 +23,8 @@ func Update(*cli.Context) (err error) {
 	blue := color.New(color.FgHiBlue).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
-	confirm := ConfirmInput(fmt.Sprintf("New version %s is available. Do you want to update?", green(newVersion)))
+	fmt.Printf("New version %s is available.\n", green(newVersion))
+	confirm := ConfirmInput("Do you want to update?")
 	if !confirm {
 		return nil
 	}
@@ -37,16 +38,21 @@ func Update(*cli.Context) (err error) {
 
 	if GOOS != "darwin" {
 		fmt.Printf("%s\n", yellow("Auto update support is only available for MacOS right now"))
-		fmt.Printf("Download the release from using the following - %s\n", blue(url))
+		fmt.Printf("Download the following release - %s\n", blue(url))
+		return nil
 	}
 
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	ex, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	dir, err := filepath.Abs(path.Dir(ex))
 	if err != nil {
 		return err
 	}
 
 	// Download the file
-	fmt.Printf("Downloading the release from the following url - %s\n", blue(url))
+	fmt.Printf("Downloading the following - %s\n", blue(url))
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
