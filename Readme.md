@@ -76,6 +76,11 @@ To migrate triggers
 harness-upgrade triggers
 ```
 
+To migrate user groups
+```shell
+harness-upgrade user-groups
+```
+
 To create project
 ```shell
 harness-upgrade project create

@@ -223,6 +223,13 @@ func main() {
 				},
 			},
 			{
+				Name:  "user-groups",
+				Usage: "Import user groups from First Gen to Next Gen",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateUserGroups, context)
+				},
+			},
+			{
 				Name:  "account",
 				Usage: "Import secrets managers, secrets, connectors. This will not migrate services, environments, triggers, pipelines etc",
 				Action: func(context *cli.Context) error {
