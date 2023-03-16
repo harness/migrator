@@ -256,5 +256,11 @@ service.name: <+project.name>
 
 If not all the required flags are provided we will fall back to prompt based technique to capture all the required details.
 
+## To update the CLI
+To update to a new version of the CLI
+```shell
+harness-upgrade update
+```
+
 ## Contact
 If you face any issues please reach out to us or feel free to create a GitHub issue.
