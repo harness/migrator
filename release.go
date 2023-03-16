@@ -14,10 +14,7 @@ type GithubRelease struct {
 	TagName    string `json:"tag_name"`
 }
 
-func CheckGithubForReleases() {
-	if Version == "development" {
-		return
-	}
+func GetNewRelease() (newVersion string) {
 	resp, err := http.Get("https://api.github.com/repos/harness/migrator/releases")
 	if err != nil {
 		return
@@ -52,6 +49,9 @@ func CheckGithubForReleases() {
 		if !v.Prerelease && len(latestStableRelease.TagName) == 0 {
 			latestStableRelease = v
 		}
+		if v.TagName == Version && v.Prerelease {
+			isPreRelease = true
+		}
 	}
 	if Version == latest.TagName {
 		return
@@ -60,15 +60,24 @@ func CheckGithubForReleases() {
 		return
 	}
 	if !latest.Prerelease {
-		printUpgradeMessage(Version, latest.TagName)
-		return
+		return latest.TagName
 	}
 	if isPreRelease {
-		printUpgradeMessage(Version, latest.TagName)
-		return
+		return latest.TagName
 	}
 	if !isPreRelease && latestStableRelease.TagName != Version {
-		printUpgradeMessage(Version, latestStableRelease.TagName)
+		return latestStableRelease.TagName
+	}
+	return
+}
+
+func CheckGithubForReleases() {
+	if Version == "development" {
+		return
+	}
+	newRelease := GetNewRelease()
+	if len(newRelease) > 0 {
+		printUpgradeMessage(Version, newRelease)
 	}
 }
 

@@ -201,6 +201,14 @@ func main() {
 		Suggest:              true,
 		Commands: []*cli.Command{
 			{
+				Name:    "update",
+				Aliases: []string{"upgrade"},
+				Usage:   "Check for updates and upgrade the CLI",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(Update, context)
+				},
+			},
+			{
 				Name:  "account-summary",
 				Usage: "Get a summary of an account",
 				Action: func(context *cli.Context) error {
