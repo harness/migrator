@@ -14,6 +14,7 @@ const (
 	Environment                    = "ENVIRONMENT"
 	ApplicationManifest            = "MANIFEST"
 	Template                       = "TEMPLATE"
+	UserGroups                     = "USER_GROUP"
 )
 
 const (
