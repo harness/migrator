@@ -6,6 +6,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -114,6 +115,23 @@ func renderSaveSummary(saveSummary SaveSummary) {
 			e := saveSummary.Errors[i]
 			logWithDetails(log.ErrorLevel, e.Entity, e.Message)
 		}
+	}
+
+	if len(saveSummary.SkippedExpressionsList) > 0 {
+		var rows []table.Row
+		for _, v := range saveSummary.SkippedExpressionsList {
+			rows = append(rows, table.Row{v.EntityType, v.Identifier, v.OrgIdentifier, v.ProjectIdentifier, strings.Join(v.Expressions, "\n")})
+		}
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{"Type", "Identifier", "Org", "Project", "Expressions"})
+		t.AppendRows(rows)
+		t.AppendSeparator()
+		t.SetStyle(table.StyleLight)
+		t.SortBy([]table.SortBy{
+			{Number: 1, Mode: table.Asc},
+		})
+		t.Render()
 	}
 }
 

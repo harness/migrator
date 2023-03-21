@@ -120,9 +120,18 @@ type ResponseMessages struct {
 }
 
 type SaveSummary struct {
-	Stats       map[string]MigrationStats `json:"stats"`
-	Errors      []UpgradeError            `json:"errors"`
-	SkipDetails []SkipDetail              `json:"skipDetails"`
+	Stats                  map[string]MigrationStats `json:"stats"`
+	Errors                 []UpgradeError            `json:"errors"`
+	SkipDetails            []SkipDetail              `json:"skipDetails"`
+	SkippedExpressionsList []SkippedExpressionDetail `json:"skippedExpressions"`
+}
+
+type SkippedExpressionDetail struct {
+	EntityType        string   `json:"entityType"`
+	Identifier        string   `json:"identifier"`
+	OrgIdentifier     string   `json:"orgIdentifier"`
+	ProjectIdentifier string   `json:"projectIdentifier"`
+	Expressions       []string `json:"expressions"`
 }
 
 type SummaryResponse struct {
