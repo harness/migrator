@@ -86,7 +86,7 @@ func printUpgradeMessage(from string, to string) {
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgHiRed).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
-	fmt.Printf("[%s] A new release of harness-upgrade is available: %s -> %s\n", blue("notice"), red(from), green(to))
+	fmt.Printf("[%s] A new release of harness-upgrade is available: %s → %s\n", blue("notice"), red(from), green(to))
 	fmt.Printf("%s\n", yellow("https://github.com/harness/migrator/releases/tag/"+to))
-	fmt.Printf("To update run - %s\n", green("harness-upgrade update"))
+	fmt.Printf("To update, run: %s\n", green("harness-upgrade update"))
 }
