@@ -23,11 +23,11 @@ func QueueCreateEntity(body RequestBody) (reqId string, err error) {
 	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/async", migrationReq.Account)
 	resp, err := Post(url, migrationReq.Auth, body)
 	if err != nil {
-		log.Fatal("Failed to create the entities")
+		log.Fatal("Failed to create the entities", err)
 	}
 	resource, err := getResource(resp.Resource)
 	if err != nil || len(resource.RequestId) == 0 {
-		log.Fatal("Failed to create the entities")
+		log.Fatal("Failed to create the entities", err)
 		return
 	}
 	reqId = resource.RequestId
@@ -48,12 +48,12 @@ func PollForCompletion(reqId string) {
 		resp, err := Get(url, migrationReq.Auth)
 		if err != nil {
 			s.Stop()
-			log.Fatal("Failed to create the entities")
+			log.Fatal("Failed to create the entities", err)
 		}
 		resource, err := getResource(resp.Resource)
 		if err != nil {
 			s.Stop()
-			log.Fatal("Failed to create the entities")
+			log.Fatal("Failed to create the entities", err)
 		}
 		if resource.Status == "ERROR" {
 			s.Stop()
@@ -63,7 +63,7 @@ func PollForCompletion(reqId string) {
 			s.Stop()
 			saveSummary, err := getSaveSummary(resource)
 			if err != nil {
-				log.Fatal("Failed to create the entities")
+				log.Fatal("Failed to create the entities", err)
 			}
 			renderSaveSummary(saveSummary)
 			break

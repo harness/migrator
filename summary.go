@@ -33,11 +33,11 @@ func GetAppSummary(*cli.Context) error {
 func handleSummary(url string) error {
 	resp, err := Get(url, migrationReq.Auth)
 	if err != nil {
-		log.Fatal("Failed to fetch account summary")
+		log.Fatal("Failed to fetch account summary", err)
 	}
 	resource, err := getResource(resp.Resource)
 	if err != nil || len(resource.RequestId) == 0 {
-		log.Fatal("Failed to fetch account summary")
+		log.Fatal("Failed to fetch account summary", err)
 		return err
 	}
 	reqId := resource.RequestId
@@ -54,23 +54,23 @@ func handleSummary(url string) error {
 		resp, err := Get(url, migrationReq.Auth)
 		if err != nil {
 			s.Stop()
-			log.Fatal("Failed to fetch account summary")
+			log.Fatal("Failed to fetch account summary", err)
 		}
 		resource, err := getResource(resp.Resource)
 		if err != nil {
 			s.Stop()
-			log.Fatal("Failed to fetch account summary")
+			log.Fatal("Failed to fetch account summary", err)
 		}
 		if resource.Status == "ERROR" {
 			s.Stop()
-			log.Fatal("Failed to fetch account summary")
+			log.Fatal("Failed to fetch account summary", err)
 		}
 		if resource.Status == "DONE" {
 			s.Stop()
 			summary, err := getSummary(resource)
 			if err != nil {
 				s.Stop()
-				log.Fatal("Failed to fetch account summary")
+				log.Fatal("Failed to fetch account summary", err)
 			}
 			renderSummary(summary.Summary)
 			break

@@ -65,9 +65,15 @@ func bulkCreateProject(*cli.Context) error {
 	promptConfirm := PromptDefaultInputs()
 	promptConfirm = PromptOrgAndProject([]string{Org}) || promptConfirm
 
+	if len(migrationReq.ExportFolderPath) == 0 {
+		migrationReq.ExportFolderPath = TextInput("Where would you like to export the generated files?")
+		promptConfirm = true
+	}
+
 	log.WithFields(log.Fields{
 		"Account":       migrationReq.Account,
 		"OrgIdentifier": migrationReq.OrgIdentifier,
+		"Export folder": migrationReq.ExportFolderPath,
 	}).Info("Bulk Project creation details")
 
 	if promptConfirm {
@@ -89,7 +95,7 @@ func bulkCreateProject(*cli.Context) error {
 	})
 
 	if err != nil {
-		log.Fatal("There was an error creating the projects")
+		log.Fatal("There was an error creating the projects", err)
 		return err
 	}
 

@@ -36,8 +36,8 @@ func Update(*cli.Context) (err error) {
 	}
 	url := fmt.Sprintf("https://github.com/harness/migrator/releases/download/%s/harness-upgrade-%s-%s-%s.%s", newVersion, newVersion, GOOS, GOARCH, extension)
 
-	if GOOS != "darwin" {
-		fmt.Printf("%s\n", yellow("Auto update support is only available for MacOS right now"))
+	if GOOS == "windows" {
+		fmt.Printf("%s\n", yellow("Auto update support is not available for windows"))
 		fmt.Printf("Download the following release - %s\n", blue(url))
 		return nil
 	}
@@ -89,7 +89,7 @@ func readTar(body io.ReadCloser, dest string) error {
 		if header.Typeflag == tar.TypeReg && header.Name == "harness-upgrade" {
 			execFile := path.Join(dest, header.Name)
 			green := color.New(color.FgGreen).SprintFunc()
-			fmt.Printf("Extracking harness-upgrade to - %s\n", green(execFile))
+			fmt.Printf("Extracting harness-upgrade to - %s\n", green(execFile))
 			outFile, err := os.Create(execFile)
 			if err != nil {
 				return err
