@@ -88,4 +88,6 @@ func printUpgradeMessage(from string, to string) {
 	yellow := color.New(color.FgYellow).SprintFunc()
 	fmt.Printf("[%s] A new release of harness-upgrade available: %s -> %s\n", blue("notice"), red(from), green(to))
 	fmt.Printf("%s\n", yellow("https://github.com/harness/migrator/releases/tag/"+to))
+	fmt.Printf("To update to the latest release use - %s\n", green("harness-upgrade update"))
+	fmt.Printf("%s\n", green("Update to the latest release for best experience"))
 }

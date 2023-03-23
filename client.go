@@ -64,7 +64,7 @@ func handleResp(req *http.Request) (respBodyObj ResponseBody, err error) {
 	}).Debug("The response body")
 	err = json.Unmarshal(respBody, &respBodyObj)
 	if err != nil {
-		log.Fatalln("There was error while parsing the response from server. Exiting...")
+		log.Fatalln("There was error while parsing the response from server. Exiting...", err)
 	}
 	if resp.StatusCode != 200 {
 		if len(respBodyObj.Message) > 0 {
