@@ -36,6 +36,7 @@ var migrationReq = struct {
 	Json                  bool   `survey:"json"`
 	AllowInsecureReq      bool   `survey:"insecure"`
 	ProjectName           string `survey:"projectName"`
+	OrgName               string `survey:"orgName"`
 	UrlNG                 string `survey:"urlNG"`
 	UrlCG                 string `survey:"urlCG"`
 	DryRun                bool   `survey:"dryRun"`
@@ -397,6 +398,48 @@ func main() {
 						Usage: "Remove projects",
 						Action: func(context *cli.Context) error {
 							return cliWrapper(bulkRemoveProject, context)
+						},
+					},
+				},
+			},
+			{
+				Name:  "org",
+				Usage: "Org specific commands.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "name",
+						Usage:       "`NAME` for the org",
+						Destination: &migrationReq.OrgName,
+					},
+					&cli.StringFlag{
+						Name:        "identifier",
+						Usage:       "`IDENTIFIER` for the org",
+						Destination: &migrationReq.OrgIdentifier,
+					},
+					&cli.StringFlag{
+						Name:        "identifiers",
+						Usage:       "`IDENTIFIERS` of the org",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the org",
+						Destination: &migrationReq.Names,
+					},
+				},
+				Subcommands: []*cli.Command{
+					{
+						Name:  "create",
+						Usage: "Create an org",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(createOrg, context)
+						},
+					},
+					{
+						Name:  "rm",
+						Usage: "Remove org",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(bulkRemoveOrg, context)
 						},
 					},
 				},
