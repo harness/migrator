@@ -34,6 +34,12 @@ type Inputs struct {
 	Defaults Defaults `json:"defaults"`
 }
 
+type OrgDetails struct {
+	Identifier  string `json:"identifier"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 type ProjectDetails struct {
 	OrgIdentifier string   `json:"orgIdentifier"`
 	Identifier    string   `json:"identifier"`
@@ -62,6 +68,18 @@ type ProjectBody struct {
 
 type ProjectListBody struct {
 	Projects []ProjectBody `json:"content"`
+}
+
+type OrgListBody struct {
+	Organisations []OrgResponse `json:"content"`
+}
+
+type OrgResponse struct {
+	Org OrgBody `json:"organizationResponse"`
+}
+
+type OrgBody struct {
+	Org OrgDetails `json:"organization"`
 }
 
 type RequestBody struct {

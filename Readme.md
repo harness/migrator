@@ -152,6 +152,24 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --or
 
 > Migrating Triggers is WIP. The current results requires considerable manual effort post migration
 
+### To create a org
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV org --name ORG_NAME --identifier ORG_IDENTIFIER create
+```
+
+### To remove organisations
+The following command removes organisations from an account. You can provide the names or identifiers of the organisations.
+
+To remove organisations by name use `--names`
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV org --names name1,name2 rm
+```
+
+To remove organisations by identifier use `--identifiers`
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV org --identifiers identifier1,identifier2 rm
+```
+
 ### To create a project
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --org ORG project --name PROJECT_NAME --identifier PROJECT_IDENTIFIER create
