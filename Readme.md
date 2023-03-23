@@ -52,6 +52,11 @@ To migrate an application and all the workflows & pipelines
 harness-upgrade app --all
 ```
 
+To migrate services from an app
+```shell
+harness-upgrade service
+```
+
 To migrate workflows
 ```shell
 harness-upgrade workflows
@@ -116,6 +121,12 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --project PROJECT --org ORG --accou
 
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --env ENV app
+```
+
+### To migrate services
+
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --app APP_ID --project PROJECT --org ORG --account ACCOUNT_ID --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE --env ENV service
 ```
 
 ### To migrate workflows
