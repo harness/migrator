@@ -251,6 +251,13 @@ func main() {
 				},
 			},
 			{
+				Name:  "service",
+				Usage: "Import services into an existing project from an application",
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateServices, context)
+				},
+			},
+			{
 				Name:  "workflows",
 				Usage: "Import workflows as stage or pipeline templates by providing the `appId` & `workflowIds`",
 				Flags: []cli.Flag{
