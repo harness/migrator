@@ -394,7 +394,7 @@ func main() {
 					},
 					{
 						Name:  "create",
-						Usage: "Create one or more projects",
+						Usage: "Create a project",
 						Action: func(context *cli.Context) error {
 							return cliWrapper(createProject, context)
 						},
