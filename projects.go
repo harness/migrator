@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jszwec/csvutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
@@ -37,19 +38,9 @@ func createProject(*cli.Context) error {
 		}
 	}
 
-	url := fmt.Sprintf("%s/api/projects?accountIdentifier=%s&orgIdentifier=%s", urlMap[migrationReq.Environment][NG], migrationReq.Account, migrationReq.OrgIdentifier)
-
 	log.Info("Creating the project....")
 
-	_, err := Post(url, migrationReq.Auth, ProjectBody{
-		Project: ProjectDetails{
-			OrgIdentifier: migrationReq.OrgIdentifier,
-			Identifier:    migrationReq.ProjectIdentifier,
-			Name:          migrationReq.ProjectName,
-			Color:         "#0063f7",
-			Modules:       []string{"CD"},
-			Description:   "",
-		}})
+	err := createAProject(migrationReq.OrgIdentifier, migrationReq.ProjectName, migrationReq.ProjectIdentifier)
 
 	if err == nil {
 		log.Info("Created the project!")
@@ -61,9 +52,28 @@ func createProject(*cli.Context) error {
 	return nil
 }
 
+func createAProject(orgIdentifier string, name string, identifier string) error {
+	url := fmt.Sprintf("%s/api/projects?accountIdentifier=%s&orgIdentifier=%s", urlMap[migrationReq.Environment][NG], migrationReq.Account, orgIdentifier)
+	_, err := Post(url, migrationReq.Auth, ProjectBody{
+		Project: ProjectDetails{
+			OrgIdentifier: orgIdentifier,
+			Identifier:    identifier,
+			Name:          name,
+			Color:         "#0063f7",
+			Modules:       []string{"CD"},
+			Description:   "",
+		}})
+	return err
+}
+
 func bulkCreateProject(*cli.Context) error {
 	promptConfirm := PromptDefaultInputs()
-	promptConfirm = PromptOrgAndProject([]string{Org}) || promptConfirm
+
+	if len(migrationReq.CsvFile) != 0 {
+		fmt.Printf("Importing from - %s\n", migrationReq.CsvFile)
+	} else {
+		promptConfirm = PromptOrgAndProject([]string{Org}) || promptConfirm
+	}
 
 	if len(migrationReq.ExportFolderPath) == 0 {
 		migrationReq.ExportFolderPath = TextInput("Where would you like to export the generated files?")
@@ -81,6 +91,10 @@ func bulkCreateProject(*cli.Context) error {
 		if !confirm {
 			log.Fatal("Aborting...")
 		}
+	}
+
+	if len(migrationReq.CsvFile) != 0 {
+		return CreateProjectsUsingCSV()
 	}
 
 	url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "projects/bulk", map[string]string{
@@ -114,42 +128,50 @@ func bulkCreateProject(*cli.Context) error {
 			log.Errorf("When creating a project for application '%s' there was an error %s", result.AppName, result.Error.Message)
 			continue
 		}
-
-		yamlData := map[string]string{
-			"env":             migrationReq.Environment,
-			"account":         migrationReq.Account,
-			"api-key":         migrationReq.Auth,
-			"app":             result.AppId,
-			"org":             migrationReq.OrgIdentifier,
-			"project":         result.ProjectIdentifier,
-			"secret-scope":    migrationReq.SecretScope,
-			"connector-scope": migrationReq.ConnectorScope,
-			"template-scope":  migrationReq.TemplateScope,
-			"workflow-scope":  Project,
-		}
-
-		yamlContent, err := yaml.Marshal(&yamlData)
-		if err != nil {
-			log.Fatalf("error: %v", err)
-			return err
-		}
-
-		absolutePath, err := filepath.Abs(migrationReq.ExportFolderPath)
-		if err != nil {
-			return err
-		}
-		err = MkDir(absolutePath)
-		if err != nil {
-			return err
-		}
-		err = WriteToFile(path.Join(absolutePath, result.ProjectIdentifier+".yaml"), yamlContent)
+		err = writeYamlToFile(result.AppId, result.AppName, migrationReq.OrgIdentifier, result.ProjectIdentifier)
 		if err != nil {
 			log.Fatal(err)
 			return err
 		}
-		log.Infof("Application %s was exported to file %s.yaml", result.AppName, result.ProjectIdentifier)
 	}
 
+	return nil
+}
+
+func writeYamlToFile(appId string, appName string, orgIdentifier string, projectIdentifier string) error {
+	yamlData := map[string]string{
+		"env":             migrationReq.Environment,
+		"account":         migrationReq.Account,
+		"api-key":         migrationReq.Auth,
+		"app":             appId,
+		"org":             orgIdentifier,
+		"project":         projectIdentifier,
+		"secret-scope":    migrationReq.SecretScope,
+		"connector-scope": migrationReq.ConnectorScope,
+		"template-scope":  migrationReq.TemplateScope,
+		"workflow-scope":  Project,
+	}
+
+	yamlContent, err := yaml.Marshal(&yamlData)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+		return err
+	}
+
+	absolutePath, err := filepath.Abs(migrationReq.ExportFolderPath)
+	if err != nil {
+		return err
+	}
+	err = MkDir(absolutePath)
+	if err != nil {
+		return err
+	}
+	err = WriteToFile(path.Join(absolutePath, projectIdentifier+".yaml"), yamlContent)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	log.Infof("Application %s was exported to file %s.yaml", appName, projectIdentifier)
 	return nil
 }
 
@@ -238,4 +260,79 @@ func findProjectIdByName(projects []ProjectDetails, projectName string) string {
 		}
 	}
 	return ""
+}
+
+func GetProjectCSVTemplate(*cli.Context) (err error) {
+	_ = PromptEnvDetails()
+
+	if len(migrationReq.CsvFile) == 0 {
+		migrationReq.CsvFile = TextInput("File to export the csv to - ")
+	}
+
+	apps, err := listEntities("apps")
+	if err != nil {
+		return
+	}
+	if len(apps) == 0 {
+		return
+	}
+
+	var records []ProjectCSV
+	for _, app := range apps {
+		records = append(records, ProjectCSV{
+			ProjectIdentifier: ToCamelCase(app.Name),
+			AppName:           app.Name,
+			OrgIdentifier:     "default",
+			ProjectName:       app.Name,
+		})
+	}
+
+	content, err := csvutil.Marshal(records)
+	if err != nil {
+		return
+	}
+
+	err = WriteToFile(migrationReq.CsvFile, content)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateProjectsUsingCSV() (err error) {
+	data, err := ReadFile(migrationReq.CsvFile)
+	if err != nil {
+		return
+	}
+
+	var records []ProjectCSV
+	if err = csvutil.Unmarshal([]byte(data), &records); err != nil {
+		return
+	}
+
+	apps, err := listEntities("apps")
+	if err != nil {
+		return err
+	}
+	var appsMap = make(map[string]string)
+	for _, app := range apps {
+		appsMap[app.Name] = app.Id
+	}
+
+	for _, record := range records {
+		appId, ok := appsMap[record.AppName]
+		if !ok {
+			continue
+		}
+		err = createAProject(record.OrgIdentifier, record.ProjectName, record.ProjectIdentifier)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		err = writeYamlToFile(appId, record.AppName, record.OrgIdentifier, record.ProjectIdentifier)
+		if err != nil {
+			return
+		}
+	}
+	return
 }

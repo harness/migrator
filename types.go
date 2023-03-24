@@ -176,3 +176,15 @@ type EntitySummary struct {
 	CloudProviderTypeSummary map[string]int64          `json:"cloudProviderTypeSummary"`
 	Expressions              []string                  `json:"expressions"`
 }
+
+type BaseEntityDetail struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type ProjectCSV struct {
+	AppName           string `json:"appName"`
+	ProjectName       string `json:"projectName"`
+	ProjectIdentifier string `json:"projectIdentifier"`
+	OrgIdentifier     string `json:"orgIdentifier"`
+}

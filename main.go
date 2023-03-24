@@ -43,6 +43,7 @@ var migrationReq = struct {
 	FileExtensions        string `survey:"fileExtensions"`
 	CustomExpressionsFile string `survey:"customExpressionsFile"`
 	ExportFolderPath      string `survey:"export"`
+	CsvFile               string `survey:"csv"`
 	Names                 string `survey:"names"`
 	Identifiers           string `survey:"identifiers"`
 	All                   bool   `survey:"all"`
@@ -368,6 +369,11 @@ func main() {
 						Destination: &migrationReq.ExportFolderPath,
 					},
 					&cli.StringFlag{
+						Name:        "csv",
+						Usage:       "`CSV_FILE` path to the csv file",
+						Destination: &migrationReq.CsvFile,
+					},
+					&cli.StringFlag{
 						Name:        "identifiers",
 						Usage:       "`IDENTIFIERS` of the projects",
 						Destination: &migrationReq.Identifiers,
@@ -380,6 +386,13 @@ func main() {
 				},
 				Subcommands: []*cli.Command{
 					{
+						Name:  "csv-template",
+						Usage: "Get a CSV with application name, project name, project identifier template for an account",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(GetProjectCSVTemplate, context)
+						},
+					},
+					{
 						Name:  "create",
 						Usage: "Create a project",
 						Action: func(context *cli.Context) error {
@@ -388,7 +401,7 @@ func main() {
 					},
 					{
 						Name:  "create-bulk",
-						Usage: "Creates all apps as projects",
+						Usage: "Creates apps as projects",
 						Action: func(context *cli.Context) error {
 							return cliWrapper(bulkCreateProject, context)
 						},

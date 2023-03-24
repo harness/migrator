@@ -186,6 +186,28 @@ If you wish to migrate all the above apps then run this -
 for f in /path/to/folder/*.yaml; do harness-upgrade --load $f app --all; done
 ```
 
+### To create projects in bulk using CSV
+You can use a CSV containing the mapping for first gen applications to a next gen projects. 
+
+Generate a template that contains application name, project name, project identifier & org identifier. We default project name to application name, project identifier defaults to camelCase format of the application name & org is default. You can modify the csv if you want to customize them.
+
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV project --csv PATH_TO_CSV csv-template
+```
+
+Sample contents of csv file
+```text
+AppName,ProjectName,ProjectIdentifier,OrgIdentifier
+Demo,Demo,demo,default
+Test App,Test App,testApp,default
+```
+
+You can then create & generate yaml file based on the above CSV
+
+```shell
+HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV --secret-scope SCOPE --connector-scope SCOPE --template-scope SCOPE project --csv PATH_TO_CSV --export FOLDER_PATH create-bulk
+```
+
 ### To remove projects
 The following command removes projects from a given org in an account. You can provide the names or identifiers of the projects.
 
@@ -208,6 +230,7 @@ HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --env ENV acco
 ```shell
 HARNESS_MIGRATOR_AUTH=apiKey harness-upgrade --account ACCOUNT_ID --app APP_ID --env ENV application-summary
 ```
+
 ### Using URL to parse details
 ```shell
 harness-upgrade --source-app <CURRENT_GEN_APP_URL> --destination-project <NG_PROJECT_URL>

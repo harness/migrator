@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -206,6 +207,24 @@ func Split(str string, sep string) (result []string) {
 	result = strings.Split(str, sep)
 	for i, s := range result {
 		result[i] = strings.TrimSpace(s)
+	}
+	return
+}
+
+func listEntities(entity string) (data []BaseEntityDetail, err error) {
+	url := GetUrl(migrationReq.Environment, MIGRATOR, entity, migrationReq.Account)
+	resp, err := Get(url, migrationReq.Auth)
+	if err != nil {
+		return
+	}
+
+	byteData, err := json.Marshal(resp.Resource)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(byteData, &data)
+	if err != nil {
+		return
 	}
 	return
 }
