@@ -78,7 +78,7 @@ var ExpressionsMap = map[string]string{
 
 var DynamicExpressions = map[string]interface{}{
 	"workflow.variables": func(key string) string {
-		return "<+stage.variables.." + key + ">"
+		return "<+stage.variables." + key + ">"
 	},
 	"pipeline.variables": func(key string) string {
 		return "<+pipeline.variables." + key + ">"
