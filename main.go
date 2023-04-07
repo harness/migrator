@@ -48,6 +48,8 @@ var migrationReq = struct {
 	Identifiers           string `survey:"identifiers"`
 	All                   bool   `survey:"all"`
 	AsPipelines           bool   `survey:"asPipelines"`
+	TargetAccount         string `survey:"targetAccount"`
+	TargetAuthToken       string `survey:"targetAuth"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -61,7 +63,7 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 			Workflow:              EntityDefaults{Scope: getOrDefault(migrationReq.WorkflowScope, Project), WorkflowAsPipeline: migrationReq.AsPipelines},
 		},
 	}
-	destination := DestinationDetails{ProjectIdentifier: migrationReq.ProjectIdentifier, OrgIdentifier: migrationReq.OrgIdentifier}
+	destination := DestinationDetails{ProjectIdentifier: migrationReq.ProjectIdentifier, OrgIdentifier: migrationReq.OrgIdentifier, AccountIdentifier: migrationReq.TargetAccount, AuthToken: migrationReq.TargetAuthToken}
 	return RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter, IdentifierCaseFormat: migrationReq.IdentifierCase}
 }
 
@@ -193,6 +195,16 @@ func main() {
 			Destination: &migrationReq.IdentifierCase,
 			Value:       "CAMEL_CASE",
 			DefaultText: "CAMEL_CASE",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "target-account",
+			Usage:       "destination `ACCOUNT` that you wish to migrate to",
+			Destination: &migrationReq.TargetAccount,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "target-api-key",
+			Usage:       "`API_KEY` for the target account to authenticate & authorise the migration.",
+			Destination: &migrationReq.TargetAuthToken,
 		}),
 	}
 	app := &cli.App{
