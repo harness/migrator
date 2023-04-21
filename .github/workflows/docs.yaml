@@ -19,6 +19,7 @@ jobs:
         with:
           node-version: 16.x
           cache: yarn
+          cache-dependency-path: '**/yarn.lock' # THIS PATTERN did the trick for me.
       - name: Install dependencies
         run: yarn install --frozen-lockfile --non-interactive
       - name: Build
@@ -28,7 +29,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: build
+          path: docs/build
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
