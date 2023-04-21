@@ -4,6 +4,7 @@ on:
       - docs
 permissions:
   id-token: write
+  pages: write
   contents: read
 jobs:
   deploy:
