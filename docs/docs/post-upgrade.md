@@ -19,7 +19,7 @@ slug: /post-upgrade
 
   - Factor out common stage variables to pipeline variables
 
-- Execute a cutover deployment with same version
+- Execute a cut-over deployment with same version
 
 - Enable NextGen triggers, disable FirstGen triggers
 
