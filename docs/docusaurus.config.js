@@ -61,6 +61,11 @@ const config = {
         },
         items: [
           {
+            href: 'https://developer.harness.io/docs/continuous-delivery/get-started/upgrading/upgrade-nextgen-cd/',
+            label: 'Why upgrade?',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/harness/migrator',
             label: 'GitHub',
             position: 'right',
