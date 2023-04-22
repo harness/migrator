@@ -43,6 +43,7 @@ harness-upgrade --api-key SAT_API_KEY \
 ## Migrating workflows
 
 ### Migrating all workflows
+Workflows are created as stage templates in NextGen by default. The only exception to this rule are multi-service workflows that are created as Pipelines.
 To migrate all workflows in the app  `harness-upgrade workflows --all`
 
 ```shell
@@ -74,6 +75,25 @@ harness-upgrade --api-key SAT_API_KEY \
   workflows --workflows WORKFLOW_IDS
 ```
 
+### Migrating workflows as pipelines
+
+If we want to create Pipelines for workflows we can use the `--as-pipelines` flag.
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --project PROJECT \
+  --org ORG \
+  --account ACCOUNT_ID \
+  --secret-scope SCOPE \
+  --connector-scope SCOPE \
+  --template-scope SCOPE \
+  --workflow-scope SCOPE \
+  --env ENV \
+  workflows --all --as-pipelines
+```
+
+:::note
+When creating workflows as pipelines, workflows are first migrated as stage templates and these stage templates are used to create the pipelines.
+:::
 
 ## Migrating pipelines
 
