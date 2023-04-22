@@ -1,6 +1,6 @@
 ---
 sidebar_position: 5
-slug: /
+slug: /cli
 ---
 
 # CLI

@@ -5,7 +5,7 @@ slug: /
 
 # Introduction
 
-Harness has developed this tool to help migrate from Harness CD First Gen to CD Next Gen. This tool can migrate specific Harness resources or bulk migration resources.[intro.md](intro.md)
+Harness has developed this tool to help migrate from Harness CD First Gen to CD Next Gen. This tool can migrate specific Harness resources or bulk migration resources.
 
 ### Who is the Tool intended for?
 

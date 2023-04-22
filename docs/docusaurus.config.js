@@ -53,6 +53,9 @@ const config = {
     ({
       // Replace with your project's social card
       image: 'img/harness.png',
+      colorMode: {
+        disableSwitch: true,
+      },
       navbar: {
         title: 'Harness Upgrade',
         logo: {

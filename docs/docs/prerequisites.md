@@ -13,9 +13,9 @@ Admins privileges are required so please ensure to provide this token with **Acc
 ## Account ID & Environment
 We can both these details from the accounts overview page. If you click on the **Account Settings** on the sidebar you can get the account ID and environment is Harness cluster hosting account.
 
-| Environment | Cluster                                    |  
-|-------------|--------------------------------------------|
-| Prod        | Prod 1                                     |  
-| Prod        | Prod 2                                     |
-| Prod3       | Prod 3                                     |
-| SelfManaged | If you are self managed customer           |
+| Environment | Cluster                       |  
+|-------------|-------------------------------|
+| Prod        | Prod 1                        |  
+| Prod        | Prod 2                        |
+| Prod3       | Prod 3                        |
+| SelfManaged | Harness self managed platform |
