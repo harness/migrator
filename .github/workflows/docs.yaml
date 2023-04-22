@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - master
-      - docs
 permissions:
   id-token: write
   pages: write
