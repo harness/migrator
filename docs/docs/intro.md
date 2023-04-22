@@ -22,3 +22,5 @@ The following key components can be migrated using this tool:
 6. Connectors
 7. Secrets & Secret Managers
 8. Templates
+9. Triggers
+10. User groups
