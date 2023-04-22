@@ -64,6 +64,11 @@ const config = {
         },
         items: [
           {
+            href: 'https://developer.harness.io/docs/platform/variables-and-expressions/harness-variables/#migrating-firstgen-expressions-to-nextgen',
+            label: 'Expressions',
+            position: 'right',
+          },
+          {
             href: 'https://developer.harness.io/docs/continuous-delivery/get-started/upgrading/upgrade-nextgen-cd/',
             label: 'Why upgrade?',
             position: 'right',
