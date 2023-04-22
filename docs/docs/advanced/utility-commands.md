@@ -47,7 +47,7 @@ harness-upgrade --api-key SAT_API_KEY \
   project --name PROJECT_NAME --identifier PROJECT_IDENTIFIER create  
 ```
 
-### Create a project for an app in First Gen
+### Bulk create projects for every app in First Gen
 Projects in NextGen are counterparts to applications from FirstGen. So a common requirement is to create projects in NextGen with the same name as application from FirstGen.
 The following command creates a corresponding project for every app in the account. It then exports a YAML file for every project to the specified export path(defaults to current dir) specified.
 
