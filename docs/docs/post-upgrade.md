@@ -5,22 +5,30 @@ slug: /post-upgrade
 
 # Post Upgrade
 
-- Expressions
+After the upgrade, some additional steps need to be taken to ensure a smooth transition. Here are the steps that need to be taken:
 
-  - Update expressions in remote manifests using our tool
+### Expressions
 
-  - Review summary of expressions not migrated
+Expressions are an essential part of Harness, and they need to be updated post-upgrade. Here's what you need to do:
 
-  - Secret expressions using secrets.getValue need to use secret ID instead of name and a scoping prefix
+- Update expressions in remote manifests using our tool. This tool migrates expressions from remote manifests and provides a summary of expressions not migrated.
+- Please go over the summary post upgrade to replace the FirstGen expressions with equivalent next-gen expression
 
-- Review pipelines and stages
+### Review pipelines and stages
 
-  - Adjust runtime inputs vs expressions and fixed values, as desired
+Review your pipelines and stages to ensure they are running smoothly post-upgrade. Here's what you need to do:
 
-  - Factor out common stage variables to pipeline variables
+- Adjust runtime inputs vs. expressions and fixed values, as desired.
+- Factor out common stage variables to pipeline variables.
 
-- Execute a cut-over deployment with same version
+### Execute a cut-over deployment with the same version
 
-- Enable NextGen triggers, disable FirstGen triggers
+Execute a deployment with the same versions as the one you have currently deployed. This ensures that everything is working as expected.
 
-- Disable FirstGen access
+### Enable NextGen triggers, disable FirstGen triggers
+
+After the upgrade, you need to enable NextGen triggers and disable FirstGen triggers. This is essential to ensure that your Harness pipelines are running smoothly.
+
+### Disable FirstGen access
+
+Finally, disable FirstGen access. This ensures that all new workflows are created in NextGen and not in FirstGen.

@@ -4,24 +4,22 @@ slug: /install
 ---
 
 # Installation
-Download the latest release from GitHub releases. We support MacOS(`darwim & amd64`), Linux(`linux + (amd64/arm64)`) and Windows(`windows+amd64`). Please download the right assets. Extract the file anywhere.
-We recommend that you move it to a folder that is specified in your path.
+To install the Harness CD First Gen to CD Next Gen migration tool, follow these steps:
 
-```shell
-mv harness-upgrade /somepath/
-harness-upgrade help
-```
+1. Download the latest release from the GitHub releases page. The tool supports MacOS (darwin & amd64), Linux (linux + (amd64/arm64)), and Windows (windows+amd64) platforms, so make sure to download the correct asset for your platform.
+2. Extract the downloaded file to a directory of your choice. It is recommended that you move the extracted file to a folder specified in your system's path for ease of use.
+3. Run the harness-upgrade help command to verify that the installation was successful.
 
-If you are using macOS then just do
+If you are using macOS, you can move the harness-upgrade file to the /usr/local/bin/ directory by running the following command:
+
 ```shell
 mv harness-upgrade /usr/local/bin/
-harness-upgrade help
 ```
+Then, run the harness-upgrade help command to verify that the installation was successful.
 
-If the above works successfully you should see all the commands that are supported with `harness-upgrade`
+To update the CLI to a new version, run the following command:
 
-## Update the CLI
-To update to a new version of the CLI
 ```shell
 harness-upgrade update
 ```
+This will update the tool to the latest version.

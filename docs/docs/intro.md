@@ -5,18 +5,19 @@ slug: /
 
 # Introduction
 
-Harness has developed this tool to help migrate from Harness CD First Gen to CD Next Gen. This tool can migrate specific Harness resources or bulk migration resources.
+This tool was developed by Harness to assist in the migration process from Harness CD First Gen to CD Next Gen. It can migrate specific Harness resources or multiple resources at once.
 
 ### Who is the Tool intended for?
 
-- CLI to help customers, CSMs and developers with migrating their current gen harness account to next gen
+This tool is designed for customers, CSMs, and developers who are currently using Harness CD First Gen and wish to migrate their accounts to Harness CD Next Gen.
 
 ### Key Components that can be migrated
+The following key components can be migrated using this tool:
 
 1. Pipelines
 2. Workflows
-3. Service (Service Definition - Manifests, variables included)
-4. Environments (Overrides included)
+3. Services (including service definition manifests and variables)
+4. Environments (including overrides)
 5. Infrastructure Definition
 6. Connectors
 7. Secrets & Secret Managers

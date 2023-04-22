@@ -5,30 +5,27 @@ slug: /faqs
 
 # FAQs
 
-#### What happens if I run the migration API/CLI with the same input multiple times?
+#### If I run the migration API/CLI with the same input multiple times, what happens?
 
-Nothing. Migration is designed to be idempotent. So you will not see duplicate connectors, secrets, pipelines, etc.
+The migration process is designed to be idempotent, meaning that if you run the migration with the same input multiple times, there will be no issues or duplicate entities such as connectors, secrets, or pipelines created.
 
-#### How do we generate the identifiers?
+#### How are identifiers generated during the migration process?
 
-We remove most special characters from the name & convert the expression to camel case(configurable using `--identifier-format` flag, default is camelCase). This is one of the main reasons we can achieve idempotency. Please note that identifiers are currently capped at 128 characters.
+Most special characters are removed from the entity name and the expression is converted to camel case. The `--identifier-format` flag can be used to configure the identifier format, with the default being camelCase. Identifiers are currently limited to a maximum of 128 characters. This process of generating identifiers is one of the reasons why the migration process can achieve idempotency.
 
-#### Will the migration on the already migrated FG entity update the corresponding entity?
+#### Will the migration process update already migrated FG entities?
 
-No. If you wish to update the entity for some reason, then please delete the entity in NG and try again.
+No, the migration process will not update already migrated FG entities. If you wish to update the entity for some reason, you must delete the entity in NG and try again.
 
-#### What will happen if there is an already-created entity with the same identifier?
+#### What happens if there is an entity with the same identifier that has already been created?
 
-Migration for that entity will fail. If another entity references that entity, we will reference the existing one.
+The migration process for that entity will fail. However, if another entity references the entity that has the same identifier, we will reference the existing entity. For example, if there is a connector with the name Test in FG and a connector with the identifier test in NG, we will reference the existing NG connector when migrating an application with an artifact source in one of the services using the FG connector.
 
-Let's take an example -
+#### Is it possible to migrate entities across accounts/clusters?
 
-Let's say that a connector in NG has an identifier test. In FG, there is a connector with the name Test. Let's say the customer is migrating an application with an artifact source in one of the services using this FG connector. When migrating, we will see an error Failed to migrate Test connector, but the service migration will go through.
+Migration can be performed across accounts if they reside within the same cluster. However, if two accounts are present in different clusters, such as Prod1 and Prod2, then migration is not possible.
 
-#### Does migration support migration across accounts/clusters?
+#### How can I migrate expressions used in Git remote manifests?
 
-Migration can migrate across accounts if they reside within the same cluster. If two accounts are present in different clusters like Prod1 & Prod2 then it is not possible.
+The Harness Upgrade tool provides functionality to migrate expressions from a remote manifest. Additional details on this process can be found in the [Advanced section on remote manifest](advanced/remote-manifest).
 
-#### We use remote manifests in Git. How can we automatically migrate the expressions used in the Git remote?
-
-The Harness Upgrade tool provides functionality to migrate expressions from a remote manifest. More details can be found [here](advanced/remote-manifest).
