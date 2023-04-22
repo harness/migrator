@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Migrating Account level entities
 
-Before we move entities from first gen to next gen it is important to get a gist of entities that are present in the account.
+Before we move entities from first gen to next gen it is important to get a gist of entities that are present in the account. So ensure to run the account level summary
 
 ## Migrating all account level entities
 To migrate all secrets, connectors & cloud providers from an account we use the `harness-upgrade account`
