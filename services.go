@@ -12,36 +12,9 @@ func migrateServices(*cli.Context) (err error) {
 		migrationReq.AppId = TextInput("Please provide the application ID -")
 	}
 
-	promptConfirm = PromptOrgAndProject([]string{Project}) || promptConfirm
-
-	logMigrationDetails()
-
-	if promptConfirm {
-		confirm := ConfirmInput("Do you want to proceed?")
-		if !confirm {
-			log.Fatal("Aborting...")
-		}
+	err = MigrateEntities(promptConfirm, []string{Project}, "services", Service)
+	if err != nil {
+		log.Fatal("Failed to migrate services")
 	}
-
-	importType := ImportType("ALL")
-	var ids []string
-	if !migrationReq.All {
-		importType = "SPECIFIC"
-		ids, err = GetEntityIds("services", migrationReq.Identifiers, migrationReq.Names)
-		if err != nil {
-			log.Fatal("Failed to get ids of the services")
-		}
-		if len(ids) == 0 {
-			log.Fatal("No services found with given names/ids")
-		}
-	}
-	log.Info("Importing the services....")
-	CreateEntities(getReqBody(Service, Filter{
-		AppId: migrationReq.AppId,
-		Type:  importType,
-		Ids:   ids,
-	}))
-	log.Info("Imported the services.")
-
-	return nil
+	return
 }

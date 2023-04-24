@@ -12,36 +12,9 @@ func migrateEnvironments(*cli.Context) (err error) {
 		migrationReq.AppId = TextInput("Please provide the application ID -")
 	}
 
-	promptConfirm = PromptOrgAndProject([]string{Project}) || promptConfirm
-
-	logMigrationDetails()
-
-	if promptConfirm {
-		confirm := ConfirmInput("Do you want to proceed?")
-		if !confirm {
-			log.Fatal("Aborting...")
-		}
+	err = MigrateEntities(promptConfirm, []string{Project}, "environments", Environment)
+	if err != nil {
+		log.Fatal("Failed to migrate environments")
 	}
-
-	importType := ImportType("ALL")
-	var ids []string
-	if !migrationReq.All {
-		importType = "SPECIFIC"
-		ids, err = GetEntityIds("environments", migrationReq.Identifiers, migrationReq.Names)
-		if err != nil {
-			log.Fatal("Failed to get ids of the environments")
-		}
-		if len(ids) == 0 {
-			log.Fatal("No environments found with given names/ids")
-		}
-	}
-	log.Info("Importing the environments....")
-	CreateEntities(getReqBody(Environment, Filter{
-		AppId: migrationReq.AppId,
-		Type:  importType,
-		Ids:   ids,
-	}))
-	log.Info("Imported the environments.")
-
-	return nil
+	return
 }

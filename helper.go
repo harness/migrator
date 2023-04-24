@@ -279,3 +279,36 @@ func GetEntityIds(entity string, idsString string, namesString string) ([]string
 	}
 	return result, nil
 }
+
+func MigrateEntities(promptConfirm bool, scopes []string, pluralValue string, entityType EntityType) (err error) {
+	promptConfirm = PromptOrgAndProject(scopes) || promptConfirm
+	logMigrationDetails()
+	if promptConfirm {
+		confirm := ConfirmInput("Do you want to proceed?")
+		if !confirm {
+			log.Fatal("Aborting...")
+		}
+	}
+
+	importType := ImportType("ALL")
+	var ids []string
+	if !migrationReq.All {
+		importType = "SPECIFIC"
+		ids, err = GetEntityIds(pluralValue, migrationReq.Identifiers, migrationReq.Names)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("Failed to get ids of the %s", pluralValue))
+		}
+		if len(ids) == 0 {
+			log.Fatal(fmt.Sprintf("No %s found with given names/ids", pluralValue))
+		}
+	}
+	log.Info(fmt.Sprintf("Importing the %s....", pluralValue))
+	CreateEntities(getReqBody(entityType, Filter{
+		AppId: migrationReq.AppId,
+		Type:  importType,
+		Ids:   ids,
+	}))
+	log.Info(fmt.Sprintf("Imported the %s.", pluralValue))
+
+	return nil
+}
