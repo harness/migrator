@@ -97,6 +97,9 @@ const config = {
       },
     ],
   ],
+  scripts: [{
+      src: 'scripts/esc.mark.js'
+  }]
 };
 
 module.exports = config;
