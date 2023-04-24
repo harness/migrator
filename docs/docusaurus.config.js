@@ -97,9 +97,9 @@ const config = {
       },
     ],
   ],
-  scripts: [{
-      src: 'scripts/esc.mark.js'
-  }]
+  clientModules: [
+    require.resolve('./global.js'),
+  ]
 };
 
 module.exports = config;
