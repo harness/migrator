@@ -237,14 +237,17 @@ func GetBaseUrl(environment string, service string) string {
 	if environment != SelfManaged {
 		return urlMap[environment][service]
 	}
+	var url string
 	switch service {
 	case NG:
-		return migrationReq.BaseUrl + "/ng"
+		url = migrationReq.BaseUrl + "/ng"
 	case MIGRATOR:
-		return migrationReq.BaseUrl + "/ng-migration"
+		url = migrationReq.BaseUrl + "/ng-migration"
 	default:
 		panic("Unknown service! Please contact Harness support")
 	}
+	log.Debugf("BaseUrl for SelfManaged - %s", url)
+	return url
 }
 
 func GetEntityIds(entity string, idsString string, namesString string) ([]string, error) {
