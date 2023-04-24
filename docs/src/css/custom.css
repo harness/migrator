@@ -305,9 +305,7 @@ a:hover {
   width: 36px;
   height: auto;
 }
-.theme-doc-markdown h3 {
-  display: flex;
-}
+
 .theme-doc-markdown h3 > img {
   margin-right: 0.2em;
 }
@@ -380,9 +378,6 @@ details summary::before {
 }
 .table-of-contents ul li span[class*="color-"] {
   color: unset;
-}
-.theme-doc-markdown h3 {
-  display: flex;
 }
 .theme-doc-markdown h3 > img {
   margin-right: 0.2em;

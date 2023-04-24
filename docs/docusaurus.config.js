@@ -89,6 +89,17 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+  plugins: [
+    [
+      require.resolve("@cmfcmf/docusaurus-search-local"),
+      {
+        // Options here
+      },
+    ],
+  ],
+  clientModules: [
+    require.resolve('./global.js'),
+  ]
 };
 
 module.exports = config;
