@@ -13,10 +13,11 @@ import (
 )
 
 const (
-	Prod  string = "Prod"
-	QA           = "QA"
-	Dev          = "Dev"
-	Prod3        = "Prod3"
+	Prod        string = "Prod"
+	QA                 = "QA"
+	Dev                = "Dev"
+	Prod3              = "Prod3"
+	SelfManaged        = "SelfManaged"
 )
 
 const (
@@ -86,11 +87,11 @@ func GetUrlWithQueryParams(environment string, service string, endpoint string, 
 		params = params + k + "=" + v + "&"
 	}
 
-	return fmt.Sprintf("%s/api/ng-migration/%s?%s", urlMap[environment][service], endpoint, params)
+	return fmt.Sprintf("%s/api/ng-migration/%s?%s", GetBaseUrl(environment, service), endpoint, params)
 }
 
 func GetUrl(environment string, service string, path string, accountId string) string {
-	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment][service], path, accountId)
+	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", GetBaseUrl(environment, service), path, accountId)
 }
 
 func getOrDefault(value string, defaultValue string) string {
@@ -212,7 +213,10 @@ func Split(str string, sep string) (result []string) {
 }
 
 func listEntities(entity string) (data []BaseEntityDetail, err error) {
-	url := GetUrl(migrationReq.Environment, MIGRATOR, entity, migrationReq.Account)
+	url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, entity, map[string]string{
+		"accountIdentifier": migrationReq.Account,
+		"appId":             migrationReq.AppId,
+	})
 	resp, err := Get(url, migrationReq.Auth)
 	if err != nil {
 		return
@@ -227,4 +231,84 @@ func listEntities(entity string) (data []BaseEntityDetail, err error) {
 		return
 	}
 	return
+}
+
+func GetBaseUrl(environment string, service string) string {
+	if environment != SelfManaged {
+		return urlMap[environment][service]
+	}
+	var url string
+	switch service {
+	case NG:
+		url = migrationReq.BaseUrl + "/ng"
+	case MIGRATOR:
+		url = migrationReq.BaseUrl + "/ng-migration"
+	default:
+		panic("Unknown service! Please contact Harness support")
+	}
+	log.Debugf("BaseUrl for SelfManaged - %s", url)
+	return url
+}
+
+func GetEntityIds(entity string, idsString string, namesString string) ([]string, error) {
+	ids := Split(idsString, ",")
+	if len(ids) > 0 {
+		return ids, nil
+	}
+	names := Split(namesString, ",")
+	if len(names) == 0 {
+		return nil, nil
+	}
+	items, err := listEntities(entity)
+	if err != nil {
+		return nil, err
+	}
+
+	var nameToIdMap = make(map[string]string)
+	for _, item := range items {
+		nameToIdMap[item.Name] = item.Id
+	}
+
+	var result []string
+	for _, item := range names {
+		itemId, ok := nameToIdMap[item]
+		if !ok {
+			continue
+		}
+		result = append(result, itemId)
+	}
+	return result, nil
+}
+
+func MigrateEntities(promptConfirm bool, scopes []string, pluralValue string, entityType EntityType) (err error) {
+	promptConfirm = PromptOrgAndProject(scopes) || promptConfirm
+	logMigrationDetails()
+	if promptConfirm {
+		confirm := ConfirmInput("Do you want to proceed?")
+		if !confirm {
+			log.Fatal("Aborting...")
+		}
+	}
+
+	importType := ImportType("ALL")
+	var ids []string
+	if !migrationReq.All {
+		importType = "SPECIFIC"
+		ids, err = GetEntityIds(pluralValue, migrationReq.Identifiers, migrationReq.Names)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("Failed to get ids of the %s", pluralValue))
+		}
+		if len(ids) == 0 {
+			log.Fatal(fmt.Sprintf("No %s found with given names/ids", pluralValue))
+		}
+	}
+	log.Info(fmt.Sprintf("Importing the %s....", pluralValue))
+	CreateEntities(getReqBody(entityType, Filter{
+		AppId: migrationReq.AppId,
+		Type:  importType,
+		Ids:   ids,
+	}))
+	log.Info(fmt.Sprintf("Imported the %s.", pluralValue))
+
+	return nil
 }

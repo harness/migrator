@@ -50,6 +50,7 @@ var migrationReq = struct {
 	AsPipelines           bool   `survey:"asPipelines"`
 	TargetAccount         string `survey:"targetAccount"`
 	TargetAuthToken       string `survey:"targetAuth"`
+	BaseUrl               string `survey:"baseUrl"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -112,6 +113,11 @@ func main() {
 			Name:        "env",
 			Usage:       "possible values - Prod, QA, Dev",
 			Destination: &migrationReq.Environment,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "base-url",
+			Usage:       "provide the `BASE_URL` for self managed platforms",
+			Destination: &migrationReq.BaseUrl,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "destination-project",
@@ -265,10 +271,100 @@ func main() {
 				},
 			},
 			{
-				Name:  "service",
-				Usage: "Import services into an existing project from an application",
+				Name:    "service",
+				Aliases: []string{"services"},
+				Usage:   "Import services into an existing project from an application",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all services in the app need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the services",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the services",
+						Destination: &migrationReq.Names,
+					},
+				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateServices, context)
+				},
+			},
+			{
+				Name:  "secrets",
+				Usage: "Import secrets",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all secrets in the account need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the secrets",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the secrets",
+						Destination: &migrationReq.Names,
+					},
+				},
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateSecrets, context)
+				},
+			},
+			{
+				Name:  "environments",
+				Usage: "Import environments into an existing project from an application",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all environments in the app need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the environments",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the environments",
+						Destination: &migrationReq.Names,
+					},
+				},
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateEnvironments, context)
+				},
+			},
+			{
+				Name:  "connectors",
+				Usage: "Import connectors",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all connectors in the account need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the connectors",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the connectors",
+						Destination: &migrationReq.Names,
+					},
+				},
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateConnectors, context)
 				},
 			},
 			{

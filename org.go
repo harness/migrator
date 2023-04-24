@@ -32,7 +32,7 @@ func createOrg(*cli.Context) error {
 		}
 	}
 
-	url := fmt.Sprintf("%s/api/organizations?accountIdentifier=%s", urlMap[migrationReq.Environment][NG], migrationReq.Account)
+	url := fmt.Sprintf("%s/api/organizations?accountIdentifier=%s", GetBaseUrl(migrationReq.Environment, NG), migrationReq.Account)
 
 	log.Info("Creating the org....")
 
@@ -94,7 +94,7 @@ func bulkRemoveOrg(*cli.Context) error {
 }
 
 func deleteOrg(orgId string) {
-	url := fmt.Sprintf("%s/api/organizations/%s?accountIdentifier=%s", urlMap[migrationReq.Environment][NG], orgId, migrationReq.Account)
+	url := fmt.Sprintf("%s/api/organizations/%s?accountIdentifier=%s", GetBaseUrl(migrationReq.Environment, NG), orgId, migrationReq.Account)
 
 	log.Infof("Deleting the org with identifier %s", orgId)
 
@@ -108,7 +108,7 @@ func deleteOrg(orgId string) {
 }
 
 func getOrganisations() []OrgDetails {
-	url := fmt.Sprintf("%s/api/aggregate/organizations?accountIdentifier=%s&pageSize=1000", urlMap[migrationReq.Environment][NG], migrationReq.Account)
+	url := fmt.Sprintf("%s/api/aggregate/organizations?accountIdentifier=%s&pageSize=1000", GetBaseUrl(migrationReq.Environment, NG), migrationReq.Account)
 	resp, err := Get(url, migrationReq.Auth)
 	if err != nil || resp.Status != "SUCCESS" {
 		log.Fatal("Failed to fetch organisations", err)
