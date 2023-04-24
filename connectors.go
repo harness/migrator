@@ -5,7 +5,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func migrateConnectors(*cli.Context) error {
+func migrateConnectors(*cli.Context) (err error) {
 	promptConfirm := PromptConnectorDetails()
 	promptConfirm = PromptOrgAndProject([]string{migrationReq.ConnectorScope, migrationReq.SecretScope}) || promptConfirm
 
@@ -19,14 +19,17 @@ func migrateConnectors(*cli.Context) error {
 	}
 
 	importType := ImportType("ALL")
-	ids, err := GetEntityIds("connectors", migrationReq.Identifiers, migrationReq.Names)
-	if err != nil {
-		log.Fatal("Failed to get ids of the connectors")
-	}
-	if len(ids) > 0 {
+	var ids []string
+	if !migrationReq.All {
 		importType = "SPECIFIC"
+		ids, err = GetEntityIds("connectors", migrationReq.Identifiers, migrationReq.Names)
+		if err != nil {
+			log.Fatal("Failed to get ids of the connectors")
+		}
+		if len(ids) == 0 {
+			log.Fatal("No connectors found with given names/ids")
+		}
 	}
-
 	log.Info("Importing the connectors....")
 	CreateEntities(getReqBody(Connector, Filter{
 		Type: importType,

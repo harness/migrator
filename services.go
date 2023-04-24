@@ -5,7 +5,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func migrateServices(*cli.Context) error {
+func migrateServices(*cli.Context) (err error) {
 	promptConfirm := PromptDefaultInputs()
 	if len(migrationReq.AppId) == 0 {
 		promptConfirm = true
@@ -24,14 +24,17 @@ func migrateServices(*cli.Context) error {
 	}
 
 	importType := ImportType("ALL")
-	ids, err := GetEntityIds("services", migrationReq.Identifiers, migrationReq.Names)
-	if err != nil {
-		log.Fatal("Failed to get ids of the services")
-	}
-	if len(ids) > 0 {
+	var ids []string
+	if !migrationReq.All {
 		importType = "SPECIFIC"
+		ids, err = GetEntityIds("services", migrationReq.Identifiers, migrationReq.Names)
+		if err != nil {
+			log.Fatal("Failed to get ids of the services")
+		}
+		if len(ids) == 0 {
+			log.Fatal("No services found with given names/ids")
+		}
 	}
-
 	log.Info("Importing the services....")
 	CreateEntities(getReqBody(Service, Filter{
 		AppId: migrationReq.AppId,
