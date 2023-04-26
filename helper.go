@@ -240,7 +240,7 @@ func GetBaseUrl(environment string, service string) string {
 	if environment != SelfManaged {
 		url := urlMap[environment][service]
 		if len(url) == 0 {
-			log.Fatal("invalid environment value")
+			log.Fatalf("invalid environment value - %s", environment)
 		}
 		return url
 	}
