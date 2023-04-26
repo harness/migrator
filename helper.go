@@ -234,8 +234,15 @@ func listEntities(entity string) (data []BaseEntityDetail, err error) {
 }
 
 func GetBaseUrl(environment string, service string) string {
+	if environment == "Prod1" || environment == "Prod2" {
+		environment = "Prod"
+	}
 	if environment != SelfManaged {
-		return urlMap[environment][service]
+		url := urlMap[environment][service]
+		if len(url) == 0 {
+			log.Fatalf("invalid environment value - %s", environment)
+		}
+		return url
 	}
 	var url string
 	switch service {
