@@ -98,7 +98,17 @@ type TemplateDetails struct {
 	VersionLabel string `json:"versionLabel"`
 }
 
-type TemplateRequestBody struct {
+type PipelineListBody struct {
+	Pipelines []PipelineDetails `json:"content"`
+}
+
+type PipelineDetails struct {
+	Identifier  string `json:"identifier"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type FilterRequestBody struct {
 	FilterType          string   `json:"filterType"`
 	TemplateIdentifiers []string `json:"templateIdentifiers"`
 }

@@ -14,7 +14,7 @@ import (
 
 func GetAccountSummary(*cli.Context) error {
 	_ = PromptEnvDetails()
-	url := GetUrl(migrationReq.Environment, MIGRATOR, "discover/summary/async", migrationReq.Account)
+	url := GetUrl(migrationReq.Environment, MigratorService, "discover/summary/async", migrationReq.Account)
 	return handleSummary(url)
 }
 
@@ -23,7 +23,7 @@ func GetAppSummary(*cli.Context) error {
 	if len(migrationReq.AppId) == 0 {
 		migrationReq.AppId = TextInput("Please provide the application ID - ")
 	}
-	url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "discover/summary/async", map[string]string{
+	url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "discover/summary/async", map[string]string{
 		AccountIdentifier: migrationReq.Account,
 		"appId":           migrationReq.AppId,
 	})
@@ -47,7 +47,7 @@ func handleSummary(url string) error {
 	s.Start()
 	for {
 		time.Sleep(time.Second)
-		url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "discover/summary/async-result", map[string]string{
+		url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "discover/summary/async-result", map[string]string{
 			AccountIdentifier: migrationReq.Account,
 			"requestId":       reqId,
 		})

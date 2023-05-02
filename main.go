@@ -398,17 +398,40 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:        "all",
-						Usage:       "if all pipelines in the app need to be migrated",
+						Usage:       "all pipelines",
 						Destination: &migrationReq.All,
 					},
 					altsrc.NewStringFlag(&cli.StringFlag{
 						Name:        "pipelines",
-						Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
+						Usage:       "first gen pipeline ids as comma separated values `pipeline1,pipeline2`",
 						Destination: &migrationReq.PipelineIds,
 					}),
+					&cli.StringFlag{
+						Name:        "identifiers",
+						Usage:       "`IDENTIFIERS` of the next gen pipelines",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the next gen pipeline",
+						Destination: &migrationReq.Names,
+					},
 				},
-				Action: func(context *cli.Context) error {
-					return cliWrapper(migratePipelines, context)
+				Subcommands: []*cli.Command{
+					{
+						Name:  "rm",
+						Usage: "Remove nextgen pipelines",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(BulkRemovePipelines, context)
+						},
+					},
+					{
+						Name:  "import",
+						Usage: "import first gen pipelines to next gen",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(migratePipelines, context)
+						},
+					},
 				},
 			},
 			{

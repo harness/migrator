@@ -41,7 +41,7 @@ func Get(reqUrl string, auth string) (respBodyObj ResponseBody, err error) {
 }
 
 func Delete(reqUrl string, auth string, body interface{}) (respBodyObj ResponseBody, err error) {
-	var requestBody *bytes.Buffer = nil
+	var requestBody *bytes.Buffer
 	if body != nil {
 		postBody, _ := json.Marshal(body)
 		requestBody = bytes.NewBuffer(postBody)
@@ -49,13 +49,25 @@ func Delete(reqUrl string, auth string, body interface{}) (respBodyObj ResponseB
 			"url":  reqUrl,
 			"body": string(postBody),
 		}).Debug("The request details")
+	} else {
+		log.WithFields(log.Fields{
+			"url": reqUrl,
+		}).Debug("The request details")
 	}
-	req, err := http.NewRequest("DELETE", reqUrl, requestBody)
+	var req *http.Request
+	if requestBody != nil {
+		req, err = http.NewRequest("DELETE", reqUrl, requestBody)
+	} else {
+		req, err = http.NewRequest("DELETE", reqUrl, nil)
+	}
 	if err != nil {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(AuthHeaderKey(auth), auth)
+	if requestBody == nil {
+		req.ContentLength = 0
+	}
 	return handleResp(req)
 }
 

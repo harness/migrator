@@ -47,7 +47,7 @@ func BulkRemoveTemplates(*cli.Context) error {
 				identifiers = append(identifiers, id)
 			}
 		}
-		log.Debugf("Valid identifers for the given names are - %s", identifiers)
+		log.Debugf("Valid identifiers for the given names are - %s", identifiers)
 	}
 
 	for _, identifier := range identifiers {
@@ -73,7 +73,7 @@ func deleteTemplate(orgId string, projectId string, templateId string, force boo
 	if len(projectId) > 0 {
 		queryParams[ProjectIdentifier] = projectId
 	}
-	url := GetUrlWithQueryParams(migrationReq.Environment, TEMPLATE, fmt.Sprintf("api/templates/%s", templateId), queryParams)
+	url := GetUrlWithQueryParams(migrationReq.Environment, TemplateService, fmt.Sprintf("api/templates/%s", templateId), queryParams)
 
 	log.Infof("Deleting the template with identifier %s", templateId)
 
@@ -98,8 +98,8 @@ func getTemplates(orgId string, projectId string, templateIdentifiers []string) 
 	if len(projectId) > 0 {
 		queryParams[ProjectIdentifier] = projectId
 	}
-	url := GetUrlWithQueryParams(migrationReq.Environment, TEMPLATE, "api/templates/list-metadata", queryParams)
-	resp, err := Post(url, migrationReq.Auth, TemplateRequestBody{FilterType: TEMPLATE, TemplateIdentifiers: templateIdentifiers})
+	url := GetUrlWithQueryParams(migrationReq.Environment, TemplateService, "api/templates/list-metadata", queryParams)
+	resp, err := Post(url, migrationReq.Auth, FilterRequestBody{FilterType: TemplateService, TemplateIdentifiers: templateIdentifiers})
 	if err != nil || resp.Status != "SUCCESS" {
 		log.Fatal("Failed to fetch templates", err)
 	}
@@ -112,12 +112,8 @@ func getTemplates(orgId string, projectId string, templateIdentifiers []string) 
 	if err != nil {
 		log.Fatal("Failed to fetch templates", err)
 	}
-	var details []TemplateDetails
 
-	for _, o := range templateListBody.Templates {
-		details = append(details, o)
-	}
-	return details
+	return templateListBody.Templates
 }
 
 func findTemplateIdByName(templates []TemplateDetails, templateName string) string {
