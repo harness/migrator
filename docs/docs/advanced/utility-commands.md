@@ -128,6 +128,41 @@ harness-upgrade --api-key SAT_API_KEY \
   project --identifiers identifier1,identifier2 rm  
 ```
 
+## Pipelines Management
+
+### Remove pipelines
+To remove pipelines, you can provide their names or identifiers.
+
+To remove pipelines by name use `--names`
+```shell  
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  pipelines --names name1,name2 rm  
+```  
+
+To remove pipelines by identifier use `--identifiers`
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  pipelines --identifiers identifier1,identifier2 rm
+```
+
+To remove all pipelines
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  pipelines --all rm
+```
+
 ## Templates Management
 
 ### Remove templates
