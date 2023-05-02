@@ -41,6 +41,9 @@ func Delete(reqUrl string, auth string, body interface{}) (respBodyObj ResponseB
 	if body != nil {
 		postBody, _ := json.Marshal(body)
 		requestBody = bytes.NewBuffer(postBody)
+		log.WithFields(log.Fields{
+			"body": string(postBody),
+		}).Debug("The request body")
 	}
 	req, err := http.NewRequest("DELETE", reqUrl, requestBody)
 	if err != nil {
