@@ -51,6 +51,7 @@ var migrationReq = struct {
 	TargetAccount         string `survey:"targetAccount"`
 	TargetAuthToken       string `survey:"targetAuth"`
 	BaseUrl               string `survey:"baseUrl"`
+	Force                 bool   `survey:"force"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -397,17 +398,40 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:        "all",
-						Usage:       "if all pipelines in the app need to be migrated",
+						Usage:       "all pipelines",
 						Destination: &migrationReq.All,
 					},
 					altsrc.NewStringFlag(&cli.StringFlag{
 						Name:        "pipelines",
-						Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
+						Usage:       "first gen pipeline ids as comma separated values `pipeline1,pipeline2`",
 						Destination: &migrationReq.PipelineIds,
 					}),
+					&cli.StringFlag{
+						Name:        "identifiers",
+						Usage:       "`IDENTIFIERS` of the next gen pipelines",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the next gen pipeline",
+						Destination: &migrationReq.Names,
+					},
 				},
-				Action: func(context *cli.Context) error {
-					return cliWrapper(migratePipelines, context)
+				Subcommands: []*cli.Command{
+					{
+						Name:  "rm",
+						Usage: "Remove nextgen pipelines",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(BulkRemovePipelines, context)
+						},
+					},
+					{
+						Name:  "import",
+						Usage: "import first gen pipelines to next gen",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(migratePipelines, context)
+						},
+					},
 				},
 			},
 			{
@@ -561,6 +585,41 @@ func main() {
 						Usage: "Remove org",
 						Action: func(context *cli.Context) error {
 							return cliWrapper(bulkRemoveOrg, context)
+						},
+					},
+				},
+			},
+			{
+				Name:  "templates",
+				Usage: "Template specific commands.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "identifiers",
+						Usage:       "`IDENTIFIERS` of the template",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the template",
+						Destination: &migrationReq.Names,
+					},
+					&cli.BoolFlag{
+						Name:        "force",
+						Usage:       "to force delete template",
+						Destination: &migrationReq.Force,
+					},
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if set will delete all templates",
+						Destination: &migrationReq.All,
+					},
+				},
+				Subcommands: []*cli.Command{
+					{
+						Name:  "rm",
+						Usage: "Remove templates",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(BulkRemoveTemplates, context)
 						},
 					},
 				},

@@ -126,4 +126,93 @@ harness-upgrade --api-key SAT_API_KEY \
   --env ENV \
   --org ORG \
   project --identifiers identifier1,identifier2 rm  
+```
+
+## Pipelines Management
+
+### Remove pipelines
+To remove pipelines, you can provide their names or identifiers.
+
+To remove pipelines by name use `--names`
+```shell  
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  pipelines --names name1,name2 rm  
 ```  
+
+To remove pipelines by identifier use `--identifiers`
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  pipelines --identifiers identifier1,identifier2 rm
+```
+
+To remove all pipelines
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  pipelines --all rm
+```
+
+## Templates Management
+
+### Remove templates
+To remove templates, you can provide their names or identifiers.
+
+To remove templates by name use `--names`
+```shell  
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  templates --names name1,name2 rm  
+```  
+
+To remove templates by identifier use `--identifiers`
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  templates --identifiers identifier1,identifier2 rm
+```
+
+To remove all templates
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  templates --all rm
+```
+
+If the templates are being referenced, the deletion may fail. Use the `--force` flag to force delete the templates:
+
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --account ACCOUNT_ID \
+  --org ORG_ID \
+  --project PROJECT_ID \
+  --env ENV \
+  templates --all --force rm
+```
+
+:::info
+The above commands are for removing project level templates.
+
+If you want to remove org level templates, do not pass the --project flag.
+
+If you want to remove global level templates, do not pass the --project and --org flags.
+:::

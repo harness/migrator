@@ -110,7 +110,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --template-scope SCOPE \
   --workflow-scope SCOPE \
   --env ENV \
-  workflows --all
+  pipelines --all import
 ```
 
 ### Migrating specific pipelines
@@ -126,7 +126,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --template-scope SCOPE \
   --workflow-scope SCOPE \
   --env ENV \
-  pipelines --pipelines PIPELINE_IDS
+  pipelines --pipelines PIPELINE_IDS import
 ```
 
 ## Migrating triggers

@@ -53,7 +53,7 @@ func createProject(*cli.Context) error {
 }
 
 func createAProject(orgIdentifier string, name string, identifier string) error {
-	url := fmt.Sprintf("%s/api/projects?accountIdentifier=%s&orgIdentifier=%s", GetBaseUrl(migrationReq.Environment, NG), migrationReq.Account, orgIdentifier)
+	url := fmt.Sprintf("%s/api/projects?accountIdentifier=%s&orgIdentifier=%s", GetBaseUrl(migrationReq.Environment, NextGenService), migrationReq.Account, orgIdentifier)
 	_, err := Post(url, migrationReq.Auth, ProjectBody{
 		Project: ProjectDetails{
 			OrgIdentifier: orgIdentifier,
@@ -97,8 +97,8 @@ func bulkCreateProject(*cli.Context) error {
 		return CreateProjectsUsingCSV()
 	}
 
-	url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "projects/bulk", map[string]string{
-		"accountIdentifier": migrationReq.Account,
+	url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "projects/bulk", map[string]string{
+		AccountIdentifier: migrationReq.Account,
 	})
 
 	log.Info("Creating the projects....")
@@ -206,7 +206,7 @@ func bulkRemoveProject(*cli.Context) error {
 				identifiers = append(identifiers, id)
 			}
 		}
-		log.Debugf("Valid identifers for the given names are - %s", identifiers)
+		log.Debugf("Valid identifiers for the given names are - %s", identifiers)
 	}
 
 	for _, identifier := range identifiers {
@@ -217,11 +217,11 @@ func bulkRemoveProject(*cli.Context) error {
 }
 
 func deleteProject(projectId string) {
-	url := fmt.Sprintf("%s/api/projects/%s?accountIdentifier=%s&orgIdentifier=%s", GetBaseUrl(migrationReq.Environment, NG), projectId, migrationReq.Account, migrationReq.OrgIdentifier)
+	url := fmt.Sprintf("%s/api/projects/%s?accountIdentifier=%s&orgIdentifier=%s", GetBaseUrl(migrationReq.Environment, NextGenService), projectId, migrationReq.Account, migrationReq.OrgIdentifier)
 
 	log.Infof("Deleting the project with identifier %s", projectId)
 
-	_, err := Delete(url, migrationReq.Auth)
+	_, err := Delete(url, migrationReq.Auth, nil)
 
 	if err == nil {
 		log.Infof("Successfully deleted the project - %s", projectId)
@@ -231,7 +231,7 @@ func deleteProject(projectId string) {
 }
 
 func getProjects() []ProjectDetails {
-	url := fmt.Sprintf("%s/api/projects?accountIdentifier=%s&orgIdentifier=%s&pageSize=1000", GetBaseUrl(migrationReq.Environment, NG), migrationReq.Account, migrationReq.OrgIdentifier)
+	url := fmt.Sprintf("%s/api/projects?accountIdentifier=%s&orgIdentifier=%s&pageSize=1000", GetBaseUrl(migrationReq.Environment, NextGenService), migrationReq.Account, migrationReq.OrgIdentifier)
 	resp, err := Get(url, migrationReq.Auth)
 	if err != nil || resp.Status != "SUCCESS" {
 		log.Fatal("Failed to fetch projects", err)

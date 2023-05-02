@@ -20,7 +20,7 @@ func CreateEntities(body RequestBody) {
 }
 
 func QueueCreateEntity(body RequestBody) (reqId string, err error) {
-	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/async", migrationReq.Account)
+	url := GetUrl(migrationReq.Environment, MigratorService, "save/async", migrationReq.Account)
 	resp, err := Post(url, migrationReq.Auth, body)
 	if err != nil {
 		log.Fatal("Failed to create the entities", err)
@@ -41,9 +41,9 @@ func PollForCompletion(reqId string) {
 	s.Start()
 	for {
 		time.Sleep(time.Second)
-		url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "save/async-result", map[string]string{
-			"accountIdentifier": migrationReq.Account,
-			"requestId":         reqId,
+		url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "save/async-result", map[string]string{
+			AccountIdentifier: migrationReq.Account,
+			"requestId":       reqId,
 		})
 		resp, err := Get(url, migrationReq.Auth)
 		if err != nil {

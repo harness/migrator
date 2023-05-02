@@ -32,7 +32,7 @@ func createOrg(*cli.Context) error {
 		}
 	}
 
-	url := fmt.Sprintf("%s/api/organizations?accountIdentifier=%s", GetBaseUrl(migrationReq.Environment, NG), migrationReq.Account)
+	url := fmt.Sprintf("%s/api/organizations?accountIdentifier=%s", GetBaseUrl(migrationReq.Environment, NextGenService), migrationReq.Account)
 
 	log.Info("Creating the org....")
 
@@ -83,7 +83,7 @@ func bulkRemoveOrg(*cli.Context) error {
 				identifiers = append(identifiers, id)
 			}
 		}
-		log.Debugf("Valid identifers for the given names are - %s", identifiers)
+		log.Debugf("Valid identifiers for the given names are - %s", identifiers)
 	}
 
 	for _, identifier := range identifiers {
@@ -94,11 +94,11 @@ func bulkRemoveOrg(*cli.Context) error {
 }
 
 func deleteOrg(orgId string) {
-	url := fmt.Sprintf("%s/api/organizations/%s?accountIdentifier=%s", GetBaseUrl(migrationReq.Environment, NG), orgId, migrationReq.Account)
+	url := fmt.Sprintf("%s/api/organizations/%s?accountIdentifier=%s", GetBaseUrl(migrationReq.Environment, NextGenService), orgId, migrationReq.Account)
 
 	log.Infof("Deleting the org with identifier %s", orgId)
 
-	_, err := Delete(url, migrationReq.Auth)
+	_, err := Delete(url, migrationReq.Auth, nil)
 
 	if err == nil {
 		log.Infof("Successfully deleted the org - %s", orgId)
@@ -108,7 +108,7 @@ func deleteOrg(orgId string) {
 }
 
 func getOrganisations() []OrgDetails {
-	url := fmt.Sprintf("%s/api/aggregate/organizations?accountIdentifier=%s&pageSize=1000", GetBaseUrl(migrationReq.Environment, NG), migrationReq.Account)
+	url := fmt.Sprintf("%s/api/aggregate/organizations?accountIdentifier=%s&pageSize=1000", GetBaseUrl(migrationReq.Environment, NextGenService), migrationReq.Account)
 	resp, err := Get(url, migrationReq.Auth)
 	if err != nil || resp.Status != "SUCCESS" {
 		log.Fatal("Failed to fetch organisations", err)
