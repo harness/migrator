@@ -65,9 +65,13 @@ func deleteTemplate(orgId string, projectId string, templateId string, force boo
 	}
 	queryParams := map[string]string{
 		AccountIdentifier: migrationReq.Account,
-		ProjectIdentifier: projectId,
-		OrgIdentifier:     orgId,
 		"forceDelete":     strconv.FormatBool(force),
+	}
+	if len(orgId) > 0 {
+		queryParams[OrgIdentifier] = orgId
+	}
+	if len(projectId) > 0 {
+		queryParams[ProjectIdentifier] = projectId
 	}
 	url := GetUrlWithQueryParams(migrationReq.Environment, TEMPLATE, fmt.Sprintf("api/templates/%s", templateId), queryParams)
 
