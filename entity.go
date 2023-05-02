@@ -42,8 +42,8 @@ func PollForCompletion(reqId string) {
 	for {
 		time.Sleep(time.Second)
 		url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "save/async-result", map[string]string{
-			"accountIdentifier": migrationReq.Account,
-			"requestId":         reqId,
+			AccountIdentifier: migrationReq.Account,
+			"requestId":       reqId,
 		})
 		resp, err := Get(url, migrationReq.Auth)
 		if err != nil {

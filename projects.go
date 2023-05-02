@@ -98,7 +98,7 @@ func bulkCreateProject(*cli.Context) error {
 	}
 
 	url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "projects/bulk", map[string]string{
-		"accountIdentifier": migrationReq.Account,
+		AccountIdentifier: migrationReq.Account,
 	})
 
 	log.Info("Creating the projects....")
@@ -221,7 +221,7 @@ func deleteProject(projectId string) {
 
 	log.Infof("Deleting the project with identifier %s", projectId)
 
-	_, err := Delete(url, migrationReq.Auth)
+	_, err := Delete(url, migrationReq.Auth, nil)
 
 	if err == nil {
 		log.Infof("Successfully deleted the project - %s", projectId)

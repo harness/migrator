@@ -28,3 +28,9 @@ const (
 )
 
 var scopes = []string{"project", "org", "account"}
+
+const (
+	AccountIdentifier = "accountIdentifier"
+	OrgIdentifier     = "orgIdentifier"
+	ProjectIdentifier = "projectIdentifier"
+)

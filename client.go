@@ -36,8 +36,13 @@ func Get(reqUrl string, auth string) (respBodyObj ResponseBody, err error) {
 	return handleResp(req)
 }
 
-func Delete(reqUrl string, auth string) (respBodyObj ResponseBody, err error) {
-	req, err := http.NewRequest("DELETE", reqUrl, nil)
+func Delete(reqUrl string, auth string, body interface{}) (respBodyObj ResponseBody, err error) {
+	var requestBody *bytes.Buffer = nil
+	if body != nil {
+		postBody, _ := json.Marshal(body)
+		requestBody = bytes.NewBuffer(postBody)
+	}
+	req, err := http.NewRequest("DELETE", reqUrl, requestBody)
 	if err != nil {
 		return
 	}

@@ -23,23 +23,28 @@ const (
 const (
 	MIGRATOR string = "Migrator"
 	NG              = "NextGen"
+	TEMPLATE        = "Template"
 )
 
 var urlMap = map[string]map[string]string{
 	Prod: {
-		MIGRATOR: "https://app.harness.io/gateway/ng-migration",
+		TEMPLATE: "https://app.harness.io/gateway/template",
+		MIGRATOR: "https://app.harness.io/gateway/ng-migration/api/ng-migration",
 		NG:       "https://app.harness.io/gateway/ng",
 	},
 	QA: {
-		MIGRATOR: "https://qa.harness.io/gateway/ng-migration",
+		TEMPLATE: "https://qa.harness.io/gateway/template",
+		MIGRATOR: "https://qa.harness.io/gateway/ng-migration/api/ng-migration",
 		NG:       "https://qa.harness.io/gateway/ng",
 	},
 	Dev: {
-		MIGRATOR: "https://localhost:9080",
+		TEMPLATE: "https://localhost:8181/template",
+		MIGRATOR: "https://localhost:9080/api/ng-migration",
 		NG:       "https://localhost:8181/ng",
 	},
 	Prod3: {
-		MIGRATOR: "https://app3.harness.io/gateway/ng-migration",
+		TEMPLATE: "https://app3.harness.io/gateway/template",
+		MIGRATOR: "https://app3.harness.io/gateway/ng-migration/api/ng-migration",
 		NG:       "https://app3.harness.io/gateway/ng",
 	},
 }
@@ -87,11 +92,11 @@ func GetUrlWithQueryParams(environment string, service string, endpoint string, 
 		params = params + k + "=" + v + "&"
 	}
 
-	return fmt.Sprintf("%s/api/ng-migration/%s?%s", GetBaseUrl(environment, service), endpoint, params)
+	return fmt.Sprintf("%s/%s?%s", GetBaseUrl(environment, service), endpoint, params)
 }
 
 func GetUrl(environment string, service string, path string, accountId string) string {
-	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", GetBaseUrl(environment, service), path, accountId)
+	return fmt.Sprintf("%s/%s?accountIdentifier=%s", GetBaseUrl(environment, service), path, accountId)
 }
 
 func getOrDefault(value string, defaultValue string) string {
@@ -214,8 +219,8 @@ func Split(str string, sep string) (result []string) {
 
 func listEntities(entity string) (data []BaseEntityDetail, err error) {
 	url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, entity, map[string]string{
-		"accountIdentifier": migrationReq.Account,
-		"appId":             migrationReq.AppId,
+		AccountIdentifier: migrationReq.Account,
+		"appId":           migrationReq.AppId,
 	})
 	resp, err := Get(url, migrationReq.Auth)
 	if err != nil {
@@ -246,10 +251,12 @@ func GetBaseUrl(environment string, service string) string {
 	}
 	var url string
 	switch service {
+	case TEMPLATE:
+		url = migrationReq.BaseUrl + "/template"
 	case NG:
 		url = migrationReq.BaseUrl + "/ng"
 	case MIGRATOR:
-		url = migrationReq.BaseUrl + "/ng-migration"
+		url = migrationReq.BaseUrl + "/ng-migration/api/ng-migration"
 	default:
 		panic("Unknown service! Please contact Harness support")
 	}

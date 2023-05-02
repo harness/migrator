@@ -51,6 +51,7 @@ var migrationReq = struct {
 	TargetAccount         string `survey:"targetAccount"`
 	TargetAuthToken       string `survey:"targetAuth"`
 	BaseUrl               string `survey:"baseUrl"`
+	Force                 bool   `survey:"force"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -561,6 +562,41 @@ func main() {
 						Usage: "Remove org",
 						Action: func(context *cli.Context) error {
 							return cliWrapper(bulkRemoveOrg, context)
+						},
+					},
+				},
+			},
+			{
+				Name:  "templates",
+				Usage: "Template specific commands.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "identifiers",
+						Usage:       "`IDENTIFIERS` of the template",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the template",
+						Destination: &migrationReq.Names,
+					},
+					&cli.BoolFlag{
+						Name:        "force",
+						Usage:       "to force delete template",
+						Destination: &migrationReq.Force,
+					},
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if set will delete all templates",
+						Destination: &migrationReq.All,
+					},
+				},
+				Subcommands: []*cli.Command{
+					{
+						Name:  "rm",
+						Usage: "Remove templates",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(BulkRemoveTemplates, context)
 						},
 					},
 				},

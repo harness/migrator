@@ -98,7 +98,7 @@ func deleteOrg(orgId string) {
 
 	log.Infof("Deleting the org with identifier %s", orgId)
 
-	_, err := Delete(url, migrationReq.Auth)
+	_, err := Delete(url, migrationReq.Auth, nil)
 
 	if err == nil {
 		log.Infof("Successfully deleted the org - %s", orgId)

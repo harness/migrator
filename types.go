@@ -87,6 +87,26 @@ type OrgBody struct {
 	Org OrgDetails `json:"organization"`
 }
 
+type TemplateListBody struct {
+	Templates []TemplateDetails `json:"content"`
+}
+
+type TemplateDetails struct {
+	Identifier   string `json:"identifier"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	VersionLabel string `json:"versionLabel"`
+}
+
+type TemplateRequestBody struct {
+	FilterType          string   `json:"filterType"`
+	TemplateIdentifiers []string `json:"templateIdentifiers"`
+}
+
+type TemplateDeleteBody struct {
+	TemplateVersionLabels []string `json:"templateVersionLabels"`
+}
+
 type RequestBody struct {
 	DestinationDetails   DestinationDetails `json:"destinationDetails"`
 	EntityType           EntityType         `json:"entityType"`

@@ -24,8 +24,8 @@ func GetAppSummary(*cli.Context) error {
 		migrationReq.AppId = TextInput("Please provide the application ID - ")
 	}
 	url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "discover/summary/async", map[string]string{
-		"accountIdentifier": migrationReq.Account,
-		"appId":             migrationReq.AppId,
+		AccountIdentifier: migrationReq.Account,
+		"appId":           migrationReq.AppId,
 	})
 	return handleSummary(url)
 }
@@ -48,8 +48,8 @@ func handleSummary(url string) error {
 	for {
 		time.Sleep(time.Second)
 		url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "discover/summary/async-result", map[string]string{
-			"accountIdentifier": migrationReq.Account,
-			"requestId":         reqId,
+			AccountIdentifier: migrationReq.Account,
+			"requestId":       reqId,
 		})
 		resp, err := Get(url, migrationReq.Auth)
 		if err != nil {
