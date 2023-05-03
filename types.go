@@ -2,16 +2,18 @@ package main
 
 type EntityType string
 type ImportType string
+type TemplateScope string
 
 type Filter struct {
-	Type           ImportType `json:"importType"`
-	AppId          string     `json:"appId"`
-	TriggerIds     []string   `json:"triggerIds"`
-	WorkflowIds    []string   `json:"workflowIds"`
-	PipelineIds    []string   `json:"pipelineIds"`
-	Ids            []string   `json:"ids"`
-	ServiceIds     []string   `json:"serviceIds"`
-	EnvironmentIds []string   `json:"environmentIds"`
+	Type           ImportType    `json:"importType"`
+	AppId          string        `json:"appId"`
+	TriggerIds     []string      `json:"triggerIds"`
+	WorkflowIds    []string      `json:"workflowIds"`
+	PipelineIds    []string      `json:"pipelineIds"`
+	Ids            []string      `json:"ids"`
+	ServiceIds     []string      `json:"serviceIds"`
+	EnvironmentIds []string      `json:"environmentIds"`
+	Scope          TemplateScope `json:"scope"`
 }
 
 type DestinationDetails struct {

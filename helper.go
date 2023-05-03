@@ -324,10 +324,15 @@ func MigrateEntities(promptConfirm bool, scopes []string, pluralValue string, en
 		}
 	}
 	log.Info(fmt.Sprintf("Importing the %s....", pluralValue))
+	scope := AccountScope
+	if len(migrationReq.AppId) > 0 {
+		scope = AppScope
+	}
 	CreateEntities(getReqBody(entityType, Filter{
 		AppId: migrationReq.AppId,
 		Type:  importType,
 		Ids:   ids,
+		Scope: scope,
 	}))
 	log.Info(fmt.Sprintf("Imported the %s.", pluralValue))
 

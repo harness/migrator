@@ -34,3 +34,8 @@ const (
 	OrgIdentifier     = "orgIdentifier"
 	ProjectIdentifier = "projectIdentifier"
 )
+
+const (
+	AccountScope TemplateScope = "ACCOUNT"
+	AppScope                   = "APP"
+)
