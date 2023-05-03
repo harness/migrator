@@ -128,7 +128,7 @@ func findTemplateIdByName(templates []TemplateDetails, templateName string) stri
 func MigrateTemplates(*cli.Context) (err error) {
 	promptConfirm := PromptDefaultInputs()
 	migrationReq.All = true
-	err = MigrateEntities(promptConfirm, []string{Project}, "templates", Service)
+	err = MigrateEntities(promptConfirm, []string{Project}, "templates", Template)
 	if err != nil {
 		log.Fatal("Failed to migrate templates")
 	}
