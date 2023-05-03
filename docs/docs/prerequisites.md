@@ -23,3 +23,6 @@ You will need the account ID and environment information for your Harness accoun
 | SelfManaged | Harness self-managed platform | 
 
 Make sure to note down the correct environment and cluster information before starting the migration process.
+
+## SelfManaged Platform
+If you are running on Harness self-managed platform please use the `--base-url https://ACME.com/gateway` flag or set the `base-url` field in the file YAML.

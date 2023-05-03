@@ -268,6 +268,24 @@ harness-upgrade --api-key SAT_API_KEY \
   environments --ids ENVIRONMENT_IDS
 ```
 
+## Migrating app level templates
+To migrate templates from the app, use the following command `harness-upgrade --app APP_ID templates import`
+
+### Migrating all templates
+To migrate all templates on app level, use the following command
+
+```shell
+harness-upgrade --api-key SAT_API_KEY \ 
+--project PROJECT \
+--org ORG \
+--account ACCOUNT_ID \
+--app APP_ID \
+--secret-scope SCOPE \
+--connector-scope SCOPE \
+--template-scope SCOPE \
+--env ENV templates import
+```
+
 :::tip
 Instead of providing the flags, you can save all the flags into a YAML file and load them using `--load FILE`
 ```yaml
