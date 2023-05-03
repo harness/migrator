@@ -8,7 +8,7 @@ slug: /install
 ## Unix systems 
 For unix systems run this command to download the latest release & install - 
 ```shell
-curl https://raw.githubusercontent.com/harness/migrator/master/install.sh | sh
+curl https://raw.githubusercontent.com/harness/migrator/master/install | sh
 ```
 
 If the above fails, please try installing using the manual installation approach.
