@@ -622,6 +622,13 @@ func main() {
 							return cliWrapper(BulkRemoveTemplates, context)
 						},
 					},
+					{
+						Name:  "import",
+						Usage: "import templates. pass the --app flag if you want to migrate app level templates else do not pass",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(MigrateTemplates, context)
+						},
+					},
 				},
 			},
 		},
