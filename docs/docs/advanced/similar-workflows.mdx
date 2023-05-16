@@ -1,0 +1,425 @@
+import {Table} from "../../src/components/table";
+
+# Workflows & Pipelines Simplification
+
+The Harness Next Gen platform offers a variety of robust templates that can significantly reduce the number of pipelines teams need to manage.
+These templates are powerful tools that promote best practices and standardization within an organization, resulting in more streamlined and efficient software delivery processes.
+
+If you're transitioning from FirstGen, Harness can help you analyze your existing workflows and pipelines across multiple applications.
+Based on this analysis, Harness can recommend workflows and pipelines that can be easily templated and reused across different projects, reducing duplication of efforts and increasing productivity.
+
+Harness' platform and capabilities are designed to simplify pipeline management for organizations, allowing teams to focus on delivering high-quality software.
+By leveraging Harness' powerful templates and automated analysis, you can streamline your pipeline management process and achieve better outcomes.
+
+## How it works
+
+We analyze all workflows in the account to determine if they are similar based on specific criteria:
+
+- They must be the same type of workflow. In FirstGen, workflows belong to one of six types: Build, Basic, Rolling, Canary, Blue-Green, or Multi-Service. If two workflows are of different types, they are considered different.
+
+- They must have the same number of phases and rollback phases. If two workflows have different numbers of phases, they are considered different workflows.
+
+- Two phases are similar if they have the same number of phase steps.
+
+- Two phase steps are similar if they have the same number of steps.
+
+- Two steps are similar if they are of the same type.
+
+- Each step type has different criteria to determine whether they are similar or not. For example, when comparing two shell script steps, we compare the shell script code, script type (PowerShell/Bash), and whether they execute on a Delegate or not.
+
+We limit the number of comparisons in the field as much as possible, as it is possible to template fields in Next Gen and increase the chances of re-usability.
+
+
+<Table rows={[
+    {
+        category: "Common Steps",
+        rows: [{
+            title: "Approval",
+            details: (
+                <>
+                    We compare the ticketing systems.
+                    In case of Harness Approvals we compare the inputs.
+                </>
+            )
+        }, {
+            title: "Command",
+            details: (
+                <>
+                    We compare the template ids
+                </>
+            )
+        }, {
+            title: "Email",
+            details: (
+                <>
+                    We compare the subject and body properties of the step
+                </>
+            )
+        }, {
+            title: "HTTP",
+            details: (
+                <>
+                    We compare the following:
+                    <li>Body</li>
+                    <li>HTTP method</li>
+                    <li>URL</li>
+                    <li>Assertion</li>
+                    <li>Headers</li>
+                </>
+            )
+        }, {
+            title: "Shell Script",
+            details: (
+                <>
+                    We compare the following:
+                    <li>Script Type</li>
+                    <li>Script contents</li>
+                    <li>Execute on Delegate flag</li>
+                </>
+            )
+        }, {
+            title: "Jira Create & Update",
+            details: (
+                <>
+                    We only compare the Jira action(create or update?)
+                </>
+            )
+        }, {
+            title: "Resource Constraint",
+            details: (
+                <>
+                    Always true
+                </>
+            )
+        }, {
+            title: "Barrier",
+            details: (
+                <>
+                    Always true
+                </>
+            )
+        }, {
+            title: "ServiceNow",
+            details: (
+                <>
+                    Always false
+                </>
+            )
+        }, {
+            title: "Barrier",
+            details: (
+                <>
+                    We compare the template ids
+                </>
+            )
+        }, {
+            title: "Barrier",
+            details: (
+                <>
+                    We compare the template ids
+                </>
+            )
+        }]
+    },
+    {
+        category: "Provisioners",
+        rows: [
+            {
+            title: "Shell Script Provisioner",
+            details: (
+                <>
+                    Always false
+                </>
+            )
+        }, {
+                title: "Terraform Provisioner Steps",
+                details: (
+                    <>
+                        Always false for all the terraform provisioner steps - TerraformApplyStep, TerraformDestroyStep, TerraformProvisionStep, TerraformRollbackStep
+                    </>
+                )
+            }, {
+                title: "Terragrunt Provisioner",
+                details: (
+                    <>
+                        Always false for all the terragrunt provisioner steps - TerragruntDestroyStep, TerragruntProvisionStep, TerragruntRollbackStep
+                    </>
+                )
+            }, {
+                title: "Cloudformation",
+                details: (
+                    <>
+                        Always false for all the cloudformation steps - CloudformationCreateStep, CloudformationDeleteStep
+                    </>
+                )
+            }]
+    },
+    {
+        category: "Kubernetes Steps",
+        rows: [
+            {
+                title: "K8sCanaryDeploy",
+                details: (
+                    <>
+                        <li>Instance unit type</li>
+                        <li>Instances</li>
+                    </>
+                )
+            }, {
+                title: "K8sDelete",
+                details: (
+                    <>
+                        <li>File paths</li>
+                        <li>Resources</li>
+                    </>
+                )
+            }, {
+                title: "K8s Scale",
+                details: (
+                    <>
+                        <li>Instance unit type</li>
+                        <li>Instances</li>
+                        <li>Workload</li>
+                    </>
+                )
+            }, {
+                title: "K8sSwapServiceSelectors",
+                details: (
+                    <>
+                        Compare the services
+                    </>
+                )
+            }, {
+                title: "K8sApply",
+                details: (
+                    <ul>
+                        <li>Compare filepaths</li>
+                        <li>Remote step override</li>
+                        <li>Inline step override</li>
+                    </ul>
+                )
+            }, {
+                title: "K8sBlueGreenDeploy",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "K8sRollingRollback",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "K8sRolling",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "K8sTrafficSplit",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }]
+    },  {
+        category: "Helm Steps",
+        rows: [
+            {
+                title: "HelmDeploy",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "Helm Rollback",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }]
+    },  {
+        category: "AWS Steps",
+        rows: [
+            {
+                title: "AsgBlueGreenRollback",
+                details: (
+                    <>
+                        Always true                    </>
+                )
+            }, {
+                title: "AsgBlueGreenSwap",
+                details: (
+                    <>
+                        isDownsizeOldAsg
+                    </>
+                )
+            }, {
+                title: "AsgRollingDeploy",
+                details: (
+                    <>
+                        useCurrentRunningCount
+                    </>
+                )
+            }, {
+                title: "AsgRollingRollback",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "AsgBlueGreenRollback",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "ElastigroupRollback",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "ElastigroupSwapRoute",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "EcsServiceRollback",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "ElastigroupListenerRollback",
+                details: (
+                    <>
+                        Always true
+                    </>
+                )
+            }, {
+                title: "ElastigroupDeploy",
+                details: (
+                    <>
+                        <li>downsizeInstanceUnitType</li>
+                        <li>name</li>
+                        <li>downsizeInstanceCount</li>
+                        <li>instanceCount</li>
+                    </>
+                )
+            }, {
+                title: "EcsServiceSetup",
+                details: (
+                    <>
+                        <li>desiredInstanceCount</li>
+                    </>
+                )
+            }, {
+                title: "ElastigroupSetup",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }]
+    },  {
+        category: "Azure Steps",
+        rows: [
+            {
+                title: "AzureCreateARMResourceStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "AzureRollbackARMResourceStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "AzureSlotRollbackStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "AzureSlotSetupStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "AzureSlotShiftTrafficStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "AzureSlotSwap",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }]
+    },  {
+        category: "PCF Steps",
+        rows: [
+            {
+                title: "PcfBGMapRouteStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "PcfPluginStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "PcfRollbackStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "PcfSetupStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }, {
+                title: "PcfSwapRoutesStep",
+                details: (
+                    <>
+                        Always false
+                    </>
+                )
+            }]
+    }
+]} />
+

@@ -1,0 +1,231 @@
+import Check from '../src/components/check'
+import Warn from '../src/components/warning'
+import Cross from '../src/components/cross'
+import Wrench from '../src/components/wrench'
+
+# Reference
+
+## Secret Managers
+
+| Secret Manager         | Status   | Comments                                                    |
+|------------------------|----------|-------------------------------------------------------------|
+| Harness Secret Manager | <Check/> | Migrates secrets including the contents                     |
+| AWS Secret Manager     | <Check/> | We convert inline secrets to referenced secrets             |
+| GCP Secret Manager     | <Check/> | We convert inline secrets to referenced secrets             |
+| Azure Vault            | <Check/> | We convert inline secrets to referenced secrets             |
+| AWS KMS                | <Warn/>  | We create secrets but we do not migrate the actual secrets. |
+| GCP KMS                | <Warn/>  | We create secrets but we do not migrate the actual secrets. |
+| Hashicorp Vault        | <Check/> | We convert inline secrets to referenced secrets             |
+| Custom SM              | <Check/> |                                                             |
+
+
+## Connectors
+
+### Cloud Providers
+
+| Cloud Provider       | Status   | Comments                                                                |
+|----------------------|----------|-------------------------------------------------------------------------|
+| AWS Cloud Provider   | <Check/> |                                                                         |
+| GCP Cloud Provider   | <Check/> |                                                                         |
+| Azure Cloud Provider | <Check/> |                                                                         |
+| Kubernetes           | <Check/> |                                                                         |
+| Rancher              | <Cross/> | Not supported in Next Gen                                               |
+| Physical Data Center | <Warn/>  | Not migrated, but leverage inline definitions to migrate Infrastructure |
+
+
+### Artifact Sources
+
+| Connector                | Status   | Comments                                |
+|--------------------------|----------|-----------------------------------------|
+| Docker                   | <Check/> |                                         |
+| Artifactory              | <Check/> |                                         |
+| Nexus                    | <Check/> |                                         |
+| Bamboo                   | <Check/> |                                         |
+| Jenkins                  | <Check/> |                                         |
+| Bamboo                   | <Check/> |                                         |
+| Helm(HTTP, GCS, S3, OCI) | <Check/> |                                         |
+| SFTP                     | <Cross/> | Manually move to custom artifact source |
+| Samba                    | <Cross/> | Manually move to custom artifact source |
+
+
+### Verification Providers
+
+| Connector    | Status   | Comments |
+|--------------|----------|----------|
+| Splunk       | <Check/> |          |
+| Datadog      | <Check/> |          |
+| Newrelic     | <Check/> |          |
+| App Dynamics | <Check/> |          |
+| Prometheus   | <Check/> |          |
+| ELK          | <Check/> |          |
+| Logz         | <Check/> |          |
+| Sumo         | <Check/> |          |
+| Bug Snag     | <Check/> |          |
+| Dyna Trace   | <Check/> |          |
+| Cloudwatch   | <Check/> |          |
+| Scalyr       | <Check/> |          |
+| Data Dog     | <Check/> |          |
+| Instana      | <Check/> |          |
+
+
+### Misc Connectors
+
+| Connector  | Status   | Comments                                                      |
+|------------|----------|---------------------------------------------------------------|
+| Jira       | <Check/> |                                                               |
+| ServiceNow | <Check/> |                                                               |
+| Git        | <Check/> |                                                               |
+| Slack      | <Cross/> | Use custom shell script steps or use Slack webhooks for setup |
+| SMTP       | <Warn/>  | Supported in NG. Requires manual effort                       |
+
+
+## Services
+
+| Services             | Status   | Comments                    |
+|----------------------|----------|-----------------------------|
+| Kubernetes           | <Check/> |                             |
+| Helm                 | <Check/> |                             |
+| Secure Shell         | <Check/> |                             |
+| WinRM                | <Check/> |                             |
+| Azure Web Apps       | <Check/> |                             |
+| Deployment Templates | <Check/> |                             |
+| ECS                  | <Check/> |                             |
+| AMI/ASG              | <Check/> |                             |
+| Spot Instances       | <Check/> |                             |
+| PCF                  | <Check/> |                             |
+| AMI                  | <Check/> |                             |
+| AWS Lambda           | <Check/> |                             |
+| Azure VMSS           | <Cross/> | Leverage custom deployments |
+| AWS Code Deploy      | <Cross/> | Leverage custom deployments |
+
+
+## Workflow Steps
+| Steps                                     | Status    | Comments                                                                                |
+|-------------------------------------------|-----------|-----------------------------------------------------------------------------------------|
+| APM_VERIFICATION                          | <Wrench/> | Upgrade adds a placeholder step. Requires manual update post upgrade                    |
+| APP_DYNAMICS                              | <Wrench/> | Upgrade adds a placeholder step. Requires manual update post upgrade                    |
+| APPROVAL                                  | <Check/>  |                                                                                         |
+| ARM_CREATE_RESOURCE                       | <Check/>  |                                                                                         |
+| ARM_ROLLBACK                              | <Check/>  |                                                                                         |
+| ARTIFACT_CHECK                            | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| ARTIFACT_COLLECTION                       | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| ASG_AMI_ALB_SHIFT_SWITCH_ROUTES           |           |                                                                                         |
+| ASG_AMI_ROLLBACK_ALB_SHIFT_SWITCH_ROUTES  |           |                                                                                         |
+| ASG_AMI_SERVICE_ALB_SHIFT_DEPLOY          |           |                                                                                         |
+| ASG_AMI_SERVICE_ALB_SHIFT_SETUP           |           |                                                                                         |
+| AWS_AMI_ROLLBACK_SWITCH_ROUTES            |           |                                                                                         |
+| AWS_AMI_SERVICE_DEPLOY                    | <Wrench/> |                                                                                         |
+| AWS_AMI_SERVICE_ROLLBACK                  | <Wrench/> |                                                                                         |
+| AWS_AMI_SERVICE_SETUP                     | <Wrench/> |                                                                                         |
+| AWS_AMI_SWITCH_ROUTES                     | <Wrench/> |                                                                                         |
+| AWS_CODEDEPLOY_ROLLBACK                   | <Cross/>  |                                                                                         |
+| AWS_CODEDEPLOY_STATE                      | <Cross/>  |                                                                                         |
+| AWS_LAMBDA_ROLLBACK                       | <Cross/>  |                                                                                         |
+| AWS_LAMBDA_STATE                          | <Cross/>  |                                                                                         |
+| AWS_LAMBDA_VERIFICATION                   | <Wrench/> |                                                                                         |
+| AWS_NODE_SELECT                           | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| AZURE_NODE_SELECT                         | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| AZURE_VMSS_DEPLOY                         | <Cross/>  |                                                                                         |
+| AZURE_VMSS_ROLLBACK                       | <Cross/>  |                                                                                         |
+| AZURE_VMSS_SETUP                          | <Cross/>  |                                                                                         |
+| AZURE_VMSS_SWITCH_ROUTES                  | <Cross/>  |                                                                                         |
+| AZURE_VMSS_SWITCH_ROUTES_ROLLBACK         | <Cross/>  |                                                                                         |
+| AZURE_WEBAPP_SLOT_ROLLBACK                |           |                                                                                         |
+| AZURE_WEBAPP_SLOT_SETUP                   |           |                                                                                         |
+| AZURE_WEBAPP_SLOT_SHIFT_TRAFFIC           |           |                                                                                         |
+| AZURE_WEBAPP_SLOT_SWAP                    |           |                                                                                         |
+| BAMBOO                                    | <Cross/>  |                                                                                         |
+| BARRIER                                   | <Check/>  |                                                                                         |
+| BUG_SNAG                                  | <Wrench/> |                                                                                         |
+| CLOUD_FORMATION_CREATE_STACK              |           |                                                                                         |
+| CLOUD_FORMATION_DELETE_STACK              |           |                                                                                         |
+| CLOUD_FORMATION_ROLLBACK_STACK            |           |                                                                                         |
+| CLOUD_WATCH                               |           |                                                                                         |
+| COLLECT_REMAINING_INSTANCES               |           |                                                                                         |
+| COMMAND                                   | <Check/>  |                                                                                         |
+| CUSTOM_DEPLOYMENT_FETCH_INSTANCES         | <Check/>  |                                                                                         |
+| DATA_DOG                                  | <Wrench/> | We add a Placeholder CV step. Requires manual effort                                    |
+| DATA_DOG_LOG                              | <Wrench/> | We add a Placeholder CV step. Requires manual effort                                    |
+| DC_NODE_SELECT                            | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| DYNA_TRACE                                | <Wrench/> |                                                                                         |
+| ECS_BG_SERVICE_SETUP                      |           |                                                                                         |
+| ECS_BG_SERVICE_SETUP_ROUTE53              |           |                                                                                         |
+| ECS_DAEMON_SERVICE_SETUP                  |           |                                                                                         |
+| ECS_LISTENER_UPDATE                       |           |                                                                                         |
+| ECS_LISTENER_UPDATE_ROLLBACK              |           |                                                                                         |
+| ECS_ROUTE53_DNS_WEIGHT_UPDATE             |           |                                                                                         |
+| ECS_ROUTE53_DNS_WEIGHT_UPDATE_ROLLBACK    |           |                                                                                         |
+| ECS_RUN_TASK                              |           |                                                                                         |
+| ECS_SERVICE_DEPLOY                        | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| ECS_SERVICE_ROLLBACK                      | <Wrench/> |                                                                                         |
+| ECS_SERVICE_SETUP                         | <Wrench/> |                                                                                         |
+| ECS_SERVICE_SETUP_ROLLBACK                | <Wrench/> |                                                                                         |
+| ECS_STEADY_STATE_CHECK                    | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| ELASTIC_LOAD_BALANCER                     |           |                                                                                         |
+| ELK                                       | <Wrench/> | We add a Placeholder CV step. Requires manual effort                                    |
+| EMAIL                                     | <Check/>  |                                                                                         |
+| GCB                                       | <Cross/>  |                                                                                         |
+| GCP_CLUSTER_SETUP                         |           |                                                                                         |
+| HELM_DEPLOY                               | <Check/>  |                                                                                         |
+| HELM_ROLLBACK                             | <Check/>  |                                                                                         |
+| HTTP                                      | <Check/>  |                                                                                         |
+| INSTANA                                   | <Wrench/> |                                                                                         |
+| JENKINS                                   | <Check/>  |                                                                                         |
+| JIRA_CREATE_UPDATE                        | <Check/>  |                                                                                         |
+| K8S_APPLY                                 | <Check/>  |                                                                                         |
+| K8S_BLUE_GREEN_DEPLOY                     | <Check/>  |                                                                                         |
+| K8S_CANARY_DEPLOY                         | <Check/>  |                                                                                         |
+| K8S_DELETE                                | <Check/>  |                                                                                         |
+| K8S_DEPLOYMENT_ROLLING                    | <Check/>  |                                                                                         |
+| K8S_DEPLOYMENT_ROLLING_ROLLBACK           | <Check/>  |                                                                                         |
+| K8S_SCALE                                 | <Check/>  |                                                                                         |
+| K8S_TRAFFIC_SPLIT                         | <Wrench/> |                                                                                         |
+| KUBERNETES_SWAP_SERVICE_SELECTORS         | <Check/>  |                                                                                         |
+| LOG_VERIFICATION                          | <Wrench/> |                                                                                         |
+| LOGZ                                      | <Wrench/> |                                                                                         |
+| NEW_RELIC                                 | <Wrench/> |                                                                                         |
+| NEW_RELIC_DEPLOYMENT_MARKER               | <Check/>  | We add a shell script step to tackle this                                               |
+| PCF_BG_MAP_ROUTE(Deploy)                  |           |                                                                                         |
+| PCF_BG_MAP_ROUTE(Rollback)                |           |                                                                                         |
+| PCF_MAP_ROUTE                             | <Cross/>  |                                                                                         |
+| PCF_PLUGIN                                |           |                                                                                         |
+| PCF_RESIZE                                |           |                                                                                         |
+| PCF_ROLLBACK (Basic/Canary)               |           |                                                                                         |
+| PCF_ROLLBACK (BlueGreen)                  |           |                                                                                         |
+| PCF_SETUP                                 | <Check/>  |                                                                                         |
+| PCF_UNMAP_ROUTE                           | <Cross/>  |                                                                                         |
+| PROMETHEUS                                | <Wrench/> |                                                                                         |
+| RANCHER_K8S_BLUE_GREEN_DEPLOY             | <Cross/>  |                                                                                         |
+| RANCHER_K8S_CANARY_DEPLOY                 | <Cross/>  |                                                                                         |
+| RANCHER_K8S_DELETE                        | <Cross/>  |                                                                                         |
+| RANCHER_K8S_DEPLOYMENT_ROLLING            | <Cross/>  |                                                                                         |
+| RANCHER_K8S_DEPLOYMENT_ROLLING_ROLLBACK   | <Cross/>  |                                                                                         |
+| RANCHER_KUBERNETES_SWAP_SERVICE_SELECTORS | <Cross/>  |                                                                                         |
+| RANCHER_RESOLVE                           | <Cross/>  |                                                                                         |
+| RESOURCE_CONSTRAINT                       | <Check/>  |                                                                                         |
+| ROLLING_NODE_SELECT                       | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| SCALYR                                    | <Wrench/> | We add a Placeholder CV step. Requires manual effort                                    |
+| SERVICENOW_CREATE_UPDATE                  | <Check/>  |                                                                                         |
+| SHELL_SCRIPT                              | <Check/>  |                                                                                         |
+| SHELL_SCRIPT_PROVISION                    | <Wrench/> |                                                                                         |
+| SPLUNKV2                                  | <Wrench/> | We add a Placeholder CV step. Requires manual effort                                    |
+| SPOTINST_ALB_SHIFT_DEPLOY                 | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| SPOTINST_ALB_SHIFT_DEPLOY                 | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| SPOTINST_DEPLOY                           | <Check/>  |                                                                                         |
+| SPOTINST_LISTENER_ALB_SHIFT               | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| SPOTINST_LISTENER_ALB_SHIFT_ROLLBACK      | <Check/>  | Not Required in NextGen. Upgrade tool adds Wait Step in Next Gen that is always skipped |
+| SPOTINST_LISTENER_UPDATE                  | <Check/>  |                                                                                         |
+| SPOTINST_LISTENER_UPDATE_ROLLBACK         | <Check/>  |                                                                                         |
+| SPOTINST_ROLLBACK                         | <Check/>  |                                                                                         |
+| SPOTINST_SETUP                            | <Check/>  |                                                                                         |
+| STACK_DRIVER                              | <Wrench/> | We add a Placeholder CV step. Requires manual effort                                    |
+| STACK_DRIVER_LOG                          | <Wrench/> | We add a Placeholder CV step. Requires manual effort                                    |
+| SUMO                                      | <Wrench/> | We add a Placeholder CV step. Requires manual effort                                    |
+| TEMPLATIZED_SECRET_MANAGER                | <Cross/>  |                                                                                         |
+| TERRAFORM_APPLY                           | <Check/>  |                                                                                         |
+| TERRAFORM_DESTROY                         | <Check/>  |                                                                                         |
+| TERRAFORM_PROVISION                       | <Check/>  |                                                                                         |
+| TERRAFORM_ROLLBACK                        |           |                                                                                         |
+| TERRAGRUNT_DESTROY                        | <Check/>  |                                                                                         |
+| TERRAGRUNT_PROVISION                      | <Check/>  |                                                                                         |
+| TERRAGRUNT_ROLLBACK                       | <Check/>  |                                                                                         |
