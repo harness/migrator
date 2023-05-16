@@ -86,6 +86,7 @@ check_platform() {
 
   found=1
   case "$platform" in
+    darwin/arm64) found=0;;
     darwin/amd64) found=0;;
     linux/amd64) found=0 ;;
     linux/arm64) found=0 ;;
