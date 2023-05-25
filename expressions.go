@@ -156,6 +156,12 @@ var DynamicExpressions = map[string]interface{}{
 	"app.defaults": func(key string) string {
 		return "<+variable." + key + ">"
 	},
+	"configFile.getAsBase64(": func(key string) string {
+		return "<+configFile.getAsBase64(\"" + key + "\")>"
+	},
+	"configFile.getAsString(": func(key string) string {
+		return "<+configFile.getAsString(\"" + key + "\")>"
+	},
 }
 
 func getSecretKeyWithScope(key string) string {
