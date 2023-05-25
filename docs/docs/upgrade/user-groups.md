@@ -9,3 +9,9 @@ Use the following command -
 ```shell
 harness-upgrade --api-key SAT_API_KEY --account ACCOUNT_ID --env ENV user-groups
 ```
+
+Use the below command if you want to scope the user groups to a specific org or project.
+
+```shell
+harness-upgrade --api-key SAT_API_KEY --account ACCOUNT_ID --env ENV --org ORG --project PROJECT --user-group-scope SCOPE user-groups
+```
