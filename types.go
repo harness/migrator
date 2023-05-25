@@ -35,6 +35,7 @@ type Defaults struct {
 	Connector             EntityDefaults `json:"CONNECTOR"`
 	Workflow              EntityDefaults `json:"WORKFLOW"`
 	Template              EntityDefaults `json:"TEMPLATE"`
+	UserGroup             EntityDefaults `json:"USER_GROUP"`
 }
 
 type Inputs struct {
