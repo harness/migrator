@@ -52,7 +52,7 @@ harness-upgrade [global options] command [command options] [arguments...]
 | --target-api-key `API_KEY`   | `API_KEY` for the target account to authenticate & authorise the migration.                                            |
 | --load `FILE`                | `FILE` to load flags from                                                                                              |
 | --insecure                   | allow insecure API requests. This is automatically set to true if environment is Dev (default: false)                  |
-| --debug                      | print debug level logs (default: false)                                                                                |
+| --log-level                  | set the log level. Possible values - trace, debug, info, warn, error, fatal, panic. Default is `info`                  |
 | --json                       | log as JSON instead of standard ASCII formatter (default: false).                                                      |
 | --help, -h                   | show help.                                                                                                             |
 | --version, -v                | print the version                                                                                                      |
