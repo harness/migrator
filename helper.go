@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"os"
 	"strings"
 
@@ -337,4 +338,22 @@ func MigrateEntities(promptConfirm bool, scopes []string, pluralValue string, en
 	log.Info(fmt.Sprintf("Imported the %s.", pluralValue))
 
 	return nil
+}
+
+func LoadYamlFromFile(filePath string) map[string]string {
+	filePath = strings.TrimSpace(filePath)
+	if len(filePath) == 0 {
+		return nil
+	}
+	yFile, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	data := make(map[string]string)
+	err = yaml.Unmarshal(yFile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("Successfully loaded %d custom expressions from the file", len(data))
+	return data
 }

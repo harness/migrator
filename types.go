@@ -39,7 +39,8 @@ type Defaults struct {
 }
 
 type Inputs struct {
-	Defaults Defaults `json:"defaults"`
+	Expressions map[string]string `json:"expressions"`
+	Defaults    Defaults          `json:"defaults"`
 }
 
 type OrgDetails struct {

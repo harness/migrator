@@ -5,7 +5,6 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -347,21 +346,8 @@ func getDynamicExpressionKey(key string) string {
 }
 
 func loadYamlFromFile(filePath string) {
-	filePath = strings.TrimSpace(filePath)
-	if len(filePath) == 0 {
-		return
-	}
-	yFile, err := os.ReadFile(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	data := make(map[string]string)
-	err = yaml.Unmarshal(yFile, &data)
-	if err != nil {
-		log.Fatal(err)
-	}
+	data := LoadYamlFromFile(filePath)
 	for k, v := range data {
 		ExpressionsMap[k] = v
 	}
-	log.Infof("Successfully loaded %d custom expressions from the file", len(data))
 }

@@ -57,6 +57,7 @@ var migrationReq = struct {
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	inputs := Inputs{
+		Expressions: LoadYamlFromFile(migrationReq.CustomExpressionsFile),
 		Defaults: Defaults{
 			Secret:                EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
 			SecretManager:         EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
@@ -219,6 +220,11 @@ func main() {
 			Name:        "target-api-key",
 			Usage:       "`API_KEY` for the target account to authenticate & authorise the migration.",
 			Destination: &migrationReq.TargetAuthToken,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "override",
+			Usage:       "provide a `FILE` to load custom expressions from",
+			Destination: &migrationReq.CustomExpressionsFile,
 		}),
 	}
 	app := &cli.App{
@@ -475,11 +481,6 @@ func main() {
 						Value:       "json,yaml,yml",
 						DefaultText: "json,yaml,yml",
 						Destination: &migrationReq.FileExtensions,
-					},
-					&cli.StringFlag{
-						Name:        "override",
-						Usage:       "provide a `FILE` to load custom expressions from",
-						Destination: &migrationReq.CustomExpressionsFile,
 					},
 				},
 				Action: func(context *cli.Context) error {
