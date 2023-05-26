@@ -72,7 +72,7 @@ var ExpressionsMap = map[string]string{
 	"artifact.fileName":                  "<+artifact.metadata.fileName>",
 	"artifact.key":                       "<+artifact.metadata.key>",
 	"artifact.bucketName":                "<+artifact.metadata.bucketName>",
-	"artifact.source.repositoryName":     "<+artifact.metadata.repositoryName>",
+	"artifact.source.repositoryName":     "<+artifact.imagePath>",
 
 	// Rollback Artifact Expressions
 	"rollbackArtifact.metadata.image":          "<+rollbackArtifact.image>",
@@ -88,6 +88,7 @@ var ExpressionsMap = map[string]string{
 	"rollbackArtifact.metadata.repositoryName": "<+rollbackArtifact.repositoryName>",
 	"rollbackArtifact.metadata.url":            "<+rollbackArtifact.url>",
 	"rollbackArtifact.buildNo":                 "<+rollbackArtifact.tag>",
+	"rollbackArtifact.source.repositoryName":   "<+rollbackArtifact.imagePath>",
 
 	// Application Expressions
 	"app.name":                        "<+project.name>",
