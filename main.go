@@ -33,7 +33,7 @@ var migrationReq = struct {
 	TriggerIds            string `survey:"triggerIds"`
 	File                  string `survey:"load"`
 	IdentifierCase        string `survey:"identifierCase"`
-	Debug                 bool   `survey:"debug"`
+	LogLevel              string `survey:"logLevel"`
 	Json                  bool   `survey:"json"`
 	AllowInsecureReq      bool   `survey:"insecure"`
 	ProjectName           string `survey:"projectName"`
@@ -85,9 +85,14 @@ func logMigrationDetails() {
 }
 
 func cliWrapper(fn cliFnWrapper, ctx *cli.Context) error {
-	if migrationReq.Debug {
-		log.SetLevel(log.DebugLevel)
+	if len(migrationReq.LogLevel) > 0 {
+		level, err := log.ParseLevel(migrationReq.LogLevel)
+		if err != nil {
+			log.Fatal("Invalid log level")
+		}
+		log.SetLevel(level)
 	}
+
 	if migrationReq.Json {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
@@ -194,10 +199,11 @@ func main() {
 			Usage:       "allow insecure API requests. This is automatically set to true if environment is Dev",
 			Destination: &migrationReq.AllowInsecureReq,
 		}),
-		altsrc.NewBoolFlag(&cli.BoolFlag{
-			Name:        "debug",
-			Usage:       "print debug level logs",
-			Destination: &migrationReq.Debug,
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "log-level",
+			Usage:       "set the log level. Possible values - trace, debug, info, warn, error, fatal, panic. Default is `info`",
+			Destination: &migrationReq.LogLevel,
+			DefaultText: "info",
 		}),
 		altsrc.NewBoolFlag(&cli.BoolFlag{
 			Name:        "json",

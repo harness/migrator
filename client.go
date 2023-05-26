@@ -17,7 +17,7 @@ func Post(reqUrl string, auth string, body interface{}) (respBodyObj ResponseBod
 	log.WithFields(log.Fields{
 		"url":  reqUrl,
 		"body": string(postBody),
-	}).Debug("The request details")
+	}).Trace("The request details")
 	req, err := http.NewRequest("POST", reqUrl, requestBody)
 	if err != nil {
 		return
@@ -34,7 +34,7 @@ func Get(reqUrl string, auth string) (respBodyObj ResponseBody, err error) {
 	}
 	log.WithFields(log.Fields{
 		"url": reqUrl,
-	}).Debug("The request details")
+	}).Trace("The request details")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(AuthHeaderKey(auth), auth)
 	return handleResp(req)
@@ -48,11 +48,11 @@ func Delete(reqUrl string, auth string, body interface{}) (respBodyObj ResponseB
 		log.WithFields(log.Fields{
 			"url":  reqUrl,
 			"body": string(postBody),
-		}).Debug("The request details")
+		}).Trace("The request details")
 	} else {
 		log.WithFields(log.Fields{
 			"url": reqUrl,
-		}).Debug("The request details")
+		}).Trace("The request details")
 	}
 	var req *http.Request
 	if requestBody != nil {
@@ -86,7 +86,7 @@ func handleResp(req *http.Request) (respBodyObj ResponseBody, err error) {
 	}
 	log.WithFields(log.Fields{
 		"body": string(respBody),
-	}).Debug("The response body")
+	}).Trace("The response body")
 	err = json.Unmarshal(respBody, &respBodyObj)
 	if err != nil {
 		log.Fatalln("There was error while parsing the response from server. Exiting...", err)
