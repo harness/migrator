@@ -28,7 +28,7 @@ harness-upgrade --secret-scope account expressions
 
 To provide custom expressions or override default expressions
 ```shell
-harness-upgrade expressions --override /path/to/file.yaml
+harness-upgrade --override /path/to/file.yaml expressions 
 ```
 
 The above command expects a yaml file whose contents are simple key values of first-gen expressions & string to replace that expression with. A sample override file would look like this -
