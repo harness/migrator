@@ -15,6 +15,7 @@ var skipLogs = []string{
 	"Duplicate identifier, please try again with a new identifier",
 	"already exists in the account",
 	"already exists in this scope",
+	"] already exists  appId=",
 }
 
 func CreateEntities(body RequestBody) {
