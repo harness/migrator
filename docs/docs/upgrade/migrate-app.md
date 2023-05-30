@@ -144,7 +144,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --template-scope SCOPE \
   --workflow-scope SCOPE \
   --env ENV \
-  workflows --all
+  triggers --all
 ```
 
 ### Migrating specific triggers
