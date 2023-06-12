@@ -23,7 +23,7 @@ The migration process for that entity will fail. However, if another entity refe
 
 #### Is it possible to migrate entities across accounts/clusters?
 
-Migration can be performed across accounts if they reside within the same cluster. However, if two accounts are present in different clusters, such as Prod1 and Prod2, then migration is not possible.
+Yes we support across accounts and cross cluster migration. Please refer to the [Cross Account](advanced/cross-account) section for more details. 
 
 #### How can I migrate expressions used in Git remote manifests?
 
