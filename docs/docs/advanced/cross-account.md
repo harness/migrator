@@ -4,15 +4,18 @@ sidebar_position: 3
 
 # Cross Account
 
-For most accounts, the upgrade needs to happen within an account. But for a few accounts, there may be a need to create entities from one account to another. This could be the case when there are different accounts for different organizations of a company. In NextGen, it could be an effort to bring them into a single account and manage them as different organizations.
-There are commonly two use cases. 
-1. Migrate entities from one account to another within same cluster. For example `Account1` in `Prod1` to `Account2` in `Prod1`.
-2. Migrate entities across clusters/installation. For example `Account1` in `Prod1` to `Account2` in `Prod3` or `Account1` in `SelfManaged` to `Account2` in `Prod2`.
+To support different scenarios where entities need to be migrated across accounts or clusters, we provide cross-account functionality. This is particularly useful when dealing with multiple organizations within a company or when consolidating entities into a single account in NextGen.
+
+There are two common use cases for cross-account migration:
+
+1. Migrating entities from one account to another within the same cluster, such as migrating from `Account1` in `Prod1` to `Account2` in `Prod1`.
+2. Migrating entities across clusters or installations, for example, migrating from `Account1` in `Prod1` to `Account2` in `Prod3`, or migrating from `Account1` in `SelfManaged` to `Account2` in `Prod2`.
 
 ## Same Cluster
-If the two accounts are in within same installation/cluster this technique can be used. We can achieve this by using the `--target-account` & `--target-api-key` flags. All the commands like `account`, `app`, `workflows`, `pipelines` etc. can leverage these flags. The `--account` & `--api-key` will refer to the FirstGen account ID and API key.
 
-**Example -**
+When both accounts are within the same installation/cluster, you can use the `--target-account` and `--target-api-key` flags to achieve cross-account migration. These flags can be used with commands like `account`, `app`, `workflows`, `pipelines`, etc. The `--account` and `--api-key` will refer to the FirstGen account ID and API key.
+
+**Example:**
 
 ```shell
 harness-upgrade --account FG_ACCOUNT --api-key FG_API_KEY --target-account NG_ACCOUNT --target-api-key NG_API_KEY
@@ -35,20 +38,21 @@ template-scope: org
 workflow-scope: project
 ```
 
-:::note
+:::caution
 
-The two accounts need to be in the same cluster for this to work. For example, if the FirstGen account is in Prod1 & the NextGen target account is in Prod2, this will not work.
+For this technique to work, both accounts must be in the same cluster. For example, If the FirstGen account is in `Prod1` and the NextGen target account is in `Prod2`, this method will not work.
 
 :::
 
 ## Different Cluster
-There are certain scenarios that would require migration from one cluster to another or one installation to another. Here are few scenarios - 
-1. You would like to move from SelfManaged FirstGen to SaaS Nextgen.
-2. You would like to move from Prod1 FirstGen cluster to Prod3 Nextgen cluster.
-3. You would like to merge two FirstGen SelfManaged installations to a single NextGen SelfManaged installation.
+There are certain scenarios where migration is needed between clusters or installations. Here are a few examples:
 
-We can also use this technique to have a single accounts for multiple organizations that are spread across different SaaS clusters.
-We can achieve this by using the `--target-account`, `--target-api-key` & `--target-gateway-url` flags. All the commands like `account`, `app`, `workflows`, `pipelines` etc. can leverage these flags. The `--account` & `--api-key` will refer to the FirstGen account ID and API key.
+1. Moving from SelfManaged FirstGen to SaaS NextGen.
+2. Moving from Prod1 FirstGen cluster to Prod3 NextGen cluster.
+3. Merging two FirstGen SelfManaged installations into a single NextGen SelfManaged installation.
+
+This technique can also be used to have a single account for multiple organizations across different SaaS clusters.
+To achieve this, you can use the `--target-account`, `--target-api-key`, and `--target-gateway-url` flags with commands like `account`, `app`, `workflows`, `pipelines`, etc. The `--account` and `--api-key` will refer to the FirstGen account ID and API key.
 
 **Example -**
 
@@ -74,7 +78,7 @@ template-scope: org
 workflow-scope: project
 ```
 
-:::warn
+:::caution
 
 This is a beta feature. Not all utility commands support this. We are working on adding support for all commands.
 
