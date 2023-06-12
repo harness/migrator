@@ -52,6 +52,7 @@ var migrationReq = struct {
 	TargetAccount         string `survey:"targetAccount"`
 	TargetAuthToken       string `survey:"targetAuth"`
 	BaseUrl               string `survey:"baseUrl"`
+	TargetGatewayUrl      string `survey:"targetGatewayUrl"`
 	Force                 bool   `survey:"force"`
 }{}
 
@@ -68,7 +69,13 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 			UserGroup:             EntityDefaults{Scope: getOrDefault(migrationReq.UserGroupScope, Account)},
 		},
 	}
-	destination := DestinationDetails{ProjectIdentifier: migrationReq.ProjectIdentifier, OrgIdentifier: migrationReq.OrgIdentifier, AccountIdentifier: migrationReq.TargetAccount, AuthToken: migrationReq.TargetAuthToken}
+	destination := DestinationDetails{
+		ProjectIdentifier: migrationReq.ProjectIdentifier,
+		OrgIdentifier:     migrationReq.OrgIdentifier,
+		AccountIdentifier: migrationReq.TargetAccount,
+		AuthToken:         migrationReq.TargetAuthToken,
+		GatewayUrl:        migrationReq.TargetGatewayUrl,
+	}
 	return RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter, IdentifierCaseFormat: migrationReq.IdentifierCase}
 }
 
@@ -226,6 +233,11 @@ func main() {
 			Name:        "target-api-key",
 			Usage:       "`API_KEY` for the target account to authenticate & authorise the migration.",
 			Destination: &migrationReq.TargetAuthToken,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "target-gateway-url",
+			Usage:       "destination gateway `URL`. For Prod1 & Prod2, use https://app.harness.io/gateway, for Prod3 use https://app3.harness.io/gateway",
+			Destination: &migrationReq.TargetGatewayUrl,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "override",

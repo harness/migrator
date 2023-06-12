@@ -17,6 +17,7 @@ type Filter struct {
 }
 
 type DestinationDetails struct {
+	GatewayUrl        string `json:"gatewayUrl"`
 	AccountIdentifier string `json:"accountIdentifier"`
 	AuthToken         string `json:"authToken"`
 	ProjectIdentifier string `json:"projectIdentifier"`
