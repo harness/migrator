@@ -43,6 +43,7 @@ var migrationReq = struct {
 	DryRun                bool   `survey:"dryRun"`
 	FileExtensions        string `survey:"fileExtensions"`
 	CustomExpressionsFile string `survey:"customExpressionsFile"`
+	OverrideFile          string `survey:"overrideFile"`
 	ExportFolderPath      string `survey:"export"`
 	CsvFile               string `survey:"csv"`
 	Names                 string `survey:"names"`
@@ -58,6 +59,7 @@ var migrationReq = struct {
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	inputs := Inputs{
+		Overrides:   LoadOverridesFromFile(migrationReq.OverrideFile),
 		Expressions: LoadYamlFromFile(migrationReq.CustomExpressionsFile),
 		Defaults: Defaults{
 			Secret:                EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
@@ -240,9 +242,14 @@ func main() {
 			Destination: &migrationReq.TargetGatewayUrl,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:        "override",
+			Name:        "custom-expressions",
 			Usage:       "provide a `FILE` to load custom expressions from",
 			Destination: &migrationReq.CustomExpressionsFile,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "override",
+			Usage:       "provide a `FILE` to load overrides",
+			Destination: &migrationReq.OverrideFile,
 		}),
 	}
 	app := &cli.App{
@@ -621,7 +628,12 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:        "identifiers",
-						Usage:       "`IDENTIFIERS` of the template",
+						Usage:       "`IDENTIFIERS` of the next gen templates",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDS` of the first gen templates",
 						Destination: &migrationReq.Identifiers,
 					},
 					&cli.StringFlag{

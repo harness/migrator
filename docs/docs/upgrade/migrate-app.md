@@ -13,6 +13,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -32,6 +33,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -51,6 +53,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -67,6 +70,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -83,6 +87,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -105,6 +110,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -121,6 +127,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -139,6 +146,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -155,6 +163,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -178,6 +187,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -194,6 +204,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -210,6 +221,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -228,6 +240,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -244,6 +257,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -260,6 +274,7 @@ harness-upgrade --api-key SAT_API_KEY \
   --project PROJECT \
   --org ORG \
   --account ACCOUNT_ID \
+  --app APP_ID \
   --secret-scope SCOPE \
   --connector-scope SCOPE \
   --template-scope SCOPE \
@@ -269,21 +284,56 @@ harness-upgrade --api-key SAT_API_KEY \
 ```
 
 ## Migrating app level templates
-To migrate templates from the app, use the following command `harness-upgrade --app APP_ID templates import`
+To migrate templates from the app, use the following command `harness-upgrade --app APP_ID templates --all import`
 
 ### Migrating all templates
 To migrate all templates on app level, use the following command
 
 ```shell
 harness-upgrade --api-key SAT_API_KEY \ 
---project PROJECT \
---org ORG \
---account ACCOUNT_ID \
---app APP_ID \
---secret-scope SCOPE \
---connector-scope SCOPE \
---template-scope SCOPE \
---env ENV templates import
+  --project PROJECT \
+  --org ORG \
+  --account ACCOUNT_ID \
+  --app APP_ID \
+  --secret-scope SCOPE \
+  --connector-scope SCOPE \
+  --template-scope SCOPE \
+  --env ENV \
+  templates --all import
+```
+
+### Migrating templates based on names
+To migrate specific templates in the app  `harness-upgrade --app APP_ID templates --names name1,name2 import`. Pass comma separated template names.
+
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --project PROJECT \
+  --org ORG \
+  --account ACCOUNT_ID \
+  --app APP_ID \
+  --secret-scope SCOPE \
+  --connector-scope SCOPE \
+  --template-scope SCOPE \
+  --workflow-scope SCOPE \
+  --env ENV \
+  templates --names TEMPLATE_NAMES import
+```
+
+### Migrating templates based on ids
+To migrate specific templates in the app  `harness-upgrade --app APP_ID templates --ids id1,id2 import`. Pass comma separated template ids.
+
+```shell
+harness-upgrade --api-key SAT_API_KEY \
+  --project PROJECT \
+  --org ORG \
+  --account ACCOUNT_ID \
+  --app APP_ID \
+  --secret-scope SCOPE \
+  --connector-scope SCOPE \
+  --template-scope SCOPE \
+  --workflow-scope SCOPE \
+  --env ENV \
+  templates --ids TEMPLATE_IDS import
 ```
 
 :::tip

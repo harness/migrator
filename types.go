@@ -40,8 +40,28 @@ type Defaults struct {
 }
 
 type Inputs struct {
-	Expressions map[string]string `json:"expressions"`
-	Defaults    Defaults          `json:"defaults"`
+	Overrides   map[string]EntityOverrideInput `json:"overrides"`
+	Expressions map[string]string              `json:"expressions"`
+	Defaults    Defaults                       `json:"defaults"`
+}
+
+type EntityOverrideInput struct {
+	Identifier string `json:"identifier"`
+	Name       string `json:"name"`
+	//Scope      string `json:"scope"`
+}
+
+type OverrideFileData struct {
+	Overrides []EntityOverride `json:"overrides"`
+}
+
+type EntityOverride struct {
+	ID           string `json:"id" yaml:"id"`
+	FirstGenName string `json:"firstGenName" yaml:"firstGenName"`
+	Type         string `json:"type" yaml:"type"`
+	Identifier   string `json:"identifier" yaml:"identifier"`
+	Name         string `json:"name" yaml:"name"`
+	//Scope        string `json:"scope"`
 }
 
 type OrgDetails struct {
