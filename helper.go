@@ -281,14 +281,9 @@ func GetEntityIds(entity string, idsString string, namesString string) ([]string
 	if len(names) == 0 {
 		return nil, nil
 	}
-	items, err := listEntities(entity)
+	nameToIdMap, err := GetEntityNameIdMap(entity)
 	if err != nil {
 		return nil, err
-	}
-
-	var nameToIdMap = make(map[string]string)
-	for _, item := range items {
-		nameToIdMap[item.Name] = item.Id
 	}
 
 	var result []string
@@ -300,6 +295,19 @@ func GetEntityIds(entity string, idsString string, namesString string) ([]string
 		result = append(result, itemId)
 	}
 	return result, nil
+}
+
+func GetEntityNameIdMap(entity string) (map[string]string, error) {
+	items, err := listEntities(entity)
+	if err != nil {
+		return nil, err
+	}
+
+	var nameToIdMap = make(map[string]string)
+	for _, item := range items {
+		nameToIdMap[item.Name] = item.Id
+	}
+	return nameToIdMap, err
 }
 
 func MigrateEntities(promptConfirm bool, scopes []string, pluralValue string, entityType EntityType) (err error) {
@@ -356,4 +364,70 @@ func LoadYamlFromFile(filePath string) map[string]string {
 	}
 	log.Infof("Successfully loaded %d custom expressions from the file", len(data))
 	return data
+}
+
+func LoadOverridesFromFile(filePath string) map[string]EntityOverrideInput {
+	filePath = strings.TrimSpace(filePath)
+	if len(filePath) == 0 {
+		return nil
+	}
+	yFile, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var data OverrideFileData
+	err = yaml.Unmarshal(yFile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("Successfully loaded %d overrides from the file", len(data.Overrides))
+
+	if len(data.Overrides) == 0 {
+		log.Fatal("No overrides found in the file")
+	}
+
+	var overrides = make(map[string]EntityOverrideInput)
+	var nameToIdMap = make(map[string]map[string]string)
+	for i, override := range data.Overrides {
+		assertNotBlank(override.Type, fmt.Sprintf("Type cannot be blank in overrides for index - %d", i))
+		assertNotBlank(override.Identifier, fmt.Sprintf("Identifier cannot be blank in overrides for index %d", i))
+		assertNotBlank(override.Name, fmt.Sprintf("Name cannot be blank in overrides for index %d", i))
+		assertAllowedValues(override.Type, []string{Template, Connector, Secret, Service, Environment, Workflow, Pipeline}, fmt.Sprintf("Only a few types of entities support overrides for index %d", i))
+		if len(strings.TrimSpace(override.ID)) > 0 {
+			overrides[fmt.Sprintf("CgEntityId(id=%s, type=%s)", override.ID, override.Type)] = EntityOverrideInput{
+				Name:       override.Name,
+				Identifier: override.Identifier,
+			}
+		} else {
+			assertNotBlank(override.FirstGenName, fmt.Sprintf("Both firstGen name & ID fields cannot be blank in overrides for index %d", i))
+			if len(nameToIdMap[override.Type]) == 0 {
+				nameToIdMap[override.Type], err = GetEntityNameIdMap(strings.ToLower(override.Type + "s"))
+				if err != nil {
+					log.Fatal(fmt.Sprintf("Failed to fetch ids from names for - %s", override.Type), err)
+				}
+			}
+			id, ok := nameToIdMap[override.Type][override.FirstGenName]
+			if !ok {
+				log.Fatal(fmt.Sprintf("Failed to fetch id for name %s of type - %s", override.FirstGenName, override.Type))
+			}
+			overrides[fmt.Sprintf("CgEntityId(id=%s, type=%s)", id, override.Type)] = EntityOverrideInput{
+				Name:       override.Name,
+				Identifier: override.Identifier,
+			}
+		}
+	}
+
+	return overrides
+}
+
+func assertNotBlank(value string, message string) {
+	if len(strings.TrimSpace(value)) == 0 {
+		log.Fatal(message)
+	}
+}
+
+func assertAllowedValues(value string, allowed []string, message string) {
+	if !slices.Contains(allowed, value) {
+		log.Fatal(message)
+	}
 }
