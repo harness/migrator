@@ -4,11 +4,10 @@ sidebar_position: 1
 
 # Override Names and Identifiers
 
-When Harness upgrades entities from FirstGen to NextGen we try to keep the name same as that of First Gen(sometime we strip-out character such as `(,),{,},[,]` etc.) and for identifiers we convert the name to camel case(Hello World -> helloWorld).
-This works out best for most cases. In few cases there may be a need to control the identifier generation logic to a different format(e.g all lower case) and in such cases we provide `--identifier-format` flag to override the default logic.
+During the upgrade process from FirstGen to NextGen in Harness, we usually keep the names of entities the same as in FirstGen (sometimes removing certain characters such as `(`,`)`,`{`,`}`,`[`,`]`). For identifiers, we convert the names to camel case (e.g., `Hello World` -> `helloWorld`).
+This approach generally works well, but in some cases, there may be a need to customize the identifier generation logic to a different format, such as using all lowercase letters. In such situations, you can use the `--identifier-format` flag to override the default logic.
 
-There may be times when we want a much more granular control over the generation of name & identifier. For example in first gen a connector may be named as `Harness Docker Registry` and in next gen we want to name it as `Docker Registry` and the identifier should be `docker_registry`. 
-If you would like to achieve this then we can leverage the `--override` flag. This flag takes a file as an input and the contents of the file look as following - 
+However, there are scenarios where more granular control over the generation of names and identifiers is required. For example, in FirstGen, a connector may be named `Harness Docker Registry`, but in NextGen, we want to name it `Docker Registry` with the identifier `docker_registry`. To achieve this level of customization, we can utilize the `--override` flag. This flag takes a file as input, and the file's contents should follow this structure:
 
 ```yaml
 overrides:
@@ -18,23 +17,23 @@ overrides:
     firstGenName: Release_Fetch_Info   # Name of entity in FirstGen
   - name: HarnessDockerRegistry
     identifier: Harness_Registry
-    type: CONNECTOR                    
+    type: CONNECTOR
     id: pwrySmUISimoRrJL6Nsvbw         # ID of the entity in FirstGen
- ```
+```
 
-The type allows the following values - `SECRET`, `CONNECTOR`, `SERVICE`, `ENVIRONMENT`, `WORKFLOW`, `PIPELINE`, `TEMPLATE`.
+The type field allows the following values: `SECRET`, `CONNECTOR`, `SERVICE`, `ENVIRONMENT`, `WORKFLOW`, `PIPELINE`, `TEMPLATE`.
 
-Here is an example on how to use it with the upgrade tool - 
+Here's an example of how to use the override flag with the upgrade tool:
 
 ```shell
-# Import app from FirstGen to NextGen
+# Importing app from FirstGen to NextGen
 harness-upgrade --load file.yaml --override overrides.yaml app --all
 ```
 
-You can use the flag with any command that are importing entities such as services, workflows, pipelines, environments, connectors, templates, secrets, triggers etc.
+You can use the `--override` flag with any command that imports entities, such as services, workflows, pipelines, environments, connectors, templates, secrets, triggers, etc.
 
 :::caution
 
-It is important that the flag is used with all commands that are importing entities. If is not used then we revert to using the default logic for name and identifier generation. This may be lead to duplicate and inconsistent entities in NextGen.
+It's important to use the `--override` flag with all entity import commands. If it's not used, the default logic for name and identifier generation will be applied, potentially resulting in duplicate and inconsistent entities in NextGen.
 
 :::
