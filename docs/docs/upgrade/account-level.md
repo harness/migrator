@@ -26,7 +26,7 @@ harness-upgrade --api-key SAT_API_KEY \
 --secret-scope SCOPE \
 --connector-scope SCOPE \
 --template-scope SCOPE \
---env ENV secrets
+--env ENV secrets --all
 ```
 
 ### Migrating specific secrets by names
