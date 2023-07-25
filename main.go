@@ -182,6 +182,7 @@ func main() {
 			Name:        "user-group-scope",
 			Usage:       "`SCOPE` to create user groups in. Possible values - account, org, project",
 			Destination: &migrationReq.UserGroupScope,
+			DefaultText: Account,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "org",
@@ -284,6 +285,23 @@ func main() {
 			{
 				Name:  "user-groups",
 				Usage: "Import user groups from First Gen to Next Gen",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all user groups need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the user groups",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the user groups",
+						Destination: &migrationReq.Names,
+					},
+				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateUserGroups, context)
 				},
