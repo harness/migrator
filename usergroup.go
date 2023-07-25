@@ -5,11 +5,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func migrateUserGroups(*cli.Context) error {
-	_ = PromptEnvDetails()
-	logMigrationDetails()
+func migrateUserGroups(*cli.Context) (err error) {
+	promptConfirm := PromptEnvDetails()
 	log.Info("Importing the user groups....")
-	CreateEntities(getReqBody(UserGroups, Filter{}))
-	log.Info("Imported the user groups.")
-	return nil
+	return MigrateEntities(promptConfirm, []string{migrationReq.UserGroupScope}, "usergroups", UserGroups)
 }

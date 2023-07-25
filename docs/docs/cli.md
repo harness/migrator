@@ -23,12 +23,16 @@ harness-upgrade [global options] command [command options] [arguments...]
 | account             | Import secrets managers, secrets, connectors. This will not migrate services, environments, triggers, pipelines etc                        |  
 | app                 | Import an app into an existing project by providing the `appId`                                                                            |  
 | service, services   | Import services into an existing project from an application                                                                               |  
+| secrets             | Import secrets                                                                                                                             |  
+| environments        | Import environments into an existing project from an application                                                                           |  
+| connectors          | Import connectors                                                                                                                          |
 | workflows           | Import workflows as stage or pipeline templates by providing the `appId` & `workflowIds`                                                   |  
 | pipelines           | Import pipelines into an existing project by providing the `appId` & `pipelineIds`                                                         |  
 | triggers            | Import triggers by providing the `appId` & `triggerIds`                                                                                    |  
 | expressions         | looks for harness CG expressions in current directory & sub directories from current folder & replaces them with equivalent NG expressions |  
 | project             | Project specific commands like create, delete, list etc.                                                                                   |  
 | org                 | Org specific commands.                                                                                                                     |  
+| templates           | Template specific commands.                                                                                                                |
 | help, h             | Shows a list of commands or help for one command                                                                                           |  
 
 
@@ -44,10 +48,13 @@ harness-upgrade [global options] command [command options] [arguments...]
 | --connector-scope `SCOPE`    | `SCOPE` to create connectors in. Possible values - `account`, `org`, `project`                                                  |  
 | --workflow-scope `SCOPE`     | `SCOPE` to create stage templates in. Possible values - `account`, `org`, `project`                                             |  
 | --template-scope `SCOPE`     | `SCOPE` to create templates in. Possible values - `account`, `org`, `project`                                                   |  
+| --user-group-scope `SCOPE`   | `SCOPE` to create user groups in. Possible values - `account`, `org`, `project`                                                 |
 | --org `IDENTIFIER`           | organisation `IDENTIFIER` in next gen                                                                                           |  
 | --project `IDENTIFIER`       | project `IDENTIFIER` in next gen                                                                                                |  
 | --app `APP_ID`               | `APP_ID` in current gen                                                                                                         |  
 | --identifier-format `FORMAT` | `FORMAT` to use for generation of identifiers. Supported values as `CAMEL_CASE` & `LOWER_CASE` (default: `CAMEL_CASE`)          |  
+| --custom-expressions `FILE`  | provide a `FILE` to load custom expressions from                                                                                |  
+| --override `FILE`            | provide a `FILE` to load overrides                                                                                              |
 | --target-account `ACCOUNT`   | destination `ACCOUNT` that you wish to migrate to                                                                               |  
 | --target-api-key `API_KEY`   | `API_KEY` for the target account to authenticate & authorise the migration.                                                     |
 | --target-gateway-url `URL`   | destination gateway `URL`. For Prod1 & Prod2, use https://app.harness.io/gateway, for Prod3 use https://app3.harness.io/gateway |
