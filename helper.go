@@ -380,10 +380,10 @@ func LoadOverridesFromFile(filePath string) map[string]EntityOverrideInput {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Infof("Successfully loaded %d overrides from the file", len(data.Overrides))
+	log.Infof("Successfully loaded %d overrides & %d settings from the file", len(data.Overrides), len(data.Settings))
 
 	if len(data.Overrides) == 0 {
-		log.Fatal("No overrides found in the file")
+		return nil
 	}
 
 	var overrides = make(map[string]EntityOverrideInput)
@@ -392,7 +392,7 @@ func LoadOverridesFromFile(filePath string) map[string]EntityOverrideInput {
 		assertNotBlank(override.Type, fmt.Sprintf("Type cannot be blank in overrides for index - %d", i))
 		assertNotBlank(override.Identifier, fmt.Sprintf("Identifier cannot be blank in overrides for index %d", i))
 		assertNotBlank(override.Name, fmt.Sprintf("Name cannot be blank in overrides for index %d", i))
-		assertAllowedValues(override.Type, []string{Template, Connector, Secret, Service, Environment, Workflow, Pipeline}, fmt.Sprintf("Only a few types of entities support overrides for index %d", i))
+		assertAllowedValues(override.Type, []string{UserGroups, Template, Connector, Secret, Service, Environment, Workflow, Pipeline}, fmt.Sprintf("Only a few types of entities support overrides for index %d", i))
 		if len(strings.TrimSpace(override.ID)) > 0 {
 			overrides[fmt.Sprintf("CgEntityId(id=%s, type=%s)", override.ID, override.Type)] = EntityOverrideInput{
 				Name:       override.Name,
@@ -401,7 +401,7 @@ func LoadOverridesFromFile(filePath string) map[string]EntityOverrideInput {
 		} else {
 			assertNotBlank(override.FirstGenName, fmt.Sprintf("Both firstGen name & ID fields cannot be blank in overrides for index %d", i))
 			if len(nameToIdMap[override.Type]) == 0 {
-				nameToIdMap[override.Type], err = GetEntityNameIdMap(strings.ToLower(override.Type + "s"))
+				nameToIdMap[override.Type], err = GetEntityNameIdMap(GetEndpointFromType(override.Type))
 				if err != nil {
 					log.Fatal(fmt.Sprintf("Failed to fetch ids from names for - %s", override.Type), err)
 				}
@@ -418,6 +418,30 @@ func LoadOverridesFromFile(filePath string) map[string]EntityOverrideInput {
 	}
 
 	return overrides
+}
+
+func GetEndpointFromType(entityType string) string {
+	if entityType == UserGroups {
+		return "usergroups"
+	}
+	return strings.ToLower(entityType + "s")
+}
+
+func LoadSettingsFromFile(filePath string) []Setting {
+	filePath = strings.TrimSpace(filePath)
+	if len(filePath) == 0 {
+		return nil
+	}
+	yFile, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil
+	}
+	var data OverrideFileData
+	err = yaml.Unmarshal(yFile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data.Settings
 }
 
 func assertNotBlank(value string, message string) {

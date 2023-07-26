@@ -96,6 +96,18 @@ const config = {
         // Options here
       },
     ],
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          // /docs/oldDoc -> /docs/newDoc
+          {
+            to: '/migrator/advanced/override-names-identifiers',
+            from: '/migrator/advanced/overrides-and-settings',
+          },
+        ],
+      },
+    ],
   ],
   clientModules: [
     require.resolve('./global.js'),

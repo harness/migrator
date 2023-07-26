@@ -39,10 +39,16 @@ type Defaults struct {
 	UserGroup             EntityDefaults `json:"USER_GROUP"`
 }
 
+type Setting struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
 type Inputs struct {
 	Overrides   map[string]EntityOverrideInput `json:"overrides"`
 	Expressions map[string]string              `json:"expressions"`
 	Defaults    Defaults                       `json:"defaults"`
+	Settings    []Setting                      `json:"settings"`
 }
 
 type EntityOverrideInput struct {
@@ -53,6 +59,7 @@ type EntityOverrideInput struct {
 
 type OverrideFileData struct {
 	Overrides []EntityOverride `json:"overrides"`
+	Settings  []Setting        `json:"settings"`
 }
 
 type EntityOverride struct {
