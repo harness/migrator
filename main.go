@@ -61,6 +61,7 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	inputs := Inputs{
 		Overrides:   LoadOverridesFromFile(migrationReq.OverrideFile),
 		Expressions: LoadYamlFromFile(migrationReq.CustomExpressionsFile),
+		Settings:    LoadSettingsFromFile(migrationReq.OverrideFile),
 		Defaults: Defaults{
 			Secret:                EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
 			SecretManager:         EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
