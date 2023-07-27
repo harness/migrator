@@ -102,8 +102,8 @@ const config = {
         redirects: [
           // /docs/oldDoc -> /docs/newDoc
           {
-            to: '/migrator/advanced/override-names-identifiers',
-            from: '/migrator/advanced/overrides-and-settings',
+            from: ['/advanced/override-names-identifiers'],
+            to: '/advanced/overrides-and-settings',
           },
         ],
       },
