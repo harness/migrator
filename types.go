@@ -52,9 +52,9 @@ type Inputs struct {
 }
 
 type EntityOverrideInput struct {
-	Identifier string `json:"identifier"`
-	Name       string `json:"name"`
-	//Scope      string `json:"scope"`
+	Identifier *string `json:"identifier"`
+	Name       *string `json:"name"`
+	Scope      *string `json:"scope"`
 }
 
 type OverrideFileData struct {
@@ -63,12 +63,12 @@ type OverrideFileData struct {
 }
 
 type EntityOverride struct {
-	ID           string `json:"id" yaml:"id"`
-	FirstGenName string `json:"firstGenName" yaml:"firstGenName"`
-	Type         string `json:"type" yaml:"type"`
-	Identifier   string `json:"identifier" yaml:"identifier"`
-	Name         string `json:"name" yaml:"name"`
-	//Scope        string `json:"scope"`
+	ID           string  `json:"id" yaml:"id"`
+	FirstGenName string  `json:"firstGenName" yaml:"firstGenName"`
+	Type         string  `json:"type" yaml:"type"`
+	Identifier   *string `json:"identifier" yaml:"identifier"`
+	Name         *string `json:"name" yaml:"name"`
+	Scope        *string `json:"scope" yaml:"scope"`
 }
 
 type OrgDetails struct {
