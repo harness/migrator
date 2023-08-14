@@ -95,8 +95,11 @@ type BulkProjectResult struct {
 }
 
 type BulkCreateBody struct {
-	Org                  string `json:"orgIdentifier"`
-	IdentifierCaseFormat string `json:"identifierCaseFormat"`
+	DestinationAccountIdentifier string `json:"destinationAccountIdentifier"`
+	DestinationGatewayUrl        string `json:"destinationGatewayUrl"`
+	DestinationAuthToken         string `json:"destinationAuthToken"`
+	Org                          string `json:"orgIdentifier"`
+	IdentifierCaseFormat         string `json:"identifierCaseFormat"`
 }
 
 type ProjectBody struct {

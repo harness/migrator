@@ -104,8 +104,11 @@ func bulkCreateProject(*cli.Context) error {
 	log.Info("Creating the projects....")
 
 	resp, err := Post(url, migrationReq.Auth, BulkCreateBody{
-		Org:                  migrationReq.OrgIdentifier,
-		IdentifierCaseFormat: migrationReq.IdentifierCase,
+		DestinationAccountIdentifier: migrationReq.TargetAccount,
+		DestinationAuthToken:         migrationReq.TargetAuthToken,
+		DestinationGatewayUrl:        migrationReq.TargetGatewayUrl,
+		Org:                          migrationReq.OrgIdentifier,
+		IdentifierCaseFormat:         migrationReq.IdentifierCase,
 	})
 
 	if err != nil {
