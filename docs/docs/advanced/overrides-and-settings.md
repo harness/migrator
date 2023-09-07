@@ -13,6 +13,19 @@ However, there are scenarios where more granular control over the generation of 
 
 Another scenario is you need to override the scope case to case basis rather than scoping all entities. For example, by default you wish to migrate all connectors to the project scope, but you want to scope a specific connector to the org scope. In such cases, you can use the `scope` field in the overrides file.  
 
+Supported overrides properties:
+`name`: Name of the entity to be created in NextGen
+`identifier`: Identifier of the entity to be created in NextGen
+`type`: Type of entity to be overrided in FirstGen
+`firstGenName`: Name of entity to be overrided in FirstGen
+`id`: ID of the entity to be overrided in FirstGen
+
+:::tip
+
+To retrieve the entity requiring an override, you don't need to rely solely on the `id` property. Alternatively, you may utilize the `firstGenName` property.
+
+:::
+
 ```yaml
 overrides:
   - name: Fetch Release Information    # Name of the entity in NextGen 
@@ -30,7 +43,7 @@ overrides:
     id: XD2pyPRmT0GW7SKgaSZawS
 ```
 
-The type field allows the following values: `SECRET`, `CONNECTOR`, `SERVICE`, `ENVIRONMENT`, `WORKFLOW`, `PIPELINE`, `TEMPLATE`.
+The type field allows the following values: `SECRET`, `CONNECTOR`, `SERVICE`, `ENVIRONMENT`, `WORKFLOW`, `PIPELINE`, `TEMPLATE`, `USER_GROUP`.
 
 Here's an example of how to use the override flag with the upgrade tool:
 
