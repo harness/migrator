@@ -6,6 +6,12 @@ sidebar_position: 3
 
 Before we move entities from first gen to next gen it is important to get a gist of entities that are present in the app. So ensure to run application summary
 
+:::info
+Harness has introduced an enhanced experience for service, environment, and infrastructure overrides in Continuous Delivery (CD). A new page, named Overrides, is added in Deployments. In Overrides, you can define overrides for services, environments, and infrastructures. More details can be found here - [Overrides V2](https://developer.harness.io/docs/continuous-delivery/x-platform-cd-features/overrides-v2/)
+
+The migrator tool will take care of migrating directly to Override V2. Please ensure following flag in enabled before running migrator commands - In **Account Settings > Account Resources > Continuous Deployment**, set the **Enable Service Override V2** to `true` for the enhanced overrides experience. 
+:::
+
 ## Migrating an application
 To migrate all services, environments, application defaults, referenced secrets, referenced connectors we use the `harness-upgrade app`
 ```shell
