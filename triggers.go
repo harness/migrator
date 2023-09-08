@@ -17,7 +17,7 @@ func migrateTriggers(*cli.Context) error {
 		migrationReq.WorkflowScope = SelectInput("Scope for workflows:", scopes, Project)
 	}
 
-	if len(migrationReq.TriggerIds) == 0 && !migrationReq.All {
+	if len(migrationReq.Names) == 0 && len(migrationReq.TriggerIds) == 0 && !migrationReq.All {
 		allTriggerConfirm := ConfirmInput("No triggers provided. This defaults to migrating all triggers within the application. Do you want to proceed?")
 		if !allTriggerConfirm {
 			promptConfirm = true
@@ -38,9 +38,16 @@ func migrateTriggers(*cli.Context) error {
 
 	// Migrating the triggers
 	var triggerIds []string
-	if len(migrationReq.TriggerIds) > 0 {
-		triggerIds = Split(migrationReq.TriggerIds, ",")
+	if len(migrationReq.TriggerIds) > 0 || len(migrationReq.Names) > 0 {
+		triggerIds, err := GetEntityIds("triggers", migrationReq.TriggerIds, migrationReq.Names)
+		if err != nil {
+			log.Fatal("Failed to get ids of the triggers")
+		}
+		if len(triggerIds) == 0 {
+			log.Fatal("No triggers found with given names/ids")
+		}
 	}
+
 	log.Info("Importing the triggers....")
 	CreateEntities(getReqBody(Trigger, Filter{
 		TriggerIds: triggerIds,

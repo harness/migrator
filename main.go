@@ -505,6 +505,11 @@ func main() {
 						Usage:       "triggers as comma separated values `triggerId1,triggerId2`",
 						Destination: &migrationReq.TriggerIds,
 					}),
+					altsrc.NewStringFlag(&cli.StringFlag{
+						Name:        "names",
+						Usage:       "First Gen `NAMES` of the triggers",
+						Destination: &migrationReq.Names,
+					}),
 				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateTriggers, context)
