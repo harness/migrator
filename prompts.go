@@ -31,6 +31,25 @@ func PromptDefaultInputs() bool {
 	return promptConfirm
 }
 
+func PromptSecretDetails() (promptConfirm bool) {
+	promptConfirm = PromptEnvDetails()
+	if len(migrationReq.SecretScope) == 0 {
+		promptConfirm = true
+		migrationReq.SecretScope = SelectInput("Scope for secrets & secret managers:", scopes, Project)
+	}
+	return
+}
+
+func PromptConnectorDetails() (promptConfirm bool) {
+	promptConfirm = PromptEnvDetails()
+	promptConfirm = PromptSecretDetails()
+	if len(migrationReq.ConnectorScope) == 0 {
+		promptConfirm = true
+		migrationReq.ConnectorScope = SelectInput("Scope for connectors:", scopes, Project)
+	}
+	return
+}
+
 func PromptEnvDetails() bool {
 	promptConfirm := false
 

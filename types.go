@@ -2,16 +2,24 @@ package main
 
 type EntityType string
 type ImportType string
+type TemplateScope string
 
 type Filter struct {
-	Type        ImportType `json:"importType"`
-	AppId       string     `json:"appId"`
-	TriggerIds  []string   `json:"triggerIds"`
-	WorkflowIds []string   `json:"workflowIds"`
-	PipelineIds []string   `json:"pipelineIds"`
+	Type           ImportType    `json:"importType"`
+	AppId          string        `json:"appId"`
+	TriggerIds     []string      `json:"triggerIds"`
+	WorkflowIds    []string      `json:"workflowIds"`
+	PipelineIds    []string      `json:"pipelineIds"`
+	Ids            []string      `json:"ids"`
+	ServiceIds     []string      `json:"serviceIds"`
+	EnvironmentIds []string      `json:"environmentIds"`
+	Scope          TemplateScope `json:"scope"`
 }
 
 type DestinationDetails struct {
+	GatewayUrl        string `json:"gatewayUrl"`
+	AccountIdentifier string `json:"accountIdentifier"`
+	AuthToken         string `json:"authToken"`
 	ProjectIdentifier string `json:"projectIdentifier"`
 	OrgIdentifier     string `json:"orgIdentifier"`
 }
@@ -28,10 +36,39 @@ type Defaults struct {
 	Connector             EntityDefaults `json:"CONNECTOR"`
 	Workflow              EntityDefaults `json:"WORKFLOW"`
 	Template              EntityDefaults `json:"TEMPLATE"`
+	UserGroup             EntityDefaults `json:"USER_GROUP"`
+}
+
+type Setting struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
 
 type Inputs struct {
-	Defaults Defaults `json:"defaults"`
+	Overrides   map[string]EntityOverrideInput `json:"overrides"`
+	Expressions map[string]string              `json:"expressions"`
+	Defaults    Defaults                       `json:"defaults"`
+	Settings    []Setting                      `json:"settings"`
+}
+
+type EntityOverrideInput struct {
+	Identifier *string `json:"identifier"`
+	Name       *string `json:"name"`
+	Scope      *string `json:"scope"`
+}
+
+type OverrideFileData struct {
+	Overrides []EntityOverride `json:"overrides"`
+	Settings  []Setting        `json:"settings"`
+}
+
+type EntityOverride struct {
+	ID           string  `json:"id" yaml:"id"`
+	FirstGenName string  `json:"firstGenName" yaml:"firstGenName"`
+	Type         string  `json:"type" yaml:"type"`
+	Identifier   *string `json:"identifier" yaml:"identifier"`
+	Name         *string `json:"name" yaml:"name"`
+	Scope        *string `json:"scope" yaml:"scope"`
 }
 
 type OrgDetails struct {
@@ -58,8 +95,11 @@ type BulkProjectResult struct {
 }
 
 type BulkCreateBody struct {
-	Org                  string `json:"orgIdentifier"`
-	IdentifierCaseFormat string `json:"identifierCaseFormat"`
+	DestinationAccountIdentifier string `json:"destinationAccountIdentifier"`
+	DestinationGatewayUrl        string `json:"destinationGatewayUrl"`
+	DestinationAuthToken         string `json:"destinationAuthToken"`
+	Org                          string `json:"orgIdentifier"`
+	IdentifierCaseFormat         string `json:"identifierCaseFormat"`
 }
 
 type ProjectBody struct {
@@ -80,6 +120,36 @@ type OrgResponse struct {
 
 type OrgBody struct {
 	Org OrgDetails `json:"organization"`
+}
+
+type TemplateListBody struct {
+	Templates []TemplateDetails `json:"content"`
+}
+
+type TemplateDetails struct {
+	Identifier   string `json:"identifier"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	VersionLabel string `json:"versionLabel"`
+}
+
+type PipelineListBody struct {
+	Pipelines []PipelineDetails `json:"content"`
+}
+
+type PipelineDetails struct {
+	Identifier  string `json:"identifier"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type FilterRequestBody struct {
+	FilterType          string   `json:"filterType"`
+	TemplateIdentifiers []string `json:"templateIdentifiers"`
+}
+
+type TemplateDeleteBody struct {
+	TemplateVersionLabels []string `json:"templateVersionLabels"`
 }
 
 type RequestBody struct {

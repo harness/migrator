@@ -23,6 +23,7 @@ var migrationReq = struct {
 	WorkflowScope         string `survey:"workflowScope"`
 	PipelineScope         string `survey:"pipelineScope"`
 	TemplateScope         string `survey:"templateScope"`
+	UserGroupScope        string `survey:"userGroupScope"`
 	OrgIdentifier         string `survey:"org"`
 	ProjectIdentifier     string `survey:"project"`
 	AppId                 string `survey:"appId"`
@@ -32,7 +33,7 @@ var migrationReq = struct {
 	TriggerIds            string `survey:"triggerIds"`
 	File                  string `survey:"load"`
 	IdentifierCase        string `survey:"identifierCase"`
-	Debug                 bool   `survey:"debug"`
+	LogLevel              string `survey:"logLevel"`
 	Json                  bool   `survey:"json"`
 	AllowInsecureReq      bool   `survey:"insecure"`
 	ProjectName           string `survey:"projectName"`
@@ -42,16 +43,25 @@ var migrationReq = struct {
 	DryRun                bool   `survey:"dryRun"`
 	FileExtensions        string `survey:"fileExtensions"`
 	CustomExpressionsFile string `survey:"customExpressionsFile"`
+	OverrideFile          string `survey:"overrideFile"`
 	ExportFolderPath      string `survey:"export"`
 	CsvFile               string `survey:"csv"`
 	Names                 string `survey:"names"`
 	Identifiers           string `survey:"identifiers"`
 	All                   bool   `survey:"all"`
 	AsPipelines           bool   `survey:"asPipelines"`
+	TargetAccount         string `survey:"targetAccount"`
+	TargetAuthToken       string `survey:"targetAuth"`
+	BaseUrl               string `survey:"baseUrl"`
+	TargetGatewayUrl      string `survey:"targetGatewayUrl"`
+	Force                 bool   `survey:"force"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	inputs := Inputs{
+		Overrides:   LoadOverridesFromFile(migrationReq.OverrideFile),
+		Expressions: LoadYamlFromFile(migrationReq.CustomExpressionsFile),
+		Settings:    LoadSettingsFromFile(migrationReq.OverrideFile),
 		Defaults: Defaults{
 			Secret:                EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
 			SecretManager:         EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
@@ -59,9 +69,16 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 			Connector:             EntityDefaults{Scope: getOrDefault(migrationReq.ConnectorScope, Project)},
 			Template:              EntityDefaults{Scope: getOrDefault(migrationReq.TemplateScope, Project)},
 			Workflow:              EntityDefaults{Scope: getOrDefault(migrationReq.WorkflowScope, Project), WorkflowAsPipeline: migrationReq.AsPipelines},
+			UserGroup:             EntityDefaults{Scope: getOrDefault(migrationReq.UserGroupScope, Account)},
 		},
 	}
-	destination := DestinationDetails{ProjectIdentifier: migrationReq.ProjectIdentifier, OrgIdentifier: migrationReq.OrgIdentifier}
+	destination := DestinationDetails{
+		ProjectIdentifier: migrationReq.ProjectIdentifier,
+		OrgIdentifier:     migrationReq.OrgIdentifier,
+		AccountIdentifier: migrationReq.TargetAccount,
+		AuthToken:         migrationReq.TargetAuthToken,
+		GatewayUrl:        migrationReq.TargetGatewayUrl,
+	}
 	return RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter, IdentifierCaseFormat: migrationReq.IdentifierCase}
 }
 
@@ -78,9 +95,14 @@ func logMigrationDetails() {
 }
 
 func cliWrapper(fn cliFnWrapper, ctx *cli.Context) error {
-	if migrationReq.Debug {
-		log.SetLevel(log.DebugLevel)
+	if len(migrationReq.LogLevel) > 0 {
+		level, err := log.ParseLevel(migrationReq.LogLevel)
+		if err != nil {
+			log.Fatal("Invalid log level")
+		}
+		log.SetLevel(level)
 	}
+
 	if migrationReq.Json {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
@@ -110,6 +132,11 @@ func main() {
 			Name:        "env",
 			Usage:       "possible values - Prod, QA, Dev",
 			Destination: &migrationReq.Environment,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "base-url",
+			Usage:       "provide the `BASE_URL` for self managed platforms",
+			Destination: &migrationReq.BaseUrl,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "destination-project",
@@ -153,6 +180,12 @@ func main() {
 			Destination: &migrationReq.TemplateScope,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "user-group-scope",
+			Usage:       "`SCOPE` to create user groups in. Possible values - account, org, project",
+			Destination: &migrationReq.UserGroupScope,
+			DefaultText: Account,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "org",
 			Usage:       "organisation `IDENTIFIER` in next gen",
 			Destination: &migrationReq.OrgIdentifier,
@@ -177,10 +210,11 @@ func main() {
 			Usage:       "allow insecure API requests. This is automatically set to true if environment is Dev",
 			Destination: &migrationReq.AllowInsecureReq,
 		}),
-		altsrc.NewBoolFlag(&cli.BoolFlag{
-			Name:        "debug",
-			Usage:       "print debug level logs",
-			Destination: &migrationReq.Debug,
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "log-level",
+			Usage:       "set the log level. Possible values - trace, debug, info, warn, error, fatal, panic. Default is `info`",
+			Destination: &migrationReq.LogLevel,
+			DefaultText: "info",
 		}),
 		altsrc.NewBoolFlag(&cli.BoolFlag{
 			Name:        "json",
@@ -193,6 +227,31 @@ func main() {
 			Destination: &migrationReq.IdentifierCase,
 			Value:       "CAMEL_CASE",
 			DefaultText: "CAMEL_CASE",
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "target-account",
+			Usage:       "destination `ACCOUNT` that you wish to migrate to",
+			Destination: &migrationReq.TargetAccount,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "target-api-key",
+			Usage:       "`API_KEY` for the target account to authenticate & authorise the migration.",
+			Destination: &migrationReq.TargetAuthToken,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "target-gateway-url",
+			Usage:       "destination gateway `URL`. For Prod1 & Prod2, use https://app.harness.io/gateway, for Prod3 use https://app3.harness.io/gateway",
+			Destination: &migrationReq.TargetGatewayUrl,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "custom-expressions",
+			Usage:       "provide a `FILE` to load custom expressions from",
+			Destination: &migrationReq.CustomExpressionsFile,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "override",
+			Usage:       "provide a `FILE` to load overrides",
+			Destination: &migrationReq.OverrideFile,
 		}),
 	}
 	app := &cli.App{
@@ -227,6 +286,23 @@ func main() {
 			{
 				Name:  "user-groups",
 				Usage: "Import user groups from First Gen to Next Gen",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all user groups need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the user groups",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the user groups",
+						Destination: &migrationReq.Names,
+					},
+				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateUserGroups, context)
 				},
@@ -253,10 +329,100 @@ func main() {
 				},
 			},
 			{
-				Name:  "service",
-				Usage: "Import services into an existing project from an application",
+				Name:    "service",
+				Aliases: []string{"services"},
+				Usage:   "Import services into an existing project from an application",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all services in the app need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the services",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the services",
+						Destination: &migrationReq.Names,
+					},
+				},
 				Action: func(context *cli.Context) error {
 					return cliWrapper(migrateServices, context)
+				},
+			},
+			{
+				Name:  "secrets",
+				Usage: "Import secrets",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all secrets in the account need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the secrets",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the secrets",
+						Destination: &migrationReq.Names,
+					},
+				},
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateSecrets, context)
+				},
+			},
+			{
+				Name:  "environments",
+				Usage: "Import environments into an existing project from an application",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all environments in the app need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the environments",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the environments",
+						Destination: &migrationReq.Names,
+					},
+				},
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateEnvironments, context)
+				},
+			},
+			{
+				Name:  "connectors",
+				Usage: "Import connectors",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if all connectors in the account need to be migrated",
+						Destination: &migrationReq.All,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDs` of the connectors",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the connectors",
+						Destination: &migrationReq.Names,
+					},
+				},
+				Action: func(context *cli.Context) error {
+					return cliWrapper(migrateConnectors, context)
 				},
 			},
 			{
@@ -289,17 +455,40 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:        "all",
-						Usage:       "if all pipelines in the app need to be migrated",
+						Usage:       "all pipelines",
 						Destination: &migrationReq.All,
 					},
 					altsrc.NewStringFlag(&cli.StringFlag{
 						Name:        "pipelines",
-						Usage:       "pipelines as comma separated values `pipeline1,pipeline2`",
+						Usage:       "first gen pipeline ids as comma separated values `pipeline1,pipeline2`",
 						Destination: &migrationReq.PipelineIds,
 					}),
+					&cli.StringFlag{
+						Name:        "identifiers",
+						Usage:       "`IDENTIFIERS` of the next gen pipelines",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the next gen pipeline",
+						Destination: &migrationReq.Names,
+					},
 				},
-				Action: func(context *cli.Context) error {
-					return cliWrapper(migratePipelines, context)
+				Subcommands: []*cli.Command{
+					{
+						Name:  "rm",
+						Usage: "Remove nextgen pipelines",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(BulkRemovePipelines, context)
+						},
+					},
+					{
+						Name:  "import",
+						Usage: "import first gen pipelines to next gen",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(migratePipelines, context)
+						},
+					},
 				},
 			},
 			{
@@ -315,6 +504,11 @@ func main() {
 						Name:        "triggers",
 						Usage:       "triggers as comma separated values `triggerId1,triggerId2`",
 						Destination: &migrationReq.TriggerIds,
+					}),
+					altsrc.NewStringFlag(&cli.StringFlag{
+						Name:        "names",
+						Usage:       "First Gen `NAMES` of the triggers",
+						Destination: &migrationReq.Names,
 					}),
 				},
 				Action: func(context *cli.Context) error {
@@ -336,11 +530,6 @@ func main() {
 						Value:       "json,yaml,yml",
 						DefaultText: "json,yaml,yml",
 						Destination: &migrationReq.FileExtensions,
-					},
-					&cli.StringFlag{
-						Name:        "override",
-						Usage:       "provide a `FILE` to load custom expressions from",
-						Destination: &migrationReq.CustomExpressionsFile,
 					},
 				},
 				Action: func(context *cli.Context) error {
@@ -453,6 +642,53 @@ func main() {
 						Usage: "Remove org",
 						Action: func(context *cli.Context) error {
 							return cliWrapper(bulkRemoveOrg, context)
+						},
+					},
+				},
+			},
+			{
+				Name:  "templates",
+				Usage: "Template specific commands.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "identifiers",
+						Usage:       "`IDENTIFIERS` of the next gen templates",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "ids",
+						Usage:       "`IDS` of the first gen templates",
+						Destination: &migrationReq.Identifiers,
+					},
+					&cli.StringFlag{
+						Name:        "names",
+						Usage:       "`NAMES` of the template",
+						Destination: &migrationReq.Names,
+					},
+					&cli.BoolFlag{
+						Name:        "force",
+						Usage:       "to force delete template",
+						Destination: &migrationReq.Force,
+					},
+					&cli.BoolFlag{
+						Name:        "all",
+						Usage:       "if set will delete all templates",
+						Destination: &migrationReq.All,
+					},
+				},
+				Subcommands: []*cli.Command{
+					{
+						Name:  "rm",
+						Usage: "Remove templates",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(BulkRemoveTemplates, context)
+						},
+					},
+					{
+						Name:  "import",
+						Usage: "import templates. pass the --app flag if you want to migrate app level templates else do not pass",
+						Action: func(context *cli.Context) error {
+							return cliWrapper(MigrateTemplates, context)
 						},
 					},
 				},

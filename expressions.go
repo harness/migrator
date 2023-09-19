@@ -5,7 +5,6 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -16,39 +15,64 @@ const ExpressionPattern = "\\$\\{[\\w-.\"()]+}"
 const SecretExpressionPattern = "\\$\\{secrets.getValue\\([^{}]+\\)}"
 
 var ExpressionsMap = map[string]string{
+	"deploymentTriggeredBy": "<+pipeline.triggeredBy.name>",
+	"currentStep.name":      "<+step.name>",
+	"deploymentUrl":         "<+pipeline.execution.url>",
+
+	// Infra Expressions
 	"infra.kubernetes.namespace": "<+infra.namespace>",
 	"infra.kubernetes.infraId":   "<+INFRA_KEY>",
 	"infra.helm.releaseName":     "<+infra.releaseName>",
 	"infra.name":                 "<+infra.name>",
+	"infra.cloudProvider.name":   "<+infra.connectorRef>",
 
 	// Env Expressions
 	"env.name":            "<+env.name>",
 	"env.description":     "<+env.description>",
 	"env.environmentType": "<+env.type>",
 	"env.uuid":            "<+env.identifier>",
+	"env.accountId":       "<+account.identifier>",
 
 	// Service Expressions
-	"service.name":        "<+service.name>",
-	"service.Name":        "<+service.name>",
-	"Service.name":        "<+service.name>",
-	"service.tag":         "<+service.tags>",
-	"service.uuid":        "<+service.identifier>",
-	"service.description": "<+service.description>",
+	"service.name":              "<+service.name>",
+	"service.Name":              "<+service.name>",
+	"Service.name":              "<+service.name>",
+	"service.tag":               "<+service.tags>",
+	"service.uuid":              "<+service.identifier>",
+	"service.description":       "<+service.description>",
+	"service.accountId":         "<+account.identifier>",
+	"service.manifest":          "<+manifest.name>",
+	"service.manifest.repoRoot": "<+manifest.repoName>",
 
 	// Artifact Expressions
-	"artifact.metadata.image":          "<+artifact.image>",
-	"artifact.metadata.tag":            "<+artifact.tag>",
-	"artifact.source.dockerconfig":     "<+artifact.imagePullSecret>",
-	"artifact.metadata.fileName":       "<+artifact.fileName>",
-	"artifact.metadata.format":         "<+artifact.repositoryFormat>",
-	"artifact.metadata.getSHA()":       "<+artifact.metadata.SHA>",
-	"artifact.metadata.groupId":        "<+artifact.groupId>",
-	"artifact.metadata.package":        "<+artifact.metadata.package>",
-	"artifact.metadata.region":         "<+artifact.metadata.region>",
-	"artifact.metadata.repository":     "<+artifact.repository>",
-	"artifact.metadata.repositoryName": "<+artifact.repositoryName>",
-	"artifact.metadata.url":            "<+artifact.url>",
-	"artifact.buildNo":                 "<+artifact.tag>",
+	"artifact.metadata.image":            "<+artifact.image>",
+	"artifact.metadata.tag":              "<+artifact.tag>",
+	"artifact.source.dockerconfig":       "<+artifact.imagePullSecret>",
+	"artifact.metadata.fileName":         "<+artifact.fileName>",
+	"artifact.metadata.format":           "<+artifact.repositoryFormat>",
+	"artifact.metadata.getSHA()":         "<+artifact.metadata.SHA>",
+	"artifact.metadata.groupId":          "<+artifact.groupId>",
+	"artifact.metadata.package":          "<+artifact.metadata.package>",
+	"artifact.metadata.region":           "<+artifact.metadata.region>",
+	"artifact.metadata.repository":       "<+artifact.repository>",
+	"artifact.metadata.repositoryName":   "<+artifact.repositoryName>",
+	"artifact.metadata.url":              "<+artifact.url>",
+	"artifact.metadata.URL":              "<+artifact.url>",
+	"artifact.buildNo":                   "<+artifact.tag>",
+	"artifact.metadata.artifactFileName": "<+artifact.metadata.fileName>",
+	"artifact.buildFullDisplayName":      "<+artifact.uiDisplayName>",
+	"artifact.displayName":               "<+artifact.displayName>",
+	"artifact.metadata.artifactId":       "<+artifact.metadata.artifactId>",
+	"artifact.metadata.version":          "<+artifact.metadata.version>",
+	"artifact.revision":                  "<+artifact.tag>",
+	"artifact.source.registryUrl":        "<+artifact.registryUrl>",
+	"artifact.URL":                       "<+artifact.url>",
+	"artifact.url":                       "<+artifact.url>",
+	"artifact.artifactPath":              "<+artifact.artifactPath>",
+	"artifact.fileName":                  "<+artifact.metadata.fileName>",
+	"artifact.key":                       "<+artifact.metadata.key>",
+	"artifact.bucketName":                "<+artifact.metadata.bucketName>",
+	"artifact.source.repositoryName":     "<+artifact.imagePath>",
 
 	// Rollback Artifact Expressions
 	"rollbackArtifact.metadata.image":          "<+rollbackArtifact.image>",
@@ -64,16 +88,44 @@ var ExpressionsMap = map[string]string{
 	"rollbackArtifact.metadata.repositoryName": "<+rollbackArtifact.repositoryName>",
 	"rollbackArtifact.metadata.url":            "<+rollbackArtifact.url>",
 	"rollbackArtifact.buildNo":                 "<+rollbackArtifact.tag>",
+	"rollbackArtifact.source.repositoryName":   "<+rollbackArtifact.imagePath>",
 
 	// Application Expressions
-	"app.name":        "<+project.name>",
-	"app.description": "<+project.description>",
+	"app.name":                        "<+project.name>",
+	"app.description":                 "<+project.description>",
+	"app.accountId":                   "<+account.identifier>",
+	"pipeline.name":                   "<+pipeline.name>",
+	"workflow.name":                   "<+stage.name>",
+	"workflow.description":            "<+stage.description>",
+	"workflow.releaseNo":              "<+pipeline.sequenceId>",
+	"workflow.pipelineResumeUuid":     "<+pipeline.executionId>",
+	"workflow.pipelineDeploymentUuid": "<+pipeline.executionId>",
+	"workflow.startTs":                "<+pipeline.startTs>",
 
 	// Http Step
 	"httpResponseCode": "<+httpResponseCode>",
 	"httpResponseBody": "<+httpResponseBody>",
 	"httpMethod":       "<+httpMethod>",
 	"httpUrl":          "<+httpUrl>",
+
+	// PCF
+	"pcf.finalRoutes":               "<+pcf.finalRoutes>",
+	"pcf.oldAppRoutes":              "<+pcf.oldAppRoutes>",
+	"pcf.tempRoutes":                "<+pcf.tempRoutes>",
+	"pcf.newAppRoutes":              "<+pcf.newAppRoutes>",
+	"pcf.newAppRoutes[0]":           "<+pcf.newAppRoutes[0]>",
+	"pcf.newAppName":                "<+pcf.newAppName>",
+	"pcf.newAppGuid":                "<+pcf.newAppGuid>",
+	"pcf.oldAppName":                "<+pcf.oldAppName>",
+	"pcf.activeAppName":             "<+pcf.activeAppName>",
+	"pcf.inActiveAppName":           "<+pcf.inActiveAppName>",
+	"pcf.oldAppGuid":                "<+pcf.oldAppGuid>",
+	"pcf.oldAppRoutes[0]":           "<+pcf.oldAppRoutes[0]>",
+	"infra.pcf.cloudProvider.name":  "<+infra.connector.name>",
+	"infra.pcf.organization":        "<+infra.organization>",
+	"infra.pcf.space":               "<+infra.space>",
+	"host.pcfElement.applicationId": "<+pcf.newAppGuid>",
+	"host.pcfElement.displayName":   "<+pcf.newAppName>",
 }
 
 var DynamicExpressions = map[string]interface{}{
@@ -103,6 +155,12 @@ var DynamicExpressions = map[string]interface{}{
 	},
 	"app.defaults": func(key string) string {
 		return "<+variable." + key + ">"
+	},
+	"configFile.getAsBase64(": func(key string) string {
+		return "<+configFile.getAsBase64(\"" + key + "\")>"
+	},
+	"configFile.getAsString(": func(key string) string {
+		return "<+configFile.getAsString(\"" + key + "\")>"
 	},
 }
 
@@ -289,21 +347,8 @@ func getDynamicExpressionKey(key string) string {
 }
 
 func loadYamlFromFile(filePath string) {
-	filePath = strings.TrimSpace(filePath)
-	if len(filePath) == 0 {
-		return
-	}
-	yFile, err := os.ReadFile(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	data := make(map[string]string)
-	err = yaml.Unmarshal(yFile, &data)
-	if err != nil {
-		log.Fatal(err)
-	}
+	data := LoadYamlFromFile(filePath)
 	for k, v := range data {
 		ExpressionsMap[k] = v
 	}
-	log.Infof("Successfully loaded %d custom expressions from the file", len(data))
 }

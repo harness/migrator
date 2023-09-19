@@ -10,17 +10,26 @@ import (
 	"time"
 )
 
+var skipLogs = []string{
+	"already exists in the parent folder",
+	"Duplicate identifier, please try again with a new identifier",
+	"already exists in the account",
+	"already exists in this scope",
+	"] already exists  appId=",
+	"that already exists. Please enter a unique ID",
+	"] already exists",
+}
+
 func CreateEntities(body RequestBody) {
 	reqId, err := QueueCreateEntity(body)
 	if err != nil {
 		return
 	}
-	log.Debugf("The request ID is %s", reqId)
 	PollForCompletion(reqId)
 }
 
 func QueueCreateEntity(body RequestBody) (reqId string, err error) {
-	url := GetUrl(migrationReq.Environment, MIGRATOR, "save/async", migrationReq.Account)
+	url := GetUrl(migrationReq.Environment, MigratorService, "save/async", migrationReq.Account)
 	resp, err := Post(url, migrationReq.Auth, body)
 	if err != nil {
 		log.Fatal("Failed to create the entities", err)
@@ -40,10 +49,10 @@ func PollForCompletion(reqId string) {
 	s.Suffix = " Processing"
 	s.Start()
 	for {
-		time.Sleep(time.Second)
-		url := GetUrlWithQueryParams(migrationReq.Environment, MIGRATOR, "save/async-result", map[string]string{
-			"accountIdentifier": migrationReq.Account,
-			"requestId":         reqId,
+		time.Sleep(time.Second * 10)
+		url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "save/async-result", map[string]string{
+			AccountIdentifier: migrationReq.Account,
+			"requestId":       reqId,
 		})
 		resp, err := Get(url, migrationReq.Auth)
 		if err != nil {
@@ -113,7 +122,15 @@ func renderSaveSummary(saveSummary SaveSummary) {
 		log.Info("Here are the errors while migrating - ")
 		for i := range saveSummary.Errors {
 			e := saveSummary.Errors[i]
-			logWithDetails(log.ErrorLevel, e.Entity, e.Message)
+			level := log.ErrorLevel
+			// log as debug if the error is in skipLogs
+			for _, v := range skipLogs {
+				if strings.Contains(e.Message, v) {
+					level = log.DebugLevel
+					break
+				}
+			}
+			logWithDetails(level, e.Entity, e.Message)
 		}
 	}
 
@@ -144,6 +161,6 @@ func logWithDetails(level log.Level, entity CurrentGenEntity, message string) {
 			"name":  entity.Name,
 		}).Log(level, message)
 	} else {
-		log.Error(message)
+		log.WithFields(log.Fields{}).Log(level, message)
 	}
 }

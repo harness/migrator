@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"os"
 	"strings"
 
@@ -13,33 +14,44 @@ import (
 )
 
 const (
-	Prod  string = "Prod"
-	QA           = "QA"
-	Dev          = "Dev"
-	Prod3        = "Prod3"
+	Prod        string = "Prod"
+	QA                 = "QA"
+	Dev                = "Dev"
+	Prod3              = "Prod3"
+	SelfManaged        = "SelfManaged"
 )
 
 const (
-	MIGRATOR string = "Migrator"
-	NG              = "NextGen"
+	MigratorService string = "Migrator"
+	NextGenService         = "NextGen"
+	TemplateService        = "Template"
+	PipelineService        = "Pipeline"
 )
 
 var urlMap = map[string]map[string]string{
 	Prod: {
-		MIGRATOR: "https://app.harness.io/gateway/ng-migration",
-		NG:       "https://app.harness.io/gateway/ng",
+		PipelineService: "https://app.harness.io/gateway/pipeline",
+		TemplateService: "https://app.harness.io/gateway/template",
+		MigratorService: "https://app.harness.io/gateway/ng-migration/api/ng-migration",
+		NextGenService:  "https://app.harness.io/gateway/ng",
 	},
 	QA: {
-		MIGRATOR: "https://qa.harness.io/gateway/ng-migration",
-		NG:       "https://qa.harness.io/gateway/ng",
+		PipelineService: "https://qa.harness.io/gateway/pipeline",
+		TemplateService: "https://qa.harness.io/gateway/template",
+		MigratorService: "https://qa.harness.io/gateway/ng-migration/api/ng-migration",
+		NextGenService:  "https://qa.harness.io/gateway/ng",
 	},
 	Dev: {
-		MIGRATOR: "https://localhost:9080",
-		NG:       "https://localhost:8181/ng",
+		PipelineService: "https://localhost:8181/pipeline",
+		TemplateService: "https://localhost:8181/template",
+		MigratorService: "https://localhost:9080/api/ng-migration",
+		NextGenService:  "https://localhost:8181/ng",
 	},
 	Prod3: {
-		MIGRATOR: "https://app3.harness.io/gateway/ng-migration",
-		NG:       "https://app3.harness.io/gateway/ng",
+		PipelineService: "https://app3.harness.io/gateway/pipeline",
+		TemplateService: "https://app3.harness.io/gateway/template",
+		MigratorService: "https://app3.harness.io/gateway/ng-migration/api/ng-migration",
+		NextGenService:  "https://app3.harness.io/gateway/ng",
 	},
 }
 
@@ -86,11 +98,11 @@ func GetUrlWithQueryParams(environment string, service string, endpoint string, 
 		params = params + k + "=" + v + "&"
 	}
 
-	return fmt.Sprintf("%s/api/ng-migration/%s?%s", urlMap[environment][service], endpoint, params)
+	return fmt.Sprintf("%s/%s?%s", GetBaseUrl(environment, service), endpoint, params)
 }
 
 func GetUrl(environment string, service string, path string, accountId string) string {
-	return fmt.Sprintf("%s/api/ng-migration/%s?accountIdentifier=%s", urlMap[environment][service], path, accountId)
+	return fmt.Sprintf("%s/%s?accountIdentifier=%s", GetBaseUrl(environment, service), path, accountId)
 }
 
 func getOrDefault(value string, defaultValue string) string {
@@ -212,7 +224,10 @@ func Split(str string, sep string) (result []string) {
 }
 
 func listEntities(entity string) (data []BaseEntityDetail, err error) {
-	url := GetUrl(migrationReq.Environment, MIGRATOR, entity, migrationReq.Account)
+	url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, entity, map[string]string{
+		AccountIdentifier: migrationReq.Account,
+		"appId":           migrationReq.AppId,
+	})
 	resp, err := Get(url, migrationReq.Auth)
 	if err != nil {
 		return
@@ -227,4 +242,226 @@ func listEntities(entity string) (data []BaseEntityDetail, err error) {
 		return
 	}
 	return
+}
+
+func GetBaseUrl(environment string, service string) string {
+	if environment == "Prod1" || environment == "Prod2" {
+		environment = "Prod"
+	}
+	if environment != SelfManaged {
+		url := urlMap[environment][service]
+		if len(url) == 0 {
+			log.Fatalf("invalid environment value - %s", environment)
+		}
+		return url
+	}
+	var url string
+	switch service {
+	case PipelineService:
+		url = migrationReq.BaseUrl + "/pipeline"
+	case TemplateService:
+		url = migrationReq.BaseUrl + "/template"
+	case NextGenService:
+		url = migrationReq.BaseUrl + "/ng"
+	case MigratorService:
+		url = migrationReq.BaseUrl + "/ng-migration/api/ng-migration"
+	default:
+		panic("Unknown service! Please contact Harness support")
+	}
+	log.Debugf("BaseUrl for SelfManaged - %s", url)
+	return url
+}
+
+func GetEntityIds(entity string, idsString string, namesString string) ([]string, error) {
+	ids := Split(idsString, ",")
+	if len(ids) > 0 {
+		return ids, nil
+	}
+	names := Split(namesString, ",")
+	if len(names) == 0 {
+		return nil, nil
+	}
+	nameToIdMap, err := GetEntityNameIdMap(entity)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []string
+	for _, item := range names {
+		itemId, ok := nameToIdMap[item]
+		if !ok {
+			continue
+		}
+		result = append(result, itemId)
+	}
+	return result, nil
+}
+
+func GetEntityNameIdMap(entity string) (map[string]string, error) {
+	items, err := listEntities(entity)
+	if err != nil {
+		return nil, err
+	}
+
+	var nameToIdMap = make(map[string]string)
+	for _, item := range items {
+		nameToIdMap[item.Name] = item.Id
+	}
+	return nameToIdMap, err
+}
+
+func MigrateEntities(promptConfirm bool, scopes []string, pluralValue string, entityType EntityType) (err error) {
+	promptConfirm = PromptOrgAndProject(scopes) || promptConfirm
+	logMigrationDetails()
+	if promptConfirm {
+		confirm := ConfirmInput("Do you want to proceed?")
+		if !confirm {
+			log.Fatal("Aborting...")
+		}
+	}
+
+	importType := ImportType("ALL")
+	var ids []string
+	if !migrationReq.All {
+		importType = "SPECIFIC"
+		ids, err = GetEntityIds(pluralValue, migrationReq.Identifiers, migrationReq.Names)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("Failed to get ids of the %s", pluralValue))
+		}
+		if len(ids) == 0 {
+			log.Fatal(fmt.Sprintf("No %s found with given names/ids", pluralValue))
+		}
+	}
+	log.Info(fmt.Sprintf("Importing the %s....", pluralValue))
+	scope := AccountScope
+	if len(migrationReq.AppId) > 0 {
+		scope = AppScope
+	}
+	CreateEntities(getReqBody(entityType, Filter{
+		AppId: migrationReq.AppId,
+		Type:  importType,
+		Ids:   ids,
+		Scope: scope,
+	}))
+	log.Info(fmt.Sprintf("Imported the %s.", pluralValue))
+
+	return nil
+}
+
+func LoadYamlFromFile(filePath string) map[string]string {
+	filePath = strings.TrimSpace(filePath)
+	if len(filePath) == 0 {
+		return nil
+	}
+	yFile, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	data := make(map[string]string)
+	err = yaml.Unmarshal(yFile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("Successfully loaded %d custom expressions from the file", len(data))
+	return data
+}
+
+func LoadOverridesFromFile(filePath string) map[string]EntityOverrideInput {
+	filePath = strings.TrimSpace(filePath)
+	if len(filePath) == 0 {
+		return nil
+	}
+	yFile, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var data OverrideFileData
+	err = yaml.Unmarshal(yFile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("Successfully loaded %d overrides & %d settings from the file", len(data.Overrides), len(data.Settings))
+
+	if len(data.Overrides) == 0 {
+		return nil
+	}
+
+	var overrides = make(map[string]EntityOverrideInput)
+	var nameToIdMap = make(map[string]map[string]string)
+	for i, override := range data.Overrides {
+		assertNotBlank(override.Type, fmt.Sprintf("Type cannot be blank in overrides for index - %d", i))
+		assertNotAllBlank(fmt.Sprintf("Name, Identifier & Scope are blank in overrides for index - %d", i), override.Name, override.Identifier, override.Scope)
+		assertAllowedValues(override.Type, []string{UserGroups, Template, Connector, Secret, Service, Environment, Workflow, Pipeline}, fmt.Sprintf("Only a few types of entities support overrides for index %d", i))
+		if len(strings.TrimSpace(override.ID)) > 0 {
+			overrides[fmt.Sprintf("CgEntityId(id=%s, type=%s)", override.ID, override.Type)] = EntityOverrideInput{
+				Name:       override.Name,
+				Identifier: override.Identifier,
+				Scope:      override.Scope,
+			}
+		} else {
+			assertNotBlank(override.FirstGenName, fmt.Sprintf("Both firstGen name & ID fields cannot be blank in overrides for index %d", i))
+			if len(nameToIdMap[override.Type]) == 0 {
+				nameToIdMap[override.Type], err = GetEntityNameIdMap(GetEndpointFromType(override.Type))
+				if err != nil {
+					log.Fatal(fmt.Sprintf("Failed to fetch ids from names for - %s", override.Type), err)
+				}
+			}
+			id, ok := nameToIdMap[override.Type][override.FirstGenName]
+			if !ok {
+				log.Fatal(fmt.Sprintf("Failed to fetch id for name %s of type - %s", override.FirstGenName, override.Type))
+			}
+			overrides[fmt.Sprintf("CgEntityId(id=%s, type=%s)", id, override.Type)] = EntityOverrideInput{
+				Name:       override.Name,
+				Identifier: override.Identifier,
+				Scope:      override.Scope,
+			}
+		}
+	}
+
+	return overrides
+}
+
+func GetEndpointFromType(entityType string) string {
+	if entityType == UserGroups {
+		return "usergroups"
+	}
+	return strings.ToLower(entityType + "s")
+}
+
+func LoadSettingsFromFile(filePath string) []Setting {
+	filePath = strings.TrimSpace(filePath)
+	if len(filePath) == 0 {
+		return nil
+	}
+	yFile, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil
+	}
+	var data OverrideFileData
+	err = yaml.Unmarshal(yFile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data.Settings
+}
+
+func assertNotBlank(value string, message string) {
+	if len(strings.TrimSpace(value)) == 0 {
+		log.Fatal(message)
+	}
+}
+
+func assertAllowedValues(value string, allowed []string, message string) {
+	if !slices.Contains(allowed, value) {
+		log.Fatal(message)
+	}
+}
+
+func assertNotAllBlank(message string, values ...*string) {
+	for _, value := range values {
+		if value != nil && len(strings.TrimSpace(*value)) > 0 {
+			return
+		}
+	}
+	log.Fatal(message)
 }

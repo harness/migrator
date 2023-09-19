@@ -5,29 +5,16 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func migrateServices(*cli.Context) error {
+func migrateServices(*cli.Context) (err error) {
 	promptConfirm := PromptDefaultInputs()
 	if len(migrationReq.AppId) == 0 {
 		promptConfirm = true
 		migrationReq.AppId = TextInput("Please provide the application ID -")
 	}
 
-	promptConfirm = PromptOrgAndProject([]string{Project}) || promptConfirm
-
-	logMigrationDetails()
-
-	if promptConfirm {
-		confirm := ConfirmInput("Do you want to proceed?")
-		if !confirm {
-			log.Fatal("Aborting...")
-		}
+	err = MigrateEntities(promptConfirm, []string{Project}, "services", Service)
+	if err != nil {
+		log.Fatal("Failed to migrate services")
 	}
-
-	log.Info("Importing the services....")
-	CreateEntities(getReqBody(Service, Filter{
-		AppId: migrationReq.AppId,
-	}))
-	log.Info("Imported the services.")
-
-	return nil
+	return
 }
