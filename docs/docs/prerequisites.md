@@ -9,7 +9,7 @@ Before using the Harness CD First Gen to CD Next Gen migration tool, you must ha
 
 ## Access Token
 
-To use the migration tool, you need a [Service Account Token (SAT)](https://developer.harness.io/docs/platform/user-management/add-and-manage-api-keys/#create-service-account-token) with the **Account Admin - All Resources Including Child Scopes** permissions. Ensure that you have the required permissions and create a SAT before using the tool.
+To use the migration tool, you need a [Service Account Token (SAT)](https://developer.harness.io/docs/platform/automation/api/add-and-manage-api-keys#create-service-account-api-keys-and-tokens) with the **Account Admin - All Resources Including Child Scopes** permissions. Ensure that you have the required permissions and create a SAT before using the tool.
 
 ## Account ID and Environment
 
