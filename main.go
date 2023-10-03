@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/urfave/cli/v2"
 	"os"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
 )
 
@@ -55,6 +55,7 @@ var migrationReq = struct {
 	BaseUrl               string `survey:"baseUrl"`
 	TargetGatewayUrl      string `survey:"targetGatewayUrl"`
 	Force                 bool   `survey:"force"`
+	Flags                 string `survey:"flags"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -72,6 +73,11 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 			UserGroup:             EntityDefaults{Scope: getOrDefault(migrationReq.UserGroupScope, Account)},
 		},
 	}
+
+	var flags []string
+	if len(migrationReq.Flags) > 0 {
+		flags = Split(migrationReq.Flags, ",")
+	}
 	destination := DestinationDetails{
 		ProjectIdentifier: migrationReq.ProjectIdentifier,
 		OrgIdentifier:     migrationReq.OrgIdentifier,
@@ -79,7 +85,8 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 		AuthToken:         migrationReq.TargetAuthToken,
 		GatewayUrl:        migrationReq.TargetGatewayUrl,
 	}
-	return RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter, IdentifierCaseFormat: migrationReq.IdentifierCase}
+	return RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter, IdentifierCaseFormat: migrationReq.IdentifierCase,
+		Flags: flags}
 }
 
 func logMigrationDetails() {
@@ -252,6 +259,11 @@ func main() {
 			Name:        "override",
 			Usage:       "provide a `FILE` to load overrides",
 			Destination: &migrationReq.OverrideFile,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "flags",
+			Usage:       "provide a list of flags for custom logic",
+			Destination: &migrationReq.Flags,
 		}),
 	}
 	app := &cli.App{
