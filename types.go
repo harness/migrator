@@ -158,6 +158,7 @@ type RequestBody struct {
 	Filter               Filter             `json:"filter"`
 	Inputs               Inputs             `json:"inputs"`
 	IdentifierCaseFormat string             `json:"identifierCaseFormat"`
+	Flags                []string           `json:"flags"`
 }
 
 type CurrentGenEntity struct {
