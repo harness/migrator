@@ -62,6 +62,13 @@ harness-upgrade [global options] command [command options] [arguments...]
 | --insecure                   | allow insecure API requests. This is automatically set to true if environment is Dev (default: false)                           |
 | --log-level                  | set the log level. Possible values - trace, debug, info, warn, error, fatal, panic. Default is `info`                           |
 | --json                       | log as JSON instead of standard ASCII formatter (default: false).                                                               |
+| --identifier-format FORMAT   | FORMAT to use for generation of identifiers. Supported values as CAMEL_CASE & LOWER_CASE (default: CAMEL_CASE)                  |
+| --target-account ACCOUNT     | destination ACCOUNT that you wish to migrate to                                                                                 |
+| --target-api-key API_KEY     | API_KEY for the target account to authenticate & authorise the migration.                                                       |
+| --target-gateway-url URL     | destination gateway URL. For Prod1 & Prod2, use https://app.harness.io/gateway, for Prod3 use https://app3.harness.io/gateway   |
+| --custom-expressions FILE    | provide a FILE to load custom expressions from                                                                                  |
+| --override FILE              | provide a FILE to load overrides                                                                                                |
+| --flags value                | provide a list of flags for custom logic. Please refer [here](advanced/flags).                                                  |
 | --help, -h                   | show help.                                                                                                                      |
 | --version, -v                | print the version                                                                                                               |
 
