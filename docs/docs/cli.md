@@ -61,6 +61,7 @@ harness-upgrade [global options] command [command options] [arguments...]
 | --load `FILE`                | `FILE` to load flags from                                                                                                       |
 | --insecure                   | allow insecure API requests. This is automatically set to true if environment is Dev (default: false)                           |
 | --log-level                  | set the log level. Possible values - trace, debug, info, warn, error, fatal, panic. Default is `info`                           |
+| --flags value                | provide a list of flags for custom logic. Please refer [here](advanced/flags).                                                  |
 | --json                       | log as JSON instead of standard ASCII formatter (default: false).                                                               |
 | --help, -h                   | show help.                                                                                                                      |
 | --version, -v                | print the version                                                                                                               |
