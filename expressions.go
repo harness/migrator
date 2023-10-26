@@ -130,38 +130,70 @@ var ExpressionsMap = map[string]string{
 
 var DynamicExpressions = map[string]interface{}{
 	"workflow.variables": func(key string) string {
-		return "<+stage.variables." + key + ">"
+		return "<+stage.variables." + formatString(key) + ">"
 	},
 	"pipeline.variables": func(key string) string {
-		return "<+pipeline.variables." + key + ">"
+		return "<+pipeline.variables." + formatString(key) + ">"
 	},
 	"serviceVariable": func(key string) string {
-		return "<+serviceVariables." + key + ">"
+		return "<+serviceVariables." + formatString(key) + ">"
 	},
 	"serviceVariables": func(key string) string {
-		return "<+serviceVariables." + key + ">"
+		return "<+serviceVariables." + formatString(key) + ">"
 	},
 	"service.variables": func(key string) string {
-		return "<+serviceVariables." + key + ">"
+		return "<+serviceVariables." + formatString(key) + ">"
 	},
 	"environmentVariable": func(key string) string {
-		return "<+env.variables." + key + ">"
+		return "<+env.variables." + formatString(key) + ">"
 	},
 	"environmentVariables": func(key string) string {
-		return "<+env.variables." + key + ">"
+		return "<+env.variables." + formatString(key) + ">"
 	},
 	"secrets.getValue(": func(key string) string {
-		return "<+secrets.getValue(\"" + getSecretKeyWithScope(key) + "\")>"
+		return "<+secrets.getValue(\"" + TrimQuotes(getSecretKeyWithScope(formatString(key))) + "\")>"
 	},
 	"app.defaults": func(key string) string {
-		return "<+variable." + key + ">"
+		return "<+variable." + formatString(key) + ">"
 	},
 	"configFile.getAsBase64(": func(key string) string {
-		return "<+configFile.getAsBase64(\"" + key + "\")>"
+		return "<+configFile.getAsBase64(\"" + TrimQuotes(formatString(key)) + "\")>"
 	},
 	"configFile.getAsString(": func(key string) string {
-		return "<+configFile.getAsString(\"" + key + "\")>"
+		return "<+configFile.getAsString(\"" + TrimQuotes(formatString(key)) + "\")>"
 	},
+}
+
+func formatString(key string) string {
+	var result string
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("Panic occurred: %v", r)
+			result = "FIX_ME"
+		}
+	}()
+
+	identifierCase := migrationReq.IdentifierCase
+	log.Debugf("key: %s, format: %s", key, identifierCase)
+	if len(key) == 0 {
+		result = "FIX_ME"
+	} else {
+		switch identifierCase {
+		case "CAMEL_CASE":
+			result = ToCamelCase(key)
+		case "LOWER_CASE":
+			result = ToLowerCase(key)
+		case "SNAKE_CASE":
+			result = ToSnakeCase(key)
+		case "HARNESS_UI_FORMAT":
+			result = GenerateHarnessUIFormatIdentifier(key)
+		default:
+			log.Info("Defaulting to Camel Case")
+			result = ToCamelCase(key)
+		}
+	}
+
+	return result
 }
 
 func getSecretKeyWithScope(key string) string {
