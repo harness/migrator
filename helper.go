@@ -4,13 +4,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v3"
-	"os"
-	"strings"
-
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/iancoleman/strcase"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
+	"gopkg.in/yaml.v3"
+	"os"
+	"regexp"
+	"strings"
+	"unicode"
 )
 
 const (
@@ -170,6 +175,48 @@ func ReadFile(absFilePath string) (string, error) {
 		return "", err
 	}
 	return string(d), err
+}
+
+func ToLowerCase(input string) string {
+	return strings.ToLower(input)
+}
+
+func ToSnakeCase(input string) string {
+	return strcase.ToSnake(input)
+}
+
+func TrimQuotes(input string) string {
+	if strings.HasPrefix(input, "\"") && strings.HasSuffix(input, "\"") {
+		return input[1 : len(input)-1]
+	}
+
+	return input
+}
+
+func GenerateHarnessUIFormatIdentifier(name string) string {
+	name = removeAccents(name)
+	name = stripStartingChars(name)
+	name = stripSpecialChars(name)
+	name = strings.ReplaceAll(name, " ", "_")
+
+	return name
+}
+
+func removeAccents(input string) string {
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	output, _, err := transform.String(t, input)
+	if err != nil {
+		return ""
+	}
+	return output
+}
+
+func stripStartingChars(s string) string {
+	return regexp.MustCompile("^[0-9-$]*").ReplaceAllString(s, "")
+}
+
+func stripSpecialChars(s string) string {
+	return regexp.MustCompile("[^0-9a-zA-Z_$ ]").ReplaceAllString(s, "")
 }
 
 func ToCamelCase(s string) string {
