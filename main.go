@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -78,6 +79,9 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	if len(migrationReq.Flags) > 0 {
 		flags = Split(migrationReq.Flags, ",")
 	}
+	flags = addIfNotExists(flags, "SEQUENTIAL_CREATION")
+	flags = addIfNotExists(flags, "HELM_INFRA_WITH_STAGE_VAR")
+
 	destination := DestinationDetails{
 		ProjectIdentifier: migrationReq.ProjectIdentifier,
 		OrgIdentifier:     migrationReq.OrgIdentifier,
@@ -85,8 +89,24 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 		AuthToken:         migrationReq.TargetAuthToken,
 		GatewayUrl:        migrationReq.TargetGatewayUrl,
 	}
-	return RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter, IdentifierCaseFormat: migrationReq.IdentifierCase,
+	body := RequestBody{Inputs: inputs, DestinationDetails: destination, EntityType: entityType, Filter: filter, IdentifierCaseFormat: migrationReq.IdentifierCase,
 		Flags: flags}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		log.Debug(err)
+	}
+	log.Debugf("Request details: %s", b)
+	return body
+}
+
+func addIfNotExists(arr []string, strToAdd string) []string {
+	for _, str := range arr {
+		if str == strToAdd {
+			return arr
+		}
+	}
+	return append(arr, strToAdd)
 }
 
 func logMigrationDetails() {
@@ -98,6 +118,7 @@ func logMigrationDetails() {
 		"AppID":             migrationReq.AppId,
 		"OrgIdentifier":     migrationReq.OrgIdentifier,
 		"ProjectIdentifier": migrationReq.ProjectIdentifier,
+		"Flags":             migrationReq.Flags,
 	}).Info("Migration details")
 }
 
