@@ -79,7 +79,6 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	if len(migrationReq.Flags) > 0 {
 		flags = Split(migrationReq.Flags, ",")
 	}
-	flags = addIfNotExists(flags, "SEQUENTIAL_CREATION")
 	flags = addIfNotExists(flags, "HELM_INFRA_WITH_STAGE_VAR")
 
 	destination := DestinationDetails{
