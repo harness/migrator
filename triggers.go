@@ -37,15 +37,12 @@ func migrateTriggers(*cli.Context) error {
 	}
 
 	// Migrating the triggers
-	var triggerIds []string
-	if len(migrationReq.TriggerIds) > 0 || len(migrationReq.Names) > 0 {
-		triggerIds, err := GetEntityIds("triggers", migrationReq.TriggerIds, migrationReq.Names)
-		if err != nil {
-			log.Fatal("Failed to get ids of the triggers")
-		}
-		if len(triggerIds) == 0 {
-			log.Fatal("No triggers found with given names/ids")
-		}
+	triggerIds, err := GetEntityIds("triggers", migrationReq.TriggerIds, migrationReq.Names)
+	if err != nil {
+		log.Fatal("Failed to get ids of the triggers")
+	}
+	if len(triggerIds) == 0 {
+		log.Fatal("No triggers found with given names/ids")
 	}
 
 	log.Info("Importing the triggers....")
