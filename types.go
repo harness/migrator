@@ -37,6 +37,7 @@ type Defaults struct {
 	Workflow              EntityDefaults `json:"WORKFLOW"`
 	Template              EntityDefaults `json:"TEMPLATE"`
 	UserGroup             EntityDefaults `json:"USER_GROUP"`
+	Environment           EntityDefaults `json:"ENVIRONMENT"`
 }
 
 type Setting struct {
