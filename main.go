@@ -24,6 +24,7 @@ var migrationReq = struct {
 	WorkflowScope         string `survey:"workflowScope"`
 	PipelineScope         string `survey:"pipelineScope"`
 	TemplateScope         string `survey:"templateScope"`
+	EnvironmentScope      string `survey:"environmentScope"`
 	UserGroupScope        string `survey:"userGroupScope"`
 	OrgIdentifier         string `survey:"org"`
 	ProjectIdentifier     string `survey:"project"`
@@ -70,6 +71,7 @@ func getReqBody(entityType EntityType, filter Filter) RequestBody {
 			SecretManagerTemplate: EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
 			Connector:             EntityDefaults{Scope: getOrDefault(migrationReq.ConnectorScope, Project)},
 			Template:              EntityDefaults{Scope: getOrDefault(migrationReq.TemplateScope, Project)},
+			Environment:           EntityDefaults{Scope: getOrDefault(migrationReq.EnvironmentScope, Project)},
 			Workflow:              EntityDefaults{Scope: getOrDefault(migrationReq.WorkflowScope, Project), WorkflowAsPipeline: migrationReq.AsPipelines},
 			UserGroup:             EntityDefaults{Scope: getOrDefault(migrationReq.UserGroupScope, Account)},
 		},
@@ -205,6 +207,11 @@ func main() {
 			Name:        "template-scope",
 			Usage:       "`SCOPE` to create templates in. Possible values - account, org, project",
 			Destination: &migrationReq.TemplateScope,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "environment-scope",
+			Usage:       "`SCOPE` to create environment in. Possible values - account, org, project",
+			Destination: &migrationReq.EnvironmentScope,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "user-group-scope",
