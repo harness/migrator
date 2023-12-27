@@ -46,6 +46,7 @@ type Setting struct {
 }
 
 type Inputs struct {
+	Replace     map[string]string              `json:"replace"`
 	Overrides   map[string]EntityOverrideInput `json:"overrides"`
 	Expressions map[string]string              `json:"expressions"`
 	Defaults    Defaults                       `json:"defaults"`

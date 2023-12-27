@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"regexp"
+	"strings"
+	"unicode"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/iancoleman/strcase"
 	log "github.com/sirupsen/logrus"
@@ -12,10 +17,6 @@ import (
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 	"gopkg.in/yaml.v3"
-	"os"
-	"regexp"
-	"strings"
-	"unicode"
 )
 
 const (
@@ -466,6 +467,48 @@ func LoadOverridesFromFile(filePath string) map[string]EntityOverrideInput {
 	}
 
 	return overrides
+}
+
+type ReplaceSection struct {
+	Old string `yaml:"old"`
+	New string `yaml:"new"`
+}
+
+func LoadCustomeStringsFromFile(filePath string) map[string]string {
+	filePath = strings.TrimSpace(filePath)
+	if len(filePath) == 0 {
+		return nil
+	}
+	// Read the entire file
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		fmt.Sprintf("error reading file: %v", err)
+	}
+
+	// Unmarshal YAML content into a slice of maps
+	var replaceSections []map[string]string
+	err = yaml.Unmarshal(content, &replaceSections)
+	if err != nil {
+		fmt.Sprintf("error unmarshalling YAML: %v", err)
+	}
+
+	// Create a map to store the accumulated sections
+	mergedSections := make(map[string]string)
+
+	// Process each section
+	for _, replaceSection := range replaceSections {
+		oldValue, oldExists := replaceSection["old"]
+		newValue, newExists := replaceSection["new"]
+
+		if oldExists && newExists {
+			delete(replaceSection, "old")
+			delete(replaceSection, "new")
+			mergedSections[oldValue] = newValue
+		} else {
+			fmt.Sprintf("'old' or 'new' keys not found in a section")
+		}
+	}
+	return mergedSections
 }
 
 func GetEndpointFromType(entityType string) string {
