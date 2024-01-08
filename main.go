@@ -45,6 +45,7 @@ var migrationReq = struct {
 	DryRun                bool   `survey:"dryRun"`
 	FileExtensions        string `survey:"fileExtensions"`
 	CustomExpressionsFile string `survey:"customExpressionsFile"`
+	CustomStringsFile     string `survey:"customStringsFile"`
 	OverrideFile          string `survey:"overrideFile"`
 	ExportFolderPath      string `survey:"export"`
 	CsvFile               string `survey:"csv"`
@@ -63,6 +64,7 @@ var migrationReq = struct {
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
 	inputs := Inputs{
 		Overrides:   LoadOverridesFromFile(migrationReq.OverrideFile),
+		Replace:     LoadCustomeStringsFromFile(migrationReq.CustomStringsFile),
 		Expressions: LoadYamlFromFile(migrationReq.CustomExpressionsFile),
 		Settings:    LoadSettingsFromFile(migrationReq.OverrideFile),
 		Defaults: Defaults{
@@ -281,6 +283,11 @@ func main() {
 			Name:        "custom-expressions",
 			Usage:       "provide a `FILE` to load custom expressions from",
 			Destination: &migrationReq.CustomExpressionsFile,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "replace",
+			Usage:       "provide a `FILE` to load strings from",
+			Destination: &migrationReq.CustomStringsFile,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "override",
