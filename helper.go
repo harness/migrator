@@ -195,10 +195,24 @@ func TrimQuotes(input string) string {
 }
 
 func GenerateHarnessUIFormatIdentifier(name string) string {
+	pattern := regexp.MustCompile(`<\+([^>]+)>`)
+	matches := pattern.FindAllStringSubmatch(name, -1)
+	preservedSubstrings := make(map[string]string)
+	for _, match := range matches {
+		placeholder := match[1]
+		preservedKey := fmt.Sprintf("<+%s>", placeholder)
+		preservedSubstrings[preservedKey] = match[0]
+		name = strings.ReplaceAll(name, preservedKey, "PLACEHOLDER")
+	}
+
 	name = removeAccents(name)
 	name = stripStartingChars(name)
 	name = stripSpecialChars(name)
 	name = strings.ReplaceAll(name, " ", "_")
+
+	for _, preservedValue := range preservedSubstrings {
+		name = strings.ReplaceAll(name, "PLACEHOLDER", preservedValue)
+	}
 
 	return name
 }
@@ -226,6 +240,16 @@ func ToCamelCase(s string) string {
 	if s == "" {
 		return s
 	}
+	pattern := regexp.MustCompile(`<\+([^>]+)>`)
+	matches := pattern.FindAllStringSubmatch(s, -1)
+	preservedSubstrings := make(map[string]string)
+	for _, match := range matches {
+		placeholder := match[1]
+		preservedKey := fmt.Sprintf("<+%s>", placeholder)
+		preservedSubstrings[preservedKey] = match[0]
+		s = strings.ReplaceAll(s, preservedKey, "PLACEHOLDER")
+	}
+
 	n := strings.Builder{}
 	n.Grow(len(s))
 	capNext := false
@@ -257,7 +281,13 @@ func ToCamelCase(s string) string {
 			capNext = v == '_' || v == ' ' || v == '-' || v == '.'
 		}
 	}
-	return n.String()
+
+	treatedString := n.String()
+	for _, preservedValue := range preservedSubstrings {
+		treatedString = strings.ReplaceAll(treatedString, "PLACEHOLDER", preservedValue)
+	}
+
+	return treatedString
 }
 
 func Split(str string, sep string) (result []string) {
