@@ -8,8 +8,17 @@ import (
 	"strconv"
 )
 
+const spinnaker string = "spinnaker"
+const legacy string = "harness-legacy"
+const authBasic string = "basic"
+const authx509 string = "x509"
+
 func migratePipelines(*cli.Context) error {
 	promptConfirm := PromptDefaultInputs()
+	if migrationReq.Platform == spinnaker {
+		return migrateSpinnakerPipelines()
+	}
+
 	if len(migrationReq.AppId) == 0 {
 		promptConfirm = true
 		migrationReq.AppId = TextInput("Please provide the application ID of the app containing the pipeline -")
@@ -52,6 +61,74 @@ func migratePipelines(*cli.Context) error {
 	log.Info("Imported the pipelines.")
 
 	return nil
+}
+
+func migrateSpinnakerPipelines() error {
+	authMethod := authBasic
+	if len(migrationReq.Cert) > 0 {
+		authMethod = authx509
+	}
+
+	if len(migrationReq.SpinnakerHost) == 0 {
+		migrationReq.SpinnakerHost = TextInput("Please provide spinnaker host")
+	}
+	if len(migrationReq.AppName) == 0 {
+		migrationReq.AppName = TextInput("Please provide the Spinnaker application name")
+	}
+
+	if !migrationReq.All {
+		migrationReq.PipelineName = TextInput("Please provide the Spinnaker pipeline name")
+	}
+
+	logSpinnakerMigrationDetails(authMethod)
+	confirm := ConfirmInput("Do you want to proceed with pipeline migration?")
+	if !confirm {
+		log.Fatal("Aborting...")
+	}
+	var jsonBody []byte
+	var pipelines []map[string]interface{}
+	var err error
+	if len(migrationReq.PipelineName) > 0 {
+		jsonBody, err = getSinglePipeline(authMethod, migrationReq.PipelineName)
+	} else {
+		jsonBody, err = getAllPipelines(authMethod)
+	}
+	if err != nil {
+		return err
+	}
+	pipelines, err = normalizeJsonArray(jsonBody)
+	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
+	_, err = createSpinnakerPipelines(payload)
+	return err
+}
+
+// / normalizeJsonArray returns an array of 1 element if body is an object, otherwise returns the existing array
+func normalizeJsonArray(body []byte) ([]map[string]interface{}, error) {
+	var temp interface{}
+	err := json.Unmarshal(body, &temp)
+	if err != nil {
+		return nil, err
+	}
+
+	var normalizedData []map[string]interface{}
+
+	switch v := temp.(type) {
+	case map[string]interface{}:
+		// If the data is a single object, wrap it in a slice
+		normalizedData = append(normalizedData, v)
+	case []interface{}:
+		// If the data is an array, convert each element to a map[string]interface{} and append to the slice
+		for _, item := range v {
+			if mapItem, ok := item.(map[string]interface{}); ok {
+				normalizedData = append(normalizedData, mapItem)
+			} else {
+				return nil, fmt.Errorf("array element is not a JSON object")
+			}
+		}
+	default:
+		return nil, fmt.Errorf("unexpected data type")
+	}
+	return normalizedData, nil
 }
 
 func BulkRemovePipelines(*cli.Context) error {
@@ -154,4 +231,34 @@ func findPipelineIdByName(pipelines []PipelineDetails, name string) string {
 		}
 	}
 	return ""
+}
+
+func getAllPipelines(authMethod string) ([]byte, error) {
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.AppName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key)
+}
+
+func getSinglePipeline(authMethod string, name string) ([]byte, error) {
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.AppName+"/pipelineConfigs/"+name, authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key)
+}
+
+func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
+	queryParams := map[string]string{
+		ProjectIdentifier: migrationReq.ProjectIdentifier,
+		OrgIdentifier:     migrationReq.OrgIdentifier,
+		AccountIdentifier: migrationReq.Account,
+	}
+	url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "spinnaker/pipelines", queryParams)
+	resp, err := Post(url, migrationReq.Auth, pipelines)
+	if err != nil || resp.Status != "SUCCESS" {
+		log.Fatal("Failed to create pipelines", err)
+		return
+	}
+	resource, err := getResource(resp.Resource)
+	if err != nil || len(resource.RequestId) == 0 {
+		log.Fatal("Failed to create the entities", err)
+		return
+	}
+	reqId = resource.RequestId
+	log.Infof("The request id is - %s", reqId)
+	return
 }

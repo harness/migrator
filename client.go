@@ -2,10 +2,13 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -108,4 +111,57 @@ func AuthHeaderKey(auth string) string {
 		return "Authorization"
 	}
 	return "x-api-key"
+}
+
+func GetWithAuth(host string, query string, authMethod string, base64Auth string, certPath string, keyPath string) (body []byte, err error) {
+	baseURL := "https://" + host + "/api/v1/" + query
+
+	var client *http.Client
+
+	req, err := http.NewRequest("GET", baseURL, nil)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+
+	// Configure client based on authentication method
+	if authMethod == authBasic {
+		// Encode credentials to base64 for the Authorization header
+		client = &http.Client{}
+		// Add the Authorization header to the request
+		req.Header.Add("Authorization", "Basic "+base64Auth)
+	} else if authMethod == authx509 {
+		// Load client certificate
+		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+		if err != nil {
+			fmt.Println("Error loading certificate:", err)
+			return nil, err
+		}
+
+		// Create a HTTPS client and supply the created CA pool and certificate
+		config := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			// In a real application, you should adjust the TLS settings according to your security requirements.
+		}
+		client = &http.Client{Transport: &http.Transport{TLSClientConfig: config}}
+	} else {
+		fmt.Println("Unsupported authentication method")
+		return nil, fmt.Errorf("unsupported authentication method %s", authMethod)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Read and print the response body
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return nil, err
+	}
+	fmt.Println(string(body))
+	return body, nil
 }
