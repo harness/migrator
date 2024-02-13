@@ -59,6 +59,14 @@ var migrationReq = struct {
 	TargetGatewayUrl      string `survey:"targetGatewayUrl"`
 	Force                 bool   `survey:"force"`
 	Flags                 string `survey:"flags"`
+	Platform              string `survey:"platform"`
+	SpinnakerHost         string `survey:"spinnaker-host"`
+	SpinnakerAPIKey       string `survey:"spinnaker-api-key"`
+	AppName               string `survey:"app-name"`
+	PipelineName          string `survey:"pipeline-name"`
+	Cert                  string `survey:"cert"`
+	Key                   string `survey:"key"`
+	Auth64                string `survey:"auth64"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -123,6 +131,25 @@ func logMigrationDetails() {
 		"ProjectIdentifier": migrationReq.ProjectIdentifier,
 		"Flags":             migrationReq.Flags,
 	}).Info("Migration details")
+}
+
+func logSpinnakerMigrationDetails(authMethod string) {
+	// Manually format the log message with line breaks
+	logMessage := fmt.Sprintf("\nMigration details:\n"+
+		"  Platform: %s\n"+
+		"  Spinnaker Host: %s\n"+
+		"  App name: %s\n"+
+		"  Pipeline Name: %s\n"+
+		"  Authentication method: %s",
+		migrationReq.Platform,
+		migrationReq.SpinnakerHost,
+		migrationReq.AppName,
+		migrationReq.PipelineName,
+		authMethod,
+	)
+
+	// Log the formatted message
+	log.Infof(logMessage)
 }
 
 func cliWrapper(fn cliFnWrapper, ctx *cli.Context) error {
@@ -298,6 +325,22 @@ func main() {
 			Name:        "flags",
 			Usage:       "provide a list of flags for custom logic",
 			Destination: &migrationReq.Flags,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "platform",
+			Usage:       "Specifies the platform that serves as the source for migration to the next-generation harness. Supported values: harness-legacy (default), spinnaker.",
+			Destination: &migrationReq.Platform,
+			DefaultText: legacy,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "spinnaker-host",
+			Usage:       "Specifies URL to the Spinnaker Gate service. Required when --platform is spinnaker.",
+			Destination: &migrationReq.SpinnakerHost,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "spinnaker-api-key",
+			Usage:       "Specifies URL to the Spinnaker Gate service. Required when --platform is spinnaker.",
+			Destination: &migrationReq.SpinnakerAPIKey,
 		}),
 	}
 	app := &cli.App{
@@ -518,6 +561,31 @@ func main() {
 						Name:        "names",
 						Usage:       "`NAMES` of the next gen pipeline",
 						Destination: &migrationReq.Names,
+					},
+					&cli.StringFlag{
+						Name:        "app-name",
+						Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
+						Destination: &migrationReq.AppName,
+					},
+					&cli.StringFlag{
+						Name:        "pipeline-name",
+						Usage:       "Specifies Spinnaker Pipeline which to be migrated.",
+						Destination: &migrationReq.PipelineName,
+					},
+					&cli.StringFlag{
+						Name:        "cert",
+						Usage:       "Cert file location in case Spinnaker uses x509 auth",
+						Destination: &migrationReq.Cert,
+					},
+					&cli.StringFlag{
+						Name:        "key",
+						Usage:       "Optional. key file location in case Spinnaker uses x509 auth",
+						Destination: &migrationReq.Key,
+					},
+					&cli.StringFlag{
+						Name:        "auth64",
+						Usage:       "Base64 <username>:<password>  in case Spinnaker uses basic auth.",
+						Destination: &migrationReq.Auth64,
 					},
 				},
 				Subcommands: []*cli.Command{
