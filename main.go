@@ -62,7 +62,7 @@ var migrationReq = struct {
 	Platform              string `survey:"platform"`
 	SpinnakerHost         string `survey:"spinnaker-host"`
 	SpinnakerAPIKey       string `survey:"spinnaker-api-key"`
-	AppName               string `survey:"app-name"`
+	SpinnakerAppName      string `survey:"app-name"`
 	PipelineName          string `survey:"pipeline-name"`
 	Cert                  string `survey:"cert"`
 	Key                   string `survey:"key"`
@@ -143,7 +143,7 @@ func logSpinnakerMigrationDetails(authMethod string) {
 		"  Authentication method: %s",
 		migrationReq.Platform,
 		migrationReq.SpinnakerHost,
-		migrationReq.AppName,
+		migrationReq.SpinnakerAppName,
 		migrationReq.PipelineName,
 		authMethod,
 	)
@@ -565,7 +565,7 @@ func main() {
 					&cli.StringFlag{
 						Name:        "app-name",
 						Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
-						Destination: &migrationReq.AppName,
+						Destination: &migrationReq.SpinnakerAppName,
 					},
 					&cli.StringFlag{
 						Name:        "pipeline-name",

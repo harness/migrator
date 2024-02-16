@@ -7,6 +7,10 @@ import (
 
 func migrateApp(*cli.Context) error {
 	promptConfirm := PromptDefaultInputs()
+	if migrationReq.Platform == spinnaker {
+		return migrateSpinnakerApplication()
+	}
+
 	if len(migrationReq.AppId) == 0 {
 		promptConfirm = true
 		migrationReq.AppId = TextInput("Please provide the application ID of the app that you wish to import -")
@@ -47,4 +51,45 @@ func migrateApp(*cli.Context) error {
 	log.Info("Imported the application.")
 
 	return nil
+}
+
+func migrateSpinnakerApplication() error {
+	authMethod := authBasic
+	if len(migrationReq.Cert) > 0 {
+		authMethod = authx509
+	}
+
+	if len(migrationReq.SpinnakerHost) == 0 {
+		migrationReq.SpinnakerHost = TextInput("Please provide spinnaker host")
+	}
+	if len(migrationReq.SpinnakerAppName) == 0 {
+		migrationReq.SpinnakerAppName = TextInput("Please provide the Spinnaker application name")
+	}
+
+	log.Info("Importing the application....")
+	logSpinnakerMigrationDetails(authMethod)
+	confirm := ConfirmInput("Do you want to proceed with pipeline migration?")
+	if !confirm {
+		log.Fatal("Aborting...")
+	}
+
+	// for now we are only creating project and migrating pipelines
+	err := createAProject("default", migrationReq.SpinnakerAppName, formatString(migrationReq.SpinnakerAppName))
+	if err != nil {
+		log.Error(err)
+	}
+
+	jsonBody, err := getAllPipelines(authMethod)
+	if err != nil {
+		return err
+	}
+
+	pipelines, err := normalizeJsonArray(jsonBody)
+	if err != nil {
+		return err
+	}
+
+	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
+	_, err = createSpinnakerPipelines(payload)
+	return err
 }
