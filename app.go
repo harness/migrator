@@ -68,7 +68,7 @@ func migrateSpinnakerApplication() error {
 
 	log.Info("Importing the application....")
 	logSpinnakerMigrationDetails(authMethod)
-	confirm := ConfirmInput("Do you want to proceed with pipeline migration?")
+	confirm := ConfirmInput("Do you want to proceed with application migration?")
 	if !confirm {
 		log.Fatal("Aborting...")
 	}
