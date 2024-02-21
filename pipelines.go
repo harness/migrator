@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"strconv"
 )
 
 const spinnaker string = "spinnaker"
@@ -72,8 +73,8 @@ func migrateSpinnakerPipelines() error {
 	if len(migrationReq.SpinnakerHost) == 0 {
 		migrationReq.SpinnakerHost = TextInput("Please provide spinnaker host")
 	}
-	if len(migrationReq.AppName) == 0 {
-		migrationReq.AppName = TextInput("Please provide the Spinnaker application name")
+	if len(migrationReq.SpinnakerAppName) == 0 {
+		migrationReq.SpinnakerAppName = TextInput("Please provide the Spinnaker application name")
 	}
 
 	if !migrationReq.All {
@@ -234,11 +235,11 @@ func findPipelineIdByName(pipelines []PipelineDetails, name string) string {
 }
 
 func getAllPipelines(authMethod string) ([]byte, error) {
-	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.AppName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key)
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key)
 }
 
 func getSinglePipeline(authMethod string, name string) ([]byte, error) {
-	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.AppName+"/pipelineConfigs/"+name, authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key)
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs/"+name, authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key)
 }
 
 func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
