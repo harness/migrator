@@ -113,7 +113,7 @@ func AuthHeaderKey(auth string) string {
 	return "x-api-key"
 }
 
-func GetWithAuth(host string, query string, authMethod string, base64Auth string, certPath string, keyPath string) (body []byte, err error) {
+func GetWithAuth(host string, query string, authMethod string, base64Auth string, certPath string, keyPath string, insecure bool) (body []byte, err error) {
 	baseURL := "https://" + host + "/api/v1/" + query
 
 	var client *http.Client
@@ -134,24 +134,24 @@ func GetWithAuth(host string, query string, authMethod string, base64Auth string
 		// Load client certificate
 		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 		if err != nil {
-			fmt.Println("Error loading certificate:", err)
+			log.WithError(err).Error("Error loading certificate")
 			return nil, err
 		}
 
 		// Create a HTTPS client and supply the created CA pool and certificate
 		config := &tls.Config{
-			Certificates: []tls.Certificate{cert},
+			Certificates:       []tls.Certificate{cert},
+			InsecureSkipVerify: insecure,
 			// In a real application, you should adjust the TLS settings according to your security requirements.
 		}
 		client = &http.Client{Transport: &http.Transport{TLSClientConfig: config}}
 	} else {
-		fmt.Println("Unsupported authentication method")
 		return nil, fmt.Errorf("unsupported authentication method %s", authMethod)
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error sending request:", err)
+		log.WithError(err).Error("Error sending request")
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -159,9 +159,10 @@ func GetWithAuth(host string, query string, authMethod string, base64Auth string
 	// Read and print the response body
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
+		log.Error("Error reading response body:", err)
 		return nil, err
 	}
-	fmt.Println(string(body))
+	log.Debugf("Found the following pipelines:")
+	log.Debugf(string(body))
 	return body, nil
 }

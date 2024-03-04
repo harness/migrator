@@ -67,6 +67,7 @@ var migrationReq = struct {
 	Cert                  string `survey:"cert"`
 	Key                   string `survey:"key"`
 	Auth64                string `survey:"auth64"`
+	Insecure              bool   `survey:"insecure"`
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
@@ -140,12 +141,14 @@ func logSpinnakerMigrationDetails(authMethod string) {
 		"  Spinnaker Host: %s\n"+
 		"  App name: %s\n"+
 		"  Pipeline Name: %s\n"+
-		"  Authentication method: %s",
+		"  Authentication method: %s \n"+
+		"  Insecure: %t",
 		migrationReq.Platform,
 		migrationReq.SpinnakerHost,
 		migrationReq.SpinnakerAppName,
 		migrationReq.PipelineName,
 		authMethod,
+		migrationReq.Insecure,
 	)
 
 	// Log the formatted message
@@ -586,6 +589,11 @@ func main() {
 						Name:        "cert",
 						Usage:       "Cert file location in case Spinnaker uses x509 auth",
 						Destination: &migrationReq.Cert,
+					},
+					&cli.BoolFlag{
+						Name:        "insecure",
+						Usage:       "Weteher to validate the TLS certificate or not",
+						Destination: &migrationReq.Insecure,
 					},
 					&cli.StringFlag{
 						Name:        "key",
