@@ -143,16 +143,17 @@ func bulkCreateProject(*cli.Context) error {
 
 func writeYamlToFile(appId string, appName string, orgIdentifier string, projectIdentifier string) error {
 	yamlData := map[string]string{
-		"env":             migrationReq.Environment,
-		"account":         migrationReq.Account,
-		"api-key":         migrationReq.Auth,
-		"app":             appId,
-		"org":             orgIdentifier,
-		"project":         projectIdentifier,
-		"secret-scope":    migrationReq.SecretScope,
-		"connector-scope": migrationReq.ConnectorScope,
-		"template-scope":  migrationReq.TemplateScope,
-		"workflow-scope":  Project,
+		"env":                  migrationReq.Environment,
+		"account":              migrationReq.Account,
+		"api-key":              migrationReq.Auth,
+		"app":                  appId,
+		"org":                  orgIdentifier,
+		"project":              projectIdentifier,
+		"secret-scope":         migrationReq.SecretScope,
+		"secret-manager-scope": migrationReq.SecretManagerScope,
+		"connector-scope":      migrationReq.ConnectorScope,
+		"template-scope":       migrationReq.TemplateScope,
+		"workflow-scope":       Project,
 	}
 
 	yamlContent, err := yaml.Marshal(&yamlData)

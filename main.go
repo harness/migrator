@@ -20,6 +20,7 @@ var migrationReq = struct {
 	Environment           string `survey:"environment"`
 	Account               string `survey:"account"`
 	SecretScope           string `survey:"secretScope"`
+	SecretManagerScope    string `survey:"secretManagerScope"`
 	ConnectorScope        string `survey:"connectorScope"`
 	WorkflowScope         string `survey:"workflowScope"`
 	PipelineScope         string `survey:"pipelineScope"`
@@ -71,15 +72,16 @@ var migrationReq = struct {
 }{}
 
 func getReqBody(entityType EntityType, filter Filter) RequestBody {
+	secretScope := getOrDefault(migrationReq.SecretScope, Project)
 	inputs := Inputs{
 		Overrides:   LoadOverridesFromFile(migrationReq.OverrideFile),
 		Replace:     LoadCustomeStringsFromFile(migrationReq.CustomStringsFile),
 		Expressions: LoadYamlFromFile(migrationReq.CustomExpressionsFile),
 		Settings:    LoadSettingsFromFile(migrationReq.OverrideFile),
 		Defaults: Defaults{
-			Secret:                EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
-			SecretManager:         EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
-			SecretManagerTemplate: EntityDefaults{Scope: getOrDefault(migrationReq.SecretScope, Project)},
+			Secret:                EntityDefaults{Scope: secretScope},
+			SecretManager:         EntityDefaults{Scope: getOrDefault(migrationReq.SecretManagerScope, secretScope)},
+			SecretManagerTemplate: EntityDefaults{Scope: getOrDefault(migrationReq.SecretManagerScope, secretScope)},
 			Connector:             EntityDefaults{Scope: getOrDefault(migrationReq.ConnectorScope, Project)},
 			Template:              EntityDefaults{Scope: getOrDefault(migrationReq.TemplateScope, Project)},
 			Environment:           EntityDefaults{Scope: getOrDefault(migrationReq.EnvironmentScope, Project)},
@@ -224,6 +226,11 @@ func main() {
 			Name:        "secret-scope",
 			Usage:       "`SCOPE` to create secrets in. Possible values - account, org, project",
 			Destination: &migrationReq.SecretScope,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "secret-manager-scope",
+			Usage:       "`SCOPE` to create secret managers in. Possible values - account, org, project",
+			Destination: &migrationReq.SecretManagerScope,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "connector-scope",
