@@ -293,7 +293,7 @@ func findPipelineIdByName(pipelines []PipelineDetails, name string) string {
 }
 
 func getAllPipelines(authMethod string) ([]byte, error) {
-	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key)
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.Insecure)
 }
 
 // this is because there's no endpoint in gate to fetch pipeline config based on a pipeline id
@@ -328,7 +328,7 @@ func findPipelineIndexForName(pipelines []map[string]interface{}, pipelineName s
 }
 
 func getSinglePipeline(authMethod string, name string) ([]byte, error) {
-	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs/"+name, authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key)
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs/"+name, authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.Insecure)
 }
 
 func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
@@ -339,16 +339,25 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 	}
 	url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "spinnaker/pipelines", queryParams)
 	resp, err := Post(url, migrationReq.Auth, pipelines)
-	if err != nil || resp.Status != "SUCCESS" {
+	if err != nil {
 		log.Fatal("Failed to create pipelines", err)
-		return
 	}
 	resource, err := getResource(resp.Resource)
-	if err != nil || len(resource.RequestId) == 0 {
-		log.Fatal("Failed to create the entities", err)
-		return
+	if err == nil && resource.Errors != nil && len(resource.Errors) > 0 {
+		// Convert the data to JSON
+		jsonData, err := json.MarshalIndent(resource.Errors, "", "    ")
+		if err != nil {
+			// Handle the error
+			log.Error(err)
+		}
+		// Convert bytes to string and print
+		jsonString := string(jsonData)
+		log.Warnf(jsonString)
 	}
-	reqId = resource.RequestId
-	log.Infof("The request id is - %s", reqId)
+	if len(resource.RequestId) != 0 {
+		reqId = resource.RequestId
+		log.Infof("The request id is - %s", reqId)
+	}
+	log.Info("Spinnaker migration completed")
 	return
 }

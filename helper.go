@@ -469,7 +469,7 @@ func LoadOverridesFromFile(filePath string) map[string]EntityOverrideInput {
 	for i, override := range data.Overrides {
 		assertNotBlank(override.Type, fmt.Sprintf("Type cannot be blank in overrides for index - %d", i))
 		assertNotAllBlank(fmt.Sprintf("Name, Identifier & Scope are blank in overrides for index - %d", i), override.Name, override.Identifier, override.Scope)
-		assertAllowedValues(override.Type, []string{UserGroups, Template, Connector, Secret, Service, Environment, Workflow, Pipeline}, fmt.Sprintf("Only a few types of entities support overrides for index %d", i))
+		assertAllowedValues(override.Type, []string{UserGroups, Template, Connector, Secret, Service, Environment, Workflow, Pipeline, SecretManager}, fmt.Sprintf("Only a few types of entities support overrides for index %d", i))
 		if len(strings.TrimSpace(override.ID)) > 0 {
 			overrides[fmt.Sprintf("CgEntityId(id=%s, type=%s)", override.ID, override.Type)] = EntityOverrideInput{
 				Name:       override.Name,
