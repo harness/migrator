@@ -20,18 +20,18 @@ import (
 )
 
 const (
-	Prod               = "Prod"
-	QA                 = "QA"
-	Dev                = "Dev"
-	Prod3              = "Prod3"
-	SelfManaged        = "SelfManaged"
+	Prod        = "Prod"
+	QA          = "QA"
+	Dev         = "Dev"
+	Prod3       = "Prod3"
+	SelfManaged = "SelfManaged"
 )
 
 const (
-	MigratorService        = "Migrator"
-	NextGenService         = "NextGen"
-	TemplateService        = "Template"
-	PipelineService        = "Pipeline"
+	MigratorService = "Migrator"
+	NextGenService  = "NextGen"
+	TemplateService = "Template"
+	PipelineService = "Pipeline"
 )
 
 var urlMap = map[string]map[string]string{
