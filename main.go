@@ -352,6 +352,11 @@ func main() {
 			Usage:       "Specifies URL to the Spinnaker Gate service. Required when --platform is spinnaker.",
 			Destination: &migrationReq.SpinnakerAPIKey,
 		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "auth64",
+			Usage:       "Base64 <username>:<password>  in case Spinnaker uses basic auth.",
+			Destination: &migrationReq.Auth64,
+		}),
 	}
 	app := &cli.App{
 		Name:                 "harness-upgrade",
@@ -429,11 +434,6 @@ func main() {
 						Name:        "app-name",
 						Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
 						Destination: &migrationReq.SpinnakerAppName,
-					},
-					&cli.StringFlag{
-						Name:        "auth64",
-						Usage:       "Base64 <username>:<password>  in case Spinnaker uses basic auth.",
-						Destination: &migrationReq.Auth64,
 					},
 				},
 			},
