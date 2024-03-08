@@ -360,9 +360,7 @@ func getDynamicExpressionValue(key string) string {
 	var dynamic string
 	if strings.HasSuffix(k, "(") {
 		dynamic = strings.Replace(key, k, "", 1)
-		if strings.HasSuffix(dynamic, ")") {
-			dynamic = dynamic[0 : len(dynamic)-1]
-		}
+		dynamic = strings.TrimSuffix(dynamic, ")")
 	} else {
 		dynamic = strings.Replace(key, k+".", "", 1)
 	}
@@ -370,7 +368,7 @@ func getDynamicExpressionValue(key string) string {
 }
 
 func getDynamicExpressionKey(key string) string {
-	for exp, _ := range DynamicExpressions {
+	for exp := range DynamicExpressions {
 		if strings.HasPrefix(key, exp) {
 			return exp
 		}

@@ -98,6 +98,9 @@ func migrateSpinnakerPipelines() error {
 		return err
 	}
 	pipelines, err = normalizeJsonArray(jsonBody)
+	if err != nil {
+		return err
+	}
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
 	_, err = createSpinnakerPipelines(payload)
 	return err
