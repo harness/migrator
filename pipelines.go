@@ -111,9 +111,9 @@ func migrateSpinnakerPipelines() error {
 }
 
 func fetchDependentPipelines(pipelines []map[string]interface{}, err error, authMethod string) ([]map[string]interface{}, error) {
-	var pipelinesToRemove []int
-	for _, pipeline := range pipelines {
 
+	for _, pipeline := range pipelines {
+		var pipelinesToRemove []int
 		stages, ok := pipeline["stages"].([]interface{})
 		if !ok {
 			fmt.Println("Error: Unable to assert 'stages' to the correct type.")
@@ -128,27 +128,70 @@ func fetchDependentPipelines(pipelines []map[string]interface{}, err error, auth
 			if okType && stageType == "pipeline" && okId {
 				// Operations on the filtered stage
 				fmt.Printf("Updated stage with pipeline ID %s\n", pipelineId)
-				var dependentPipeline map[string]interface{}
+				//var dependentPipeline map[string]interface{}
 
-				dependentPipeline, err = findPipelineById(authMethod, pipelineId)
-				if err != nil {
-					return nil, err
-				}
-				s["dependentPipeline"] = dependentPipeline
-				index, _ := findPipelineIndexForName(pipelines, dependentPipeline["name"].(string))
+				pipelinesToRemove, err = addDependentPipelineRecursive(pipelines, s, pipelineId, pipelinesToRemove, err, authMethod)
 
-				if index != -1 {
-					pipelinesToRemove = append(pipelinesToRemove, index)
-				}
+				//dependentPipeline, err = findPipelineById(authMethod, pipelineId)
+				//if err != nil {
+				//	return nil, err
+				//}
+				//s["dependentPipeline"] = dependentPipeline
+				//index, _, _ := findPipelineIndexForName(pipelines, dependentPipeline["name"].(string))
+				//
+				//if index != -1 {
+				//	pipelinesToRemove = append(pipelinesToRemove, index)
+				//}
 
 				fmt.Printf("Updated stage with pipeline ID %s\n", pipelineId)
 				// Additional operations using pipelineId can be performed here
 			}
 		}
+		// delete pipelines that are marked as dependent pipelines
+		pipelines = deleteElements(pipelines, pipelinesToRemove)
 	}
-	// delete pipelines that are marked as dependent pipelines
-	pipelines = deleteElements(pipelines, pipelinesToRemove)
+
 	return pipelines, err
+}
+
+func addDependentPipelineRecursive(pipelines []map[string]interface{}, pipelineStage map[string]interface{}, pipelineId string, pipelinesToRemove []int, err error, authMethod string) ([]int, error) {
+
+	i, p, err := findPipelineIndexById(pipelines, pipelineId)
+
+	if err == nil {
+
+		if p == nil {
+			p, err = findPipelineById(authMethod, pipelineId)
+		} else {
+			pipelinesToRemove = append(pipelinesToRemove, i)
+			//pipelines = deleteElements(pipelines, pipelinesToRemove)
+		}
+		stages, ok := p["stages"].([]interface{})
+		if !ok {
+			fmt.Println("Error: Unable to assert 'stages' to the correct type.")
+			return nil, errors.New("Spinnaker Pipeline not found by id")
+		}
+		for _, stage := range stages {
+			s := stage.(map[string]interface{})
+			stageType, okType := s["type"].(string)
+			pId, okId := s["pipeline"].(string)
+
+			if okType && stageType == "pipeline" && okId {
+				pipelineStage["dependentPipeline"] = p
+				pipelinesToRemove, err := addDependentPipelineRecursive(pipelines, s, pId, pipelinesToRemove, err, authMethod)
+				if err != nil {
+					return nil, err
+				}
+				return pipelinesToRemove, nil
+			} else {
+				pipelineStage["dependentPipeline"] = p
+				return pipelinesToRemove, nil
+			}
+		}
+
+	}
+	return nil, err
+
 }
 func deleteElements(slice []map[string]interface{}, indices []int) []map[string]interface{} {
 	// Sort indices in descending order
@@ -317,14 +360,24 @@ func findPipelineById(authMethod string, pipelineId string) (map[string]interfac
 	return nil, errors.New("Spinnaker Pipeline not found by id")
 }
 
-func findPipelineIndexForName(pipelines []map[string]interface{}, pipelineName string) (int, error) {
+func findPipelineIndexById(pipelines []map[string]interface{}, pipelineId string) (int, map[string]interface{}, error) {
+
+	for i, p := range pipelines {
+		if id, ok := p["id"].(string); ok && id == pipelineId {
+			return i, p, nil
+		}
+	}
+	return -1, nil, errors.New("Spinnaker Pipeline not found by id")
+}
+
+func findPipelineIndexForName(pipelines []map[string]interface{}, pipelineName string) (int, map[string]interface{}, error) {
 
 	for i, p := range pipelines {
 		if name, ok := p["name"].(string); ok && name == pipelineName {
-			return i, nil
+			return i, p, nil
 		}
 	}
-	return -1, errors.New("Spinnaker Pipeline not found by id")
+	return -1, nil, errors.New("Spinnaker Pipeline not found by id")
 }
 
 func getSinglePipeline(authMethod string, name string) ([]byte, error) {
