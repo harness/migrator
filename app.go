@@ -79,7 +79,7 @@ func migrateSpinnakerApplication() error {
 		log.Error(err)
 	}
 
-	jsonBody, err := getAllPipelines(authMethod)
+	jsonBody, err := getAllPipelines(authMethod, migrationReq.SpinnakerAppName)
 	if err != nil {
 		return err
 	}

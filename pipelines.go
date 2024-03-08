@@ -94,26 +94,38 @@ func migrateSpinnakerPipelines() error {
 	if len(migrationReq.PipelineName) > 0 {
 		jsonBody, err = getSinglePipeline(authMethod, migrationReq.PipelineName)
 	} else {
-		jsonBody, err = getAllPipelines(authMethod)
+		jsonBody, err = getAllPipelines(authMethod, migrationReq.SpinnakerAppName)
 	}
 	if err != nil {
 		return err
 	}
 	pipelines, err = normalizeJsonArray(jsonBody)
+	jsonBytes, err := json.MarshalIndent(pipelines, "", "   ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(jsonBytes))
 	pipelines, err = fetchDependentPipelines(pipelines, err, authMethod)
+
 	if err != nil {
 		return err
 	}
 
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
+	jsonBytes, err = json.MarshalIndent(payload, "", "   ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(jsonBytes))
 	_, err = createSpinnakerPipelines(payload)
 	return err
 }
 
 func fetchDependentPipelines(pipelines []map[string]interface{}, err error, authMethod string) ([]map[string]interface{}, error) {
-
+	var pipelinesToRemove []int
 	for _, pipeline := range pipelines {
-		var pipelinesToRemove []int
 		stages, ok := pipeline["stages"].([]interface{})
 		if !ok {
 			fmt.Println("Error: Unable to assert 'stages' to the correct type.")
@@ -147,11 +159,22 @@ func fetchDependentPipelines(pipelines []map[string]interface{}, err error, auth
 				// Additional operations using pipelineId can be performed here
 			}
 		}
-		// delete pipelines that are marked as dependent pipelines
-		pipelines = deleteElements(pipelines, pipelinesToRemove)
 	}
-
+	uniqueElementsToRemove := uniqueSliceElements(pipelinesToRemove)
+	pipelines = deleteElements(pipelines, uniqueElementsToRemove)
 	return pipelines, err
+}
+
+func uniqueSliceElements[T comparable](inputSlice []T) []T {
+	uniqueSlice := make([]T, 0, len(inputSlice))
+	seen := make(map[T]bool, len(inputSlice))
+	for _, element := range inputSlice {
+		if !seen[element] {
+			uniqueSlice = append(uniqueSlice, element)
+			seen[element] = true
+		}
+	}
+	return uniqueSlice
 }
 
 func addDependentPipelineRecursive(pipelines []map[string]interface{}, pipelineStage map[string]interface{}, pipelineId string, pipelinesToRemove []int, err error, authMethod string) ([]int, error) {
@@ -161,7 +184,8 @@ func addDependentPipelineRecursive(pipelines []map[string]interface{}, pipelineS
 	if err == nil {
 
 		if p == nil {
-			p, err = findPipelineById(authMethod, pipelineId)
+			var appName = pipelineStage["application"].(string)
+			p, err = findPipelineById(authMethod, appName, pipelineId)
 		} else {
 			pipelinesToRemove = append(pipelinesToRemove, i)
 			//pipelines = deleteElements(pipelines, pipelinesToRemove)
@@ -169,7 +193,7 @@ func addDependentPipelineRecursive(pipelines []map[string]interface{}, pipelineS
 		stages, ok := p["stages"].([]interface{})
 		if !ok {
 			fmt.Println("Error: Unable to assert 'stages' to the correct type.")
-			return nil, errors.New("Spinnaker Pipeline not found by id")
+			return nil, errors.New("Unable to assert 'stages' to the correct type.")
 		}
 		for _, stage := range stages {
 			s := stage.(map[string]interface{})
@@ -335,17 +359,17 @@ func findPipelineIdByName(pipelines []PipelineDetails, name string) string {
 	return ""
 }
 
-func getAllPipelines(authMethod string) ([]byte, error) {
-	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.Insecure)
+func getAllPipelines(authMethod string, appName string) ([]byte, error) {
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+appName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.Insecure)
 }
 
 // this is because there's no endpoint in gate to fetch pipeline config based on a pipeline id
-func findPipelineById(authMethod string, pipelineId string) (map[string]interface{}, error) {
+func findPipelineById(authMethod string, appName string, pipelineId string) (map[string]interface{}, error) {
 
 	var jsonBody []byte
 	var err error
 	var pipelines []map[string]interface{}
-	jsonBody, err = getAllPipelines(authMethod)
+	jsonBody, err = getAllPipelines(authMethod, appName)
 	pipelines, err = normalizeJsonArray(jsonBody)
 
 	if err != nil {
@@ -364,16 +388,6 @@ func findPipelineIndexById(pipelines []map[string]interface{}, pipelineId string
 
 	for i, p := range pipelines {
 		if id, ok := p["id"].(string); ok && id == pipelineId {
-			return i, p, nil
-		}
-	}
-	return -1, nil, errors.New("Spinnaker Pipeline not found by id")
-}
-
-func findPipelineIndexForName(pipelines []map[string]interface{}, pipelineName string) (int, map[string]interface{}, error) {
-
-	for i, p := range pipelines {
-		if name, ok := p["name"].(string); ok && name == pipelineName {
 			return i, p, nil
 		}
 	}
