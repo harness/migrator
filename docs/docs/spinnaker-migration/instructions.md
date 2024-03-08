@@ -1,7 +1,6 @@
  # Instructions
 
 
-
 ## Install Migrator
 
 `curl https://raw.githubusercontent.com/harness/migrator/master/install | sh`
@@ -12,7 +11,8 @@
 
 ## Create migrator-config.yml file
 
-`env: Prod1
+```yaml
+env: Prod1
 api-key: API_KEY
 account: AccountID
 platform: spinnaker
@@ -22,7 +22,8 @@ org: default
 secret-scope: project
 connector-scope: project
 template-scope: project
-workflow-scope: project  `
+workflow-scope: project
+```
 
 ## Run command
 
@@ -30,6 +31,7 @@ workflow-scope: project  `
 
 ## You should get output like this with some prompts:
 
+```shell
 `INFO[2024-03-04T15:50:38-08:00] Importing the application....                
 INFO[2024-03-04T15:50:38-08:00] 
 Migration details:
@@ -41,3 +43,4 @@ Migration details:
   Insecure: false 
 ? Do you want to proceed with application migration? Yes
 INFO[2024-03-04T15:50:41-08:00] Spinnaker migration completed`
+```
