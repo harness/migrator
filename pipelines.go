@@ -123,25 +123,8 @@ func fetchDependentPipelines(pipelines []map[string]interface{}, err error, auth
 			pipelineId, okId := s["pipeline"].(string)
 
 			if okType && stageType == "pipeline" && okId {
-				// Operations on the filtered stage
-				fmt.Printf("Updated stage with pipeline ID %s\n", pipelineId)
-				//var dependentPipeline map[string]interface{}
-
 				pipelinesToRemove, err = addDependentPipelineRecursive(pipelines, s, pipelineId, pipelinesToRemove, err, authMethod)
-
-				//dependentPipeline, err = findPipelineById(authMethod, pipelineId)
-				//if err != nil {
-				//	return nil, err
-				//}
-				//s["dependentPipeline"] = dependentPipeline
-				//index, _, _ := findPipelineIndexForName(pipelines, dependentPipeline["name"].(string))
-				//
-				//if index != -1 {
-				//	pipelinesToRemove = append(pipelinesToRemove, index)
-				//}
-
 				fmt.Printf("Updated stage with pipeline ID %s\n", pipelineId)
-				// Additional operations using pipelineId can be performed here
 			}
 		}
 	}
