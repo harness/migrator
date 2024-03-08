@@ -78,7 +78,7 @@ func readTar(body io.ReadCloser, dest string) error {
 		return err
 	}
 	reader := tar.NewReader(gzRead)
-	for true {
+	for {
 		header, err := reader.Next()
 		if err == io.EOF {
 			break

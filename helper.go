@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	Prod        string = "Prod"
+	Prod               = "Prod"
 	QA                 = "QA"
 	Dev                = "Dev"
 	Prod3              = "Prod3"
@@ -28,7 +28,7 @@ const (
 )
 
 const (
-	MigratorService string = "Migrator"
+	MigratorService        = "Migrator"
 	NextGenService         = "NextGen"
 	TemplateService        = "Template"
 	PipelineService        = "Pipeline"
@@ -153,7 +153,7 @@ func Set(str []string) []string {
 	for _, val := range str {
 		dict[val] = true
 	}
-	for k, _ := range dict {
+	for k := range dict {
 		result = append(result, k)
 	}
 	return result
@@ -512,14 +512,14 @@ func LoadCustomeStringsFromFile(filePath string) map[string]string {
 	// Read the entire file
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		fmt.Sprintf("error reading file: %v", err)
+		log.Info(fmt.Sprintf("error reading file: %v", err))
 	}
 
 	// Unmarshal YAML content into a slice of maps
 	var replaceSections []map[string]string
 	err = yaml.Unmarshal(content, &replaceSections)
 	if err != nil {
-		fmt.Sprintf("error unmarshalling YAML: %v", err)
+		log.Info(fmt.Sprintf("error unmarshalling YAML: %v", err))
 	}
 
 	// Create a map to store the accumulated sections
@@ -535,7 +535,7 @@ func LoadCustomeStringsFromFile(filePath string) map[string]string {
 			delete(replaceSection, "new")
 			mergedSections[oldValue] = newValue
 		} else {
-			fmt.Sprintf("'old' or 'new' keys not found in a section")
+			log.Info("'old' or 'new' keys not found in a section")
 		}
 	}
 	return mergedSections
