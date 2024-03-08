@@ -9,11 +9,11 @@ Before using the Spinnaker to CD Next Gen migration tool, you must have the foll
 
 - Armory Account - Armory Platform | Spinnaker 
 
-- Harness Account - <AccountID>
+- Harness Account - AccountID
 
-- Harness Org - default> if not provided
+- Harness Org - default if not provided
 
-- Harness Project - <Project_Name>
+- Harness Project - Project_Name
 
 - API Key - Follow instructions at Manage API keys | Harness Developer Hub 
 
