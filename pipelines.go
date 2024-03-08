@@ -104,6 +104,9 @@ func migrateSpinnakerPipelines() error {
 		return err
 	}
 	pipelines, err = fetchDependentPipelines(pipelines, err, authMethod)
+	if err != nil {
+		return err
+	}
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
 	_, err = createSpinnakerPipelines(payload)
 	return err
@@ -125,7 +128,7 @@ func fetchDependentPipelines(pipelines []map[string]interface{}, err error, auth
 
 			if okType && stageType == "pipeline" && okId {
 				pipelinesToRemove, err = addDependentPipelineRecursive(pipelines, s, pipelineId, pipelinesToRemove, err, authMethod)
-				fmt.Printf("Updated stage with pipeline ID %s\n", pipelineId)
+				log.Info(fmt.Printf("Updated stage with pipeline ID %s\n", pipelineId))
 			}
 		}
 	}
@@ -161,8 +164,8 @@ func addDependentPipelineRecursive(pipelines []map[string]interface{}, pipelineS
 		}
 		stages, ok := p["stages"].([]interface{})
 		if !ok {
-			fmt.Println("Error: Unable to assert 'stages' to the correct type.")
-			return nil, errors.New("Unable to assert 'stages' to the correct type.")
+			fmt.Println("error: nable to assert 'stages' to the correct type.")
+			return nil, errors.New("unable to assert 'stages' to the correct type")
 		}
 		for _, stage := range stages {
 			s := stage.(map[string]interface{})
@@ -353,7 +356,7 @@ func findPipelineById(authMethod string, appName string, pipelineId string) (map
 			return p, nil
 		}
 	}
-	return nil, errors.New("Spinnaker Pipeline not found by id")
+	return nil, errors.New("spinnaker Pipeline not found by id")
 }
 
 func findPipelineIndexById(pipelines []map[string]interface{}, pipelineId string) (int, map[string]interface{}, error) {
@@ -363,7 +366,7 @@ func findPipelineIndexById(pipelines []map[string]interface{}, pipelineId string
 			return i, p, nil
 		}
 	}
-	return -1, nil, errors.New("Spinnaker Pipeline not found by id")
+	return -1, nil, errors.New("spinnaker Pipeline not found by id")
 }
 
 func getSinglePipeline(authMethod string, name string) ([]byte, error) {
