@@ -41,7 +41,6 @@ func PromptSecretDetails() (promptConfirm bool) {
 }
 
 func PromptConnectorDetails() (promptConfirm bool) {
-	promptConfirm = PromptEnvDetails()
 	promptConfirm = PromptSecretDetails()
 	if len(migrationReq.ConnectorScope) == 0 {
 		promptConfirm = true

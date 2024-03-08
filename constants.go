@@ -18,9 +18,9 @@ const (
 )
 
 const (
-	Project string = "project"
-	Org            = "org"
-	Account        = "account"
+	Project = "project"
+	Org     = "org"
+	Account = "account"
 )
 
 const (
@@ -37,5 +37,8 @@ const (
 
 const (
 	AccountScope TemplateScope = "ACCOUNT"
-	AppScope                   = "APP"
+)
+
+const (
+	AppScope = "APP"
 )

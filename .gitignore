@@ -5,3 +5,8 @@
 /local.yaml
 /dev.yaml
 demo/
+
+.envrc
+.vscode
+
+harness-upgrade

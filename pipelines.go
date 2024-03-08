@@ -100,25 +100,10 @@ func migrateSpinnakerPipelines() error {
 		return err
 	}
 	pipelines, err = normalizeJsonArray(jsonBody)
-	jsonBytes, err := json.MarshalIndent(pipelines, "", "   ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(jsonBytes))
-	pipelines, err = fetchDependentPipelines(pipelines, err, authMethod)
-
 	if err != nil {
 		return err
 	}
-
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
-	jsonBytes, err = json.MarshalIndent(payload, "", "   ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(jsonBytes))
 	_, err = createSpinnakerPipelines(payload)
 	return err
 }

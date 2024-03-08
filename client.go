@@ -8,7 +8,6 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -157,7 +156,7 @@ func GetWithAuth(host string, query string, authMethod string, base64Auth string
 	defer resp.Body.Close()
 
 	// Read and print the response body
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		log.Error("Error reading response body:", err)
 		return nil, err
