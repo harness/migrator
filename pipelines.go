@@ -103,6 +103,7 @@ func migrateSpinnakerPipelines() error {
 	if err != nil {
 		return err
 	}
+	pipelines, err = fetchDependentPipelines(pipelines, err, authMethod)
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
 	_, err = createSpinnakerPipelines(payload)
 	return err
@@ -338,6 +339,9 @@ func findPipelineById(authMethod string, appName string, pipelineId string) (map
 	var err error
 	var pipelines []map[string]interface{}
 	jsonBody, err = getAllPipelines(authMethod, appName)
+	if err != nil {
+		return nil, err
+	}
 	pipelines, err = normalizeJsonArray(jsonBody)
 
 	if err != nil {
