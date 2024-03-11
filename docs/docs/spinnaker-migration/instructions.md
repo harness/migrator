@@ -23,11 +23,12 @@ secret-scope: project
 connector-scope: project
 template-scope: project
 workflow-scope: project
+auth64: AUTH_TOKEN
 ```
 
 ## Run command
 
-`harness-upgrade --load migrator-config.yml app --app-name prasadtest --auth64 YWRtaW46YWJjMTIz`
+`harness-upgrade --load migrator-config.yml app --app-name prasadtest`
 
 ## You should get output like this with some prompts:
 
