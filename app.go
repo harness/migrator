@@ -72,11 +72,8 @@ func migrateSpinnakerApplication() error {
 	if !confirm {
 		log.Fatal("Aborting...")
 	}
-
-	// for now we are only creating project and migrating pipelines
-	err := createAProject("default", migrationReq.SpinnakerAppName, formatString(migrationReq.SpinnakerAppName))
-	if err != nil {
-		log.Error(err)
+	if len(migrationReq.ProjectIdentifier) == 0 {
+		migrationReq.ProjectIdentifier = TextInput("Name of the Project - ")
 	}
 
 	jsonBody, err := getAllPipelines(authMethod)
@@ -87,6 +84,24 @@ func migrateSpinnakerApplication() error {
 	pipelines, err := normalizeJsonArray(jsonBody)
 	if err != nil {
 		return err
+	}
+	//first check if there are any pipeline to be migrated or not if not then don't create the project
+	if len(pipelines) == 0 {
+		log.Info("No pipelines found to be migrated")
+		return nil
+	} else {
+		// Check if the project already exists for the given input project name in the given org
+		projects := getProjects()
+		id := findProjectIdByName(projects, migrationReq.ProjectIdentifier)
+
+		if len(id) > 0 {
+			log.Info("Project already exists with the given name")
+		} else {
+			log.Info("Creating the project....")
+			if err := createAProject("default", migrationReq.ProjectIdentifier, formatString(migrationReq.ProjectIdentifier)); err != nil {
+				log.Error(err)
+			}
+		}
 	}
 
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
