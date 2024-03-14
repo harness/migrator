@@ -13,12 +13,12 @@
 
 ```yaml
 env: Prod1
-api-key: API_KEY
-account: AccountID
+api-key: NG_API_KEY
+account: NGAccountID
 platform: spinnaker
 spinnaker-host: harness-eval.dynamo-staging.eng.armory.io
-project: ProjectID
-org: default
+project: DestinationProjectID
+org: DestinationOrgID
 secret-scope: project
 connector-scope: project
 template-scope: project
@@ -28,7 +28,7 @@ auth64: AUTH_TOKEN
 
 ## Run command
 
-`harness-upgrade --load migrator-config.yml app --app-name prasadtest`
+`harness-upgrade --load migrator-config.yml app --app-name SpinnakerAppName`
 
 ## You should get output like this with some prompts:
 
