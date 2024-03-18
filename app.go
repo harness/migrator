@@ -54,26 +54,25 @@ func migrateApp(*cli.Context) error {
 }
 
 func migrateSpinnakerApplication() error {
+	log.Info("Starting the migration of Spinnaker application")
 	authMethod := authBasic
 	if len(migrationReq.Cert) > 0 {
 		authMethod = authx509
 	}
-
+	log.Info("Importing the application....")
 	if len(migrationReq.SpinnakerHost) == 0 {
-		migrationReq.SpinnakerHost = TextInput("Please provide spinnaker host")
+		migrationReq.SpinnakerHost = TextInput("Please provide spinnaker host : ")
 	}
 	if len(migrationReq.SpinnakerAppName) == 0 {
-		migrationReq.SpinnakerAppName = TextInput("Please provide the Spinnaker application name")
+		migrationReq.SpinnakerAppName = TextInput("Please provide the Spinnaker application name : ")
 	}
-
-	log.Info("Importing the application....")
 	logSpinnakerMigrationDetails(authMethod)
-	confirm := ConfirmInput("Do you want to proceed with application migration?")
+	confirm := ConfirmInput("Do you want to proceed?")
 	if !confirm {
 		log.Fatal("Aborting...")
 	}
 	if len(migrationReq.ProjectIdentifier) == 0 {
-		migrationReq.ProjectIdentifier = TextInput("Name of the Project - ")
+		migrationReq.ProjectIdentifier = TextInput("Name of the Project : ")
 	}
 
 	jsonBody, err := getAllPipelines(authMethod)
@@ -97,8 +96,8 @@ func migrateSpinnakerApplication() error {
 		if len(id) > 0 {
 			log.Info("Project already exists with the given name")
 		} else {
-			log.Info("Creating the project....")
-			if err := createAProject("default", migrationReq.ProjectIdentifier, formatString(migrationReq.ProjectIdentifier)); err != nil {
+			log.Info("Creating project....")
+			if err := createAProject(migrationReq.OrgIdentifier, migrationReq.ProjectIdentifier, formatString(migrationReq.ProjectIdentifier)); err != nil {
 				log.Error(err)
 			}
 		}

@@ -357,6 +357,11 @@ func main() {
 			Usage:       "Base64 <username>:<password>  in case Spinnaker uses basic auth.",
 			Destination: &migrationReq.Auth64,
 		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "app-name",
+			Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
+			Destination: &migrationReq.SpinnakerAppName,
+		}),
 	}
 	app := &cli.App{
 		Name:                 "harness-upgrade",
@@ -429,11 +434,6 @@ func main() {
 						Name:        "all",
 						Usage:       "if set will migrate all workflows & pipelines",
 						Destination: &migrationReq.AllAppEntities,
-					},
-					&cli.StringFlag{
-						Name:        "app-name",
-						Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
-						Destination: &migrationReq.SpinnakerAppName,
 					},
 				},
 			},
