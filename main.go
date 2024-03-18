@@ -583,11 +583,6 @@ func main() {
 						Destination: &migrationReq.Names,
 					},
 					&cli.StringFlag{
-						Name:        "app-name",
-						Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
-						Destination: &migrationReq.SpinnakerAppName,
-					},
-					&cli.StringFlag{
 						Name:        "pipeline-name",
 						Usage:       "Specifies Spinnaker Pipeline which to be migrated.",
 						Destination: &migrationReq.PipelineName,
@@ -606,11 +601,6 @@ func main() {
 						Name:        "key",
 						Usage:       "Optional. key file location in case Spinnaker uses x509 auth",
 						Destination: &migrationReq.Key,
-					},
-					&cli.StringFlag{
-						Name:        "auth64",
-						Usage:       "Base64 <username>:<password>  in case Spinnaker uses basic auth.",
-						Destination: &migrationReq.Auth64,
 					},
 				},
 				Subcommands: []*cli.Command{
