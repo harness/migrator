@@ -1,4 +1,8 @@
- # Instructions
+---
+sidebar_position: 3
+---
+
+# Instructions
 
 
 ## Install Migrator

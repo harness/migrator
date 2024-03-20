@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Advance Commands
 
 ## 1. Import Spinnaker pipeline to existing project
