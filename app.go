@@ -75,7 +75,7 @@ func migrateSpinnakerApplication() error {
 		migrationReq.ProjectIdentifier = TextInput("Name of the Project : ")
 	}
 
-	jsonBody, err := getAllPipelines(authMethod)
+	jsonBody, err := getAllPipelines(authMethod, migrationReq.SpinnakerAppName)
 	if err != nil {
 		return err
 	}
