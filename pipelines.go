@@ -71,16 +71,15 @@ func migrateSpinnakerPipelines() error {
 	if len(migrationReq.Cert) > 0 {
 		authMethod = authx509
 	}
-
+	log.Info("Importing the application....")
 	if len(migrationReq.SpinnakerHost) == 0 {
-		migrationReq.SpinnakerHost = TextInput("Please provide spinnaker host")
+		migrationReq.SpinnakerHost = TextInput("Please provide spinnaker host : ")
 	}
 	if len(migrationReq.SpinnakerAppName) == 0 {
-		migrationReq.SpinnakerAppName = TextInput("Please provide the Spinnaker application name")
+		migrationReq.SpinnakerAppName = TextInput("Please provide the Spinnaker application name : ")
 	}
-
-	if !migrationReq.All {
-		migrationReq.PipelineName = TextInput("Please provide the Spinnaker pipeline name")
+	if len(migrationReq.PipelineName) == 0 {
+		migrationReq.PipelineName = TextInput("Please provide the Spinnaker pipeline name : ")
 	}
 
 	logSpinnakerMigrationDetails(authMethod)

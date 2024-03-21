@@ -352,6 +352,16 @@ func main() {
 			Usage:       "Specifies URL to the Spinnaker Gate service. Required when --platform is spinnaker.",
 			Destination: &migrationReq.SpinnakerAPIKey,
 		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "auth64",
+			Usage:       "Base64 <username>:<password>  in case Spinnaker uses basic auth.",
+			Destination: &migrationReq.Auth64,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "app-name",
+			Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
+			Destination: &migrationReq.SpinnakerAppName,
+		}),
 	}
 	app := &cli.App{
 		Name:                 "harness-upgrade",
@@ -424,16 +434,6 @@ func main() {
 						Name:        "all",
 						Usage:       "if set will migrate all workflows & pipelines",
 						Destination: &migrationReq.AllAppEntities,
-					},
-					&cli.StringFlag{
-						Name:        "app-name",
-						Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
-						Destination: &migrationReq.SpinnakerAppName,
-					},
-					&cli.StringFlag{
-						Name:        "auth64",
-						Usage:       "Base64 <username>:<password>  in case Spinnaker uses basic auth.",
-						Destination: &migrationReq.Auth64,
 					},
 				},
 			},
@@ -583,11 +583,6 @@ func main() {
 						Destination: &migrationReq.Names,
 					},
 					&cli.StringFlag{
-						Name:        "app-name",
-						Usage:       "Specifies Spinnaker Application from which pipelines to be migrated.",
-						Destination: &migrationReq.SpinnakerAppName,
-					},
-					&cli.StringFlag{
 						Name:        "pipeline-name",
 						Usage:       "Specifies Spinnaker Pipeline which to be migrated.",
 						Destination: &migrationReq.PipelineName,
@@ -606,11 +601,6 @@ func main() {
 						Name:        "key",
 						Usage:       "Optional. key file location in case Spinnaker uses x509 auth",
 						Destination: &migrationReq.Key,
-					},
-					&cli.StringFlag{
-						Name:        "auth64",
-						Usage:       "Base64 <username>:<password>  in case Spinnaker uses basic auth.",
-						Destination: &migrationReq.Auth64,
 					},
 				},
 				Subcommands: []*cli.Command{
