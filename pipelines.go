@@ -78,7 +78,7 @@ func migrateSpinnakerPipelines() error {
 	if len(migrationReq.SpinnakerAppName) == 0 {
 		migrationReq.SpinnakerAppName = TextInput("Please provide the Spinnaker application name : ")
 	}
-	if len(migrationReq.PipelineName) == 0 {
+	if !migrationReq.All {
 		migrationReq.PipelineName = TextInput("Please provide the Spinnaker pipeline name : ")
 	}
 
@@ -378,6 +378,12 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 		OrgIdentifier:     migrationReq.OrgIdentifier,
 		AccountIdentifier: migrationReq.Account,
 	}
+	j, err := json.MarshalIndent(pipelines, "", "  ")
+	if err != nil {
+		log.Error(err)
+	}
+	str := string(j)
+	log.Info(str)
 	url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "spinnaker/pipelines", queryParams)
 	resp, err := Post(url, migrationReq.Auth, pipelines)
 	if err != nil {
