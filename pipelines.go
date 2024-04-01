@@ -380,31 +380,34 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 	}
 	j, err := json.MarshalIndent(pipelines, "", "  ")
 	if err != nil {
-		log.Error(err)
+		return "", fmt.Errorf("failed to marshal pipelines JSON: %v", err)
 	}
 	str := string(j)
 	log.Info(str)
 	url := GetUrlWithQueryParams(migrationReq.Environment, MigratorService, "spinnaker/pipelines", queryParams)
 	resp, err := Post(url, migrationReq.Auth, pipelines)
 	if err != nil {
-		log.Fatal("Failed to create pipelines", err)
+		return "", fmt.Errorf("failed to post pipelines: %v", err)
 	}
 	resource, err := getResource(resp.Resource)
-	if err == nil && resource.Errors != nil && len(resource.Errors) > 0 {
+	if err != nil {
+		return "", fmt.Errorf("failed to get resource: %v", err)
+	}
+	if resource.Errors != nil && len(resource.Errors) > 0 {
 		// Convert the data to JSON
 		jsonData, err := json.MarshalIndent(resource.Errors, "", "    ")
 		if err != nil {
-			// Handle the error
-			log.Error(err)
+			return "", fmt.Errorf("failed to marshal resource errors JSON: %v", err)
 		}
 		// Convert bytes to string and print
 		jsonString := string(jsonData)
 		log.Warnf(jsonString)
+		return "", fmt.Errorf("failed to create pipeline : %v", migrationReq.PipelineName)
 	}
 	if len(resource.RequestId) != 0 {
 		reqId = resource.RequestId
 		log.Infof("The request id is - %s", reqId)
 	}
 	log.Info("Spinnaker migration completed")
-	return
+	return reqId, nil
 }
