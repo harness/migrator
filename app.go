@@ -88,19 +88,6 @@ func migrateSpinnakerApplication() error {
 	if len(pipelines) == 0 {
 		log.Info("No pipelines found to be migrated")
 		return nil
-	} else {
-		// Check if the project already exists for the given input project name in the given org
-		projects := getProjects()
-		id := findProjectIdByName(projects, migrationReq.ProjectIdentifier)
-
-		if len(id) > 0 {
-			log.Info("Project already exists with the given name")
-		} else {
-			log.Info("Creating project....")
-			if err := createAProject(migrationReq.OrgIdentifier, migrationReq.ProjectIdentifier, formatString(migrationReq.ProjectIdentifier)); err != nil {
-				log.Error(err)
-			}
-		}
 	}
 
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}

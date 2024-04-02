@@ -378,16 +378,9 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 		OrgIdentifier:     migrationReq.OrgIdentifier,
 		AccountIdentifier: migrationReq.Account,
 	}
-	//check for the project exist or not
-	projects := getProjects()
-	id := findProjectIdByName(projects, migrationReq.ProjectIdentifier)
-	if len(id) > 0 {
-		log.Info("Project already exists with the given name")
-	} else {
-		log.Info("Creating project....")
-		if err := createAProject(migrationReq.OrgIdentifier, migrationReq.ProjectIdentifier, formatString(migrationReq.ProjectIdentifier)); err != nil {
-			log.Error(err)
-		}
+	err = CheckProjectExistsAndCreate()
+	if err != nil {
+		return "", err
 	}
 	j, err := json.MarshalIndent(pipelines, "", "  ")
 	if err != nil {

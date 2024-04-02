@@ -340,3 +340,29 @@ func CreateProjectsUsingCSV() (err error) {
 	}
 	return
 }
+
+func CheckProjectExistsAndCreate() error {
+	if len(migrationReq.ProjectIdentifier) == 0 {
+		migrationReq.ProjectIdentifier = TextInput("Identifier for the Project - ")
+	}
+
+	log.WithFields(log.Fields{
+		"Account":           migrationReq.Account,
+		"OrgIdentifier":     migrationReq.OrgIdentifier,
+		"ProjectIdentifier": migrationReq.ProjectIdentifier,
+	}).Info("Project check details : ")
+
+	projects := getProjects()
+	id := findProjectIdByName(projects, migrationReq.ProjectIdentifier)
+
+	if len(id) > 0 {
+		log.Infof("Project with identifier %s exists", migrationReq.ProjectIdentifier)
+	} else {
+		log.Infof("Project with identifier %s does not exist", migrationReq.ProjectIdentifier)
+		if err := createAProject(migrationReq.OrgIdentifier, migrationReq.ProjectIdentifier, formatString(migrationReq.ProjectIdentifier)); err != nil {
+			log.Error(err)
+		}
+		log.Infof("Project with identifier %s created", migrationReq.ProjectIdentifier)
+	}
+	return nil
+}
