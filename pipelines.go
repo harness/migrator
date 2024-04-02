@@ -378,6 +378,10 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 		OrgIdentifier:     migrationReq.OrgIdentifier,
 		AccountIdentifier: migrationReq.Account,
 	}
+	err = CheckProjectExistsAndCreate()
+	if err != nil {
+		return "", err
+	}
 	j, err := json.MarshalIndent(pipelines, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal pipelines JSON: %v", err)
