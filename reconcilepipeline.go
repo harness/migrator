@@ -13,20 +13,22 @@ import (
 // If reconciliation is needed, it fetches the pipeline YAML, refreshes it and updates the pipeline with the refreshed YAML.
 func reconcilePipeline(resp ResponseBody, queryParams map[string]string) {
 	result := extractMigratedDetails(resp)
-	pipelineID := getPipelineID(result)
+	pipelineIDs := getPipelineIDs(result)
 
-	if pipelineID == "" {
-		log.Fatalf("Pipeline ID not found in response")
-	}
+	for _, pipelineID := range pipelineIDs {
+		if pipelineID == "" {
+			log.Fatalf("Pipeline ID not found in response")
+		}
 
-	uuid, err := getPipelineUUID(pipelineID, queryParams)
-	if err != nil {
-		log.Fatalf("Error getting pipeline UUID: %v", err)
-	}
+		uuid, err := getPipelineUUID(pipelineID, queryParams)
+		if err != nil {
+			log.Fatalf("Error getting pipeline UUID: %v", err)
+		}
 
-	if reconcileNeeded, _ := checkReconcileNeeded(uuid, queryParams); reconcileNeeded {
-		log.Info("Pipeline Reconciliation is needed")
-		performReconciliation(pipelineID, queryParams)
+		if reconcileNeeded, _ := checkReconcileNeeded(uuid, queryParams); reconcileNeeded {
+			log.Info("Pipeline Reconciliation is needed for pipeline ID: ", pipelineID)
+			performReconciliation(pipelineID, queryParams)
+		}
 	}
 }
 
@@ -40,18 +42,18 @@ func extractMigratedDetails(resp ResponseBody) map[string]interface{} {
 	return result
 }
 
-func getPipelineID(result map[string]interface{}) string {
-	var pipelineID string
+func getPipelineIDs(result map[string]interface{}) []string {
+	var pipelineIDs []string
 	successfullyMigratedDetails := result["resource"].(map[string]interface{})["successfullyMigratedDetails"].([]interface{})
 	for _, detail := range successfullyMigratedDetails {
 		detailMap := detail.(map[string]interface{})
 		ngEntityDetail := detailMap["ngEntityDetail"].(map[string]interface{})
 		if ngEntityDetail["entityType"].(string) == "PIPELINE" {
-			pipelineID = ngEntityDetail["identifier"].(string)
-			break
+			pipelineID := ngEntityDetail["identifier"].(string)
+			pipelineIDs = append(pipelineIDs, pipelineID)
 		}
 	}
-	return pipelineID
+	return pipelineIDs
 }
 
 func performReconciliation(pipelineID string, queryParams map[string]string) {
