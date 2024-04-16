@@ -441,12 +441,12 @@ func reconcilePipeline(resp ResponseBody, queryParams map[string]string) {
 	if pipelineID == "" {
 		log.Fatalf("Pipeline ID not found in response")
 	}
-	log.Info("Reconciliation started for pipeline with identifier : " + pipelineID)
+	//log.Info("Reconciliation started for pipeline with identifier : " + pipelineID)
 	uuid, err := getPipelineUUID(pipelineID, queryParams)
 	if err != nil {
 		log.Fatalf("Error getting pipeline UUID: %v", err)
 	}
-	log.Info("Pipeline UUID : " + uuid)
+	//log.Info("Pipeline UUID : " + uuid)
 	reconcileNeeded, err := checkReconcileNeeded(uuid, queryParams)
 	if err != nil {
 		log.Fatalf("Error checking if reconcile is needed: %v", err)
