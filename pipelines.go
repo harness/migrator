@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -462,7 +463,14 @@ func reconcilePipeline(resp ResponseBody, queryParams map[string]string) {
 		if err != nil {
 			log.Fatalf("Error refreshing pipeline YAML: %v", err)
 		}
-		log.Info("Refreshed Pipeline YAML : " + refreshedYaml)
+		//log.Info("Refreshed Pipeline YAML : " + refreshedYaml)
+		success, err := updatePipelineYaml(pipelineID, refreshedYaml, queryParams)
+		if err != nil {
+			log.Fatalf("Error updating pipeline: %v", err)
+		}
+		if !success {
+			log.Fatalf("Failed to update pipeline")
+		}
 	} else {
 		log.Info("No reconciliation needed")
 	}
@@ -535,4 +543,17 @@ func refreshPipelineYaml(yaml string, queryParams map[string]string) (string, er
 		return "", errors.New("refreshedYaml not found in response")
 	}
 	return refreshedYaml, nil
+}
+
+func updatePipelineYaml(pipelineID string, yamlContent string, params map[string]string) (bool, error) {
+	url := GetUrlWithQueryParams(migrationReq.Environment, PipelineService, fmt.Sprintf("api/pipelines/v2/%s", pipelineID), params)
+	yamlReader := strings.NewReader(yamlContent)
+	respBodyObj, err := Put(url, migrationReq.Auth, yamlReader)
+	if err != nil {
+		return false, fmt.Errorf("error updating pipeline: %v", err)
+	}
+	if respBodyObj.Status == "SUCCESS" {
+		return true, nil
+	}
+	return false, fmt.Errorf("failed to update pipeline: %s", respBodyObj.Message)
 }
