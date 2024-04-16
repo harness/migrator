@@ -453,6 +453,16 @@ func reconcilePipeline(resp ResponseBody, queryParams map[string]string) {
 	}
 	if reconcileNeeded {
 		log.Info("Reconciliation is needed")
+		pipelineYaml, err := getPipelineYaml(pipelineID, queryParams)
+		if err != nil {
+			log.Fatalf("Error getting pipeline YAML: %v", err)
+		}
+		//log.Info("Pipeline YAML : " + pipelineYaml)
+		refreshedYaml, err := refreshPipelineYaml(pipelineYaml, queryParams)
+		if err != nil {
+			log.Fatalf("Error refreshing pipeline YAML: %v", err)
+		}
+		log.Info("Refreshed Pipeline YAML : " + refreshedYaml)
 	} else {
 		log.Info("No reconciliation needed")
 	}
@@ -490,4 +500,39 @@ func checkReconcileNeeded(uuid string, queryParams map[string]string) (bool, err
 		return false, errors.New("reconcileNeeded not found in response")
 	}
 	return reconcileNeeded, nil
+}
+
+func getPipelineYaml(identifier string, queryParams map[string]string) (string, error) {
+	queryParams["validateAsync"] = "true"
+	url := GetUrlWithQueryParams(migrationReq.Environment, PipelineService, fmt.Sprintf("api/pipelines/%s", identifier), queryParams)
+	respBodyObj, err := Get(url, migrationReq.Auth)
+	if err != nil {
+		return "", fmt.Errorf("failed to make request: %v", err)
+	}
+	data, ok := respBodyObj.Data.(map[string]interface{})
+	if !ok {
+		return "", errors.New("data not found in response")
+	}
+	yaml, ok := data["yamlPipeline"].(string)
+	if !ok {
+		return "", errors.New("yaml not found in response")
+	}
+	return yaml, nil
+}
+
+func refreshPipelineYaml(yaml string, queryParams map[string]string) (string, error) {
+	url := GetUrlWithQueryParams(migrationReq.Environment, TemplateService, "api/refresh-template/refreshed-yaml", queryParams)
+	respBodyObj, err := Post(url, migrationReq.Auth, map[string]string{"yaml": yaml})
+	if err != nil {
+		return "", fmt.Errorf("failed to make request: %v", err)
+	}
+	data, ok := respBodyObj.Data.(map[string]interface{})
+	if !ok {
+		return "", errors.New("data not found in response")
+	}
+	refreshedYaml, ok := data["refreshedYaml"].(string)
+	if !ok {
+		return "", errors.New("refreshedYaml not found in response")
+	}
+	return refreshedYaml, nil
 }
