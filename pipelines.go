@@ -412,6 +412,69 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 		reqId = resource.RequestId
 		log.Infof("The request id is - %s", reqId)
 	}
+	reconcilePipeline(resp, queryParams)
 	log.Info("Spinnaker migration completed")
 	return reqId, nil
+}
+
+func reconcilePipeline(resp ResponseBody, queryParams map[string]string) {
+	var result map[string]interface{}
+	jsonData, err := json.Marshal(resp)
+	if err != nil {
+		log.Fatalf("Error occurred during marshalling. %v", err)
+	}
+	err = json.Unmarshal([]byte(jsonData), &result)
+	if err != nil {
+		log.Fatalf("Error occurred during unmarshalling. %v", err)
+	}
+	pipelineID := result["resource"].(map[string]interface{})["successfullyMigratedDetails"].([]interface{})[0].(map[string]interface{})["ngEntityDetail"].(map[string]interface{})["identifier"].(string)
+	log.Info("Reconciliation started for pipeline with identifier : " + pipelineID)
+	uuid, err := getPipelineUUID(pipelineID, queryParams)
+	if err != nil {
+		log.Fatalf("Error getting pipeline UUID: %v", err)
+	}
+	log.Info("Pipeline UUID : " + uuid)
+	reconcileNeeded, err := checkReconcileNeeded(uuid, queryParams)
+	if err != nil {
+		log.Fatalf("Error checking if reconcile is needed: %v", err)
+	}
+	if reconcileNeeded {
+		log.Info("Reconciliation is needed")
+	} else {
+		log.Info("No reconciliation needed")
+	}
+}
+func getPipelineUUID(identifier string, queryParams map[string]string) (string, error) {
+	queryParams["getDefaultFromOtherRepo"] = "true"
+	url := GetUrlWithQueryParams(migrationReq.Environment, PipelineService, fmt.Sprintf("api/pipelines/%s/validate", identifier), queryParams)
+	respBody, err := Post(url, migrationReq.Auth, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to make request: %v", err)
+	}
+	uuid, ok := respBody.Data.(map[string]interface{})["uuid"].(string)
+	if !ok {
+		return "", errors.New("UUID not found in response")
+	}
+	return uuid, nil
+}
+
+func checkReconcileNeeded(uuid string, queryParams map[string]string) (bool, error) {
+	url := GetUrlWithQueryParams(migrationReq.Environment, PipelineService, fmt.Sprintf("api/pipelines/validate/%s", uuid), queryParams)
+	respBodyObj, err := Get(url, migrationReq.Auth)
+	if err != nil {
+		return false, fmt.Errorf("failed to make request: %v", err)
+	}
+	data, ok := respBodyObj.Data.(map[string]interface{})
+	if !ok {
+		return false, errors.New("data not found in response")
+	}
+	validateResp, ok := data["validateTemplateReconcileResponseDTO"].(map[string]interface{})
+	if !ok {
+		return false, errors.New("validateTemplateReconcileResponseDTO not found in response")
+	}
+	reconcileNeeded, ok := validateResp["reconcileNeeded"].(bool)
+	if !ok {
+		return false, errors.New("reconcileNeeded not found in response")
+	}
+	return reconcileNeeded, nil
 }
