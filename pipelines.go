@@ -427,7 +427,20 @@ func reconcilePipeline(resp ResponseBody, queryParams map[string]string) {
 	if err != nil {
 		log.Fatalf("Error occurred during unmarshalling. %v", err)
 	}
-	pipelineID := result["resource"].(map[string]interface{})["successfullyMigratedDetails"].([]interface{})[0].(map[string]interface{})["ngEntityDetail"].(map[string]interface{})["identifier"].(string)
+	var pipelineID string
+	successfullyMigratedDetails := result["resource"].(map[string]interface{})["successfullyMigratedDetails"].([]interface{})
+	for _, detail := range successfullyMigratedDetails {
+		detailMap := detail.(map[string]interface{})
+		ngEntityDetail := detailMap["ngEntityDetail"].(map[string]interface{})
+		if ngEntityDetail["entityType"].(string) == "PIPELINE" {
+			pipelineID = ngEntityDetail["identifier"].(string)
+			break
+		}
+	}
+
+	if pipelineID == "" {
+		log.Fatalf("Pipeline ID not found in response")
+	}
 	log.Info("Reconciliation started for pipeline with identifier : " + pipelineID)
 	uuid, err := getPipelineUUID(pipelineID, queryParams)
 	if err != nil {
