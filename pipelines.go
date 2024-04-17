@@ -412,6 +412,7 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 		reqId = resource.RequestId
 		log.Infof("The request id is - %s", reqId)
 	}
+	reconcilePipeline(resp, queryParams)
 	log.Info("Spinnaker migration completed")
 	return reqId, nil
 }

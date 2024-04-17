@@ -29,6 +29,16 @@ func Post(reqUrl string, auth string, body interface{}) (respBodyObj ResponseBod
 	return handleResp(req)
 }
 
+func Put(reqUrl string, auth string, body io.Reader) (respBodyObj ResponseBody, err error) {
+	req, err := http.NewRequest("PUT", reqUrl, body)
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set(AuthHeaderKey(auth), auth)
+	return handleResp(req)
+}
+
 func Get(reqUrl string, auth string) (respBodyObj ResponseBody, err error) {
 	req, err := http.NewRequest("GET", reqUrl, nil)
 	if err != nil {
