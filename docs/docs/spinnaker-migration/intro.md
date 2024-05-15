@@ -1,4 +1,6 @@
 ---
+title: Introduction
+description: Introduction to the Spinnaker Migration tool. Includes supported Spinnaker stages.
 sidebar_position: 1
 ---
 
@@ -10,5 +12,24 @@ This tool was developed by Harness to assist in the migration process from Spinn
 
 This tool is designed for customers, CSMs, and developers who are currently using Spinnaker and wish to migrate their accounts to Harness CD Next Gen.
 
-### Key Components that can be migrated
+### Spinnaker stages that can be migrated
 The following key components can be migrated using this tool:
+
+|    | Stages                    | Harness           | Can we Migrate? | Comments                                               |
+| -- | ------------------------- | ----------------- | --------------- | ------------------------------------------------------ |
+| 1  | pipeline                  | Pipeline Chaining | Yes             | Can only chain up to 2 pipelines                       |
+| 2  | manualJudgment            | Approval          | Yes             |                                                        |
+| 3  | checkPreconditions        | Shell Script      | Yes             | Supports Expressions, and Multiple Check preconditions |
+| 4  | deleteManifest            | Delete            | Yes             |                                                        |
+| 5  | evaluateVariables         | JEXL Expression   | Yes             |                                                        |
+| 6  | wait                      | Wait              | Yes             |                                                        |
+| 7  | deployManifest            | Deploy            | Yes             |                                                        |
+| 8  | webhook                   | Custom Webhook    | Yes             |                                                        |
+| 9  | findImageFromTags         |                   | Yes             |                                                        |
+| 10 | bake                      | Bake Plugin       | Yes             | AMI Baking                                             |
+| 11 | jenkins                   | Jenkins Step      | Yes             |                                                        |
+| 12 | findArtifactsFromResource | Shell Script      | Yes             |                                                        |
+| 13 | Find Image From Tags      | Plugin            | Yes             |                                                        |
+| 14 | AWS: invokeLambda         | Plugin            | Yes             |                                                        |
+| 15 | ShrinkCluster             | Plugin            | Yes             |                                                        |
+| 16 | ScaleDownCluster          | Plugin            | Yes             |
