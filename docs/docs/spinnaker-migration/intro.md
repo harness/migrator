@@ -29,12 +29,11 @@ The following key components can be migrated using this tool:
 | 10 | bake                          | Bake Plugin       | Yes             | Only supports AWS cloud provider currently             |
 | 11 | jenkins                       | Jenkins Step      | Yes             |                                                        |
 | 12 | findArtifactsFromResource     | Shell Script      | Yes             |                                                        |
-| 13 | Find Image From Tags          | Plugin            | Yes             |                                                        |
-| 14 | AWS: invokeLambda             | Plugin            | Yes             |                                                        |
-| 15 | ShrinkCluster                 | Plugin            | Yes             |                                                        |
-| 16 | ScaleDownCluster              | Plugin            | Yes             |                                                        |
-| 17 | ResizeServerGroup             | Plugin            | Yes             |                                                        |
-| 18 | DisableCluster                | Plugin            | Yes             |                                                        |
-| 19 | ArtifactoryPromote            | HTTP Step         | Yes             |                                                        |
-| 20 | DestroyServerGroup            | Plugin            | Yes             |                                                        |
-| 21 | Deploy AMI Backed with Packer | Plugin            | Yes             |                                                        |
+| 13 | AWS: invokeLambda             | Plugin            | Yes             |                                                        |
+| 14 | ShrinkCluster                 | Plugin            | Yes             |                                                        |
+| 15 | ScaleDownCluster              | Plugin            | Yes             |                                                        |
+| 16 | ResizeServerGroup             | Plugin            | Yes             |                                                        |
+| 17 | DisableCluster                | Plugin            | Yes             |                                                        |
+| 18 | ArtifactoryPromote            | HTTP Step         | Yes             |                                                        |
+| 19 | DestroyServerGroup            | Plugin            | Yes             |                                                        |
+| 20 | Deploy AMI Backed with Packer | Plugin            | Yes             |                                                        |
