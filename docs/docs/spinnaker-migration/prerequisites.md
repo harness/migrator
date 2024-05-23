@@ -28,6 +28,36 @@ AWS_SECRET_ACCESS_KEY
 
 For information on how to create secrets with Harness, go to [AWS Secrets Manager](https://developer.harness.io/docs/platform/secrets/secrets-management/add-an-aws-secret-manager)
 
+#### Jenkins Trigger 
+
+Unfortunately, Harness does not natively support passing payloads for Jenkins Trigger. Consequently, you cannot use Spinnaker expressions such as `${trigger["properties"]["hash"]}` or `${trigger["properties"]["branch"]}`.
+
+One possible workaround we suggest is using a custom webhook trigger. For more information about this, go to [Using Custom Triggers](https://developer.harness.io/docs/platform/triggers/trigger-deployments-using-custom-triggers/)
+
+With this approach, you would need to add a new step to your Jenkins Job, similar to the example below.
+
+```
+pipeline {
+    agent any
+
+    stages {
+        // YOUR STAGES HERE...
+
+        stage('Trigger Harness Pipeline') {
+            steps {
+                script {
+                    sh '''
+                        curl -X POST -H 'Content-Type: application/json' \
+                        --url 'https://app.harness.io/gateway/pipeline/api/webhook/custom/Wlke4SU6TAeKwDERALcptQ/v3?accountIdentifier=YOUR_ACCOUNT_ID&orgIdentifier=YOUR_ORG_ID&projectIdentifier=YOUR_PROJECT_ID&pipelineIdentifier=YOUR_PIPELINE_ID&triggerIdentifier=webhook_trigger' \
+                        -d '{"properties": {"hash": "hash_value", "branch": "branch_value"}}'
+                    '''
+                }
+            }
+        }
+    }
+}
+```
+
 ### GCP
 
 Regrettably, Harness lacks native support for triggering pipelines directly via incoming Pub/Sub messages. However, we can work around this limitation by using a custom webhook trigger. 
