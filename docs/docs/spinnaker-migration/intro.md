@@ -15,21 +15,26 @@ This tool is designed for customers, CSMs, and developers who are currently usin
 ### Spinnaker stages that can be migrated
 The following key components can be migrated using this tool:
 
-|    | Stages                    | Harness           | Can we Migrate? | Comments                                               |
-| -- | ------------------------- | ----------------- | --------------- | ------------------------------------------------------ |
-| 1  | pipeline                  | Pipeline Chaining | Yes             | Can only chain up to 2 pipelines                       |
-| 2  | manualJudgment            | Approval          | Yes             |                                                        |
-| 3  | checkPreconditions        | Shell Script      | Yes             | Supports Expressions, and Multiple Check preconditions |
-| 4  | deleteManifest            | Delete            | Yes             |                                                        |
-| 5  | evaluateVariables         | JEXL Expression   | Yes             |                                                        |
-| 6  | wait                      | Wait              | Yes             |                                                        |
-| 7  | deployManifest            | Deploy            | Yes             |                                                        |
-| 8  | webhook                   | Custom Webhook    | Yes             |                                                        |
-| 9  | findImageFromTags         |                   | Yes             |                                                        |
-| 10 | bake                      | Bake Plugin       | Yes             | AMI Baking                                             |
-| 11 | jenkins                   | Jenkins Step      | Yes             |                                                        |
-| 12 | findArtifactsFromResource | Shell Script      | Yes             |                                                        |
-| 13 | Find Image From Tags      | Plugin            | Yes             |                                                        |
-| 14 | AWS: invokeLambda         | Plugin            | Yes             |                                                        |
-| 15 | ShrinkCluster             | Plugin            | Yes             |                                                        |
-| 16 | ScaleDownCluster          | Plugin            | Yes             |
+|    | Stages                        | Harness           | Can we Migrate? | Comments                                               |
+|----|-------------------------------|-------------------|-----------------|--------------------------------------------------------|
+| 1  | pipeline                      | Pipeline Chaining | Yes             | Can only chain up to 2 pipelines                       |
+| 2  | manualJudgment                | Approval          | Yes             |                                                        |
+| 3  | checkPreconditions            | Shell Script      | Yes             | Supports Expressions, and Multiple Check preconditions |
+| 4  | deleteManifest                | Delete            | Yes             |                                                        |
+| 5  | evaluateVariables             | JEXL Expression   | Yes             |                                                        |
+| 6  | wait                          | Wait              | Yes             |                                                        |
+| 7  | deployManifest                | Deploy            | Yes             |                                                        |
+| 8  | webhook                       | HTTP Step         | Yes             |                                                        |
+| 9  | findImageFromTags             | Shell Script      | Yes             |                                                        |
+| 10 | bake                          | Bake Plugin       | Yes             | Only supports AWS cloud provider currently             |
+| 11 | jenkins                       | Jenkins Step      | Yes             |                                                        |
+| 12 | findArtifactsFromResource     | Shell Script      | Yes             |                                                        |
+| 13 | Find Image From Tags          | Plugin            | Yes             |                                                        |
+| 14 | AWS: invokeLambda             | Plugin            | Yes             |                                                        |
+| 15 | ShrinkCluster                 | Plugin            | Yes             |                                                        |
+| 16 | ScaleDownCluster              | Plugin            | Yes             |                                                        |
+| 17 | ResizeServerGroup             | Plugin            | Yes             |                                                        |
+| 18 | DisableCluster                | Plugin            | Yes             |                                                        |
+| 19 | ArtifactoryPromote            | HTTP Step         | Yes             |                                                        |
+| 20 | DestroyServerGroup            | Plugin            | Yes             |                                                        |
+| 21 | Deploy AMI Backed with Packer | Plugin            | Yes             |                                                        |
