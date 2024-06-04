@@ -15,25 +15,30 @@ This tool is designed for customers, CSMs, and developers who are currently usin
 ### Spinnaker stages that can be migrated
 The following key components can be migrated using this tool:
 
-|    | Stages                        | Harness           | Can we Migrate? | Comments                                               |
-|----|-------------------------------|-------------------|-----------------|--------------------------------------------------------|
-| 1  | pipeline                      | Pipeline Chaining | Yes             | Can only chain up to 2 pipelines                       |
-| 2  | manualJudgment                | Approval          | Yes             |                                                        |
-| 3  | checkPreconditions            | Shell Script      | Yes             | Supports Expressions, and Multiple Check preconditions |
-| 4  | deleteManifest                | Delete            | Yes             |                                                        |
-| 5  | evaluateVariables             | JEXL Expression   | Yes             |                                                        |
-| 6  | wait                          | Wait              | Yes             |                                                        |
-| 7  | deployManifest                | Deploy            | Yes             |                                                        |
-| 8  | webhook                       | HTTP Step         | Yes             |                                                        |
-| 9  | findImageFromTags             | Shell Script      | Yes             |                                                        |
-| 10 | bake                          | Bake Plugin       | Yes             | Only supports AWS cloud provider currently             |
-| 11 | jenkins                       | Jenkins Step      | Yes             |                                                        |
-| 12 | findArtifactsFromResource     | Shell Script      | Yes             |                                                        |
-| 13 | AWS: invokeLambda             | Plugin            | Yes             |                                                        |
-| 14 | ShrinkCluster                 | Plugin            | Yes             |                                                        |
-| 15 | ScaleDownCluster              | Plugin            | Yes             |                                                        |
-| 16 | ResizeServerGroup             | Plugin            | Yes             |                                                        |
-| 17 | DisableCluster                | Plugin            | Yes             |                                                        |
-| 18 | ArtifactoryPromote            | HTTP Step         | Yes             |                                                        |
-| 19 | DestroyServerGroup            | Plugin            | Yes             |                                                        |
-| 20 | Deploy AMI Backed with Packer | Plugin            | Yes             |                                                        |
+|    | Stages                        | Harness                                                                      | Can we Migrate? | Comments                                                   |
+|----|-------------------------------|------------------------------------------------------------------------------|-----------------|------------------------------------------------------------|
+| 1  | Wait                          | Wait                                                                         | Yes             |                                                            |
+| 2  | Bake Manifest                 | [AMI Plugin](https://hub.docker.com/r/harnessdev/aws-bake-deploy-ami-plugin) | Yes             |                                                            |
+| 3  | Deploy Manifest               | Deploy                                                                       | Yes             |                                                            |
+| 4  | Delete Manifest               | Delete                                                                       | Yes             |                                                            |
+| 5  | Manual Judgement              | Approval                                                                     | Yes             |                                                            |
+| 6  | Pipeline                      | Pipeline Chaining                                                            | Yes             | Can only chain up to 2 pipelines                           |
+| 7  | Find Artifacts From Resource  | Shell Script                                                                 | Yes             |                                                            |
+| 8  | Find Image From Tags          | Shell Script                                                                 | Yes             |                                                            |
+| 9  | Find Image                    | Shell Script                                                                 | Yes             |                                                            |
+| 10 | Evaluate Variables            | JEXL Expression                                                              | Yes             |                                                            |
+| 11 | Check Preconditions           | Shell Script                                                                 | Yes             | Supports Expressions, and Multiple Check preconditions     |
+| 12 | Jenkins                       | Jenkins Step                                                                 | Yes             |                                                            |
+| 13 | Bake                          | [AMI Plugin](https://hub.docker.com/r/harnessdev/aws-bake-deploy-ami-plugin) | Yes             | For AMI Baking, Only supports AWS cloud provider currently |
+| 14 | Deploy AMI Backed with Packer | [AMI Plugin](https://hub.docker.com/r/harnessdev/aws-bake-deploy-ami-plugin) | Yes             |                                                            |
+| 15 | AWS.LambdaInvokeStage         | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 16 | AWS.LambdaUpdateCodeStage     | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 17 | ShrinkCluster                 | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 18 | ScaleDownCluster              | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 19 | DisableCluster                | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 20 | RollbackCluster               | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 21 | ArtifactoryPromote            | HTTP Step                                                                    | Yes             |                                                            |
+| 22 | ResizeServerGroup             | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 23 | DestroyServerGroup            | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 24 | EnableServerGroup             | [AWS Drone Plugin](https://hub.docker.com/r/harnessdev/aws-drone-plugin)     | Yes             |                                                            |
+| 25 | Webhook                       | HTTP step                                                                    | Yes             |                                                            |
