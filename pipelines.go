@@ -152,7 +152,7 @@ func addDependentPipelineRecursive(pipelines []map[string]interface{}, pipelineS
 
 	i, p, err := findPipelineIndexById(pipelines, pipelineId)
 
-	if err == nil {
+	if true {
 
 		if p == nil {
 			var appName = pipelineStage["application"].(string)
@@ -331,7 +331,7 @@ func findPipelineIdByName(pipelines []PipelineDetails, name string) string {
 }
 
 func getAllPipelines(authMethod string, appName string) ([]byte, error) {
-	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+appName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.Insecure)
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+appName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.AllowInsecureReq)
 }
 
 // this is because there's no endpoint in gate to fetch pipeline config based on a pipeline id
@@ -369,7 +369,7 @@ func findPipelineIndexById(pipelines []map[string]interface{}, pipelineId string
 }
 
 func getSinglePipeline(authMethod string, name string) ([]byte, error) {
-	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs/"+name, authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.Insecure)
+	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs/"+name, authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.AllowInsecureReq)
 }
 
 func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
