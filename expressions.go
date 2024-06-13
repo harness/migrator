@@ -96,6 +96,7 @@ var ExpressionsMap = map[string]string{
 	"app.accountId":                   "<+account.identifier>",
 	"pipeline.name":                   "<+pipeline.name>",
 	"workflow.name":                   "<+stage.name>",
+	"workflow.displayName":            "<+stage.name>",
 	"workflow.description":            "<+stage.description>",
 	"workflow.releaseNo":              "<+pipeline.sequenceId>",
 	"workflow.pipelineResumeUuid":     "<+pipeline.executionId>",
@@ -161,6 +162,9 @@ var DynamicExpressions = map[string]interface{}{
 	},
 	"configFile.getAsString(": func(key string) string {
 		return "<+configFile.getAsString(\"" + TrimQuotes(formatString(key)) + "\")>"
+	},
+	"context.get(": func(key string) string {
+		return "<+exportedVariables.getValue(\"" + TrimQuotes(formatString(key)) + "\")>"
 	},
 }
 
