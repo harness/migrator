@@ -25,6 +25,7 @@ const (
 	Dev         = "Dev"
 	Prod3       = "Prod3"
 	SelfManaged = "SelfManaged"
+	DevSpace    = "DevSpace"
 )
 
 const (
@@ -33,6 +34,8 @@ const (
 	TemplateService = "Template"
 	PipelineService = "Pipeline"
 )
+
+var host = os.Getenv("HOST_NAME")
 
 var urlMap = map[string]map[string]string{
 	Prod: {
@@ -58,6 +61,12 @@ var urlMap = map[string]map[string]string{
 		TemplateService: "https://app3.harness.io/gateway/template",
 		MigratorService: "https://app3.harness.io/gateway/ng-migration/api/ng-migration",
 		NextGenService:  "https://app3.harness.io/gateway/ng",
+	},
+	DevSpace: {
+		PipelineService: "https://" + host + ".pr2.harness.io/gateway/pipeline",
+		TemplateService: "https://" + host + ".pr2.harness.io/gateway/template",
+		MigratorService: "https://" + host + ".pr2.harness.io/gateway/ng-migration/api/ng-migration",
+		NextGenService:  "https://" + host + ".pr2.harness.io/gateway/ng",
 	},
 }
 
@@ -327,6 +336,9 @@ func GetBaseUrl(environment string, service string) string {
 		environment = "Prod"
 	}
 	if environment != SelfManaged {
+		if len(host) == 0 && environment == DevSpace {
+			log.Fatal("HOST_NAME env variable is not set for DevSpace Environment")
+		}
 		url := urlMap[environment][service]
 		if len(url) == 0 {
 			log.Fatalf("invalid environment value - %s", environment)
