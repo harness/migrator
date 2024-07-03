@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
+	"net/http"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -365,4 +366,109 @@ func CheckProjectExistsAndCreate() error {
 		log.Infof("Project with identifier %s created", migrationReq.ProjectIdentifier)
 	}
 	return nil
+}
+
+func createOrgVariable(orgIdentifier string, name string, identifier string, tag string) error {
+	url := fmt.Sprintf("%s/api/variables?routingId=%s&accountIdentifier=%s", GetBaseUrl(migrationReq.Environment, NextGenService), migrationReq.Account, migrationReq.Account)
+	_, err := Post(url, migrationReq.Auth, VariableBody{
+		Variable: VariableDetails{
+			Identifier:    identifier,
+			Name:          name,
+			OrgIdentifier: orgIdentifier,
+			Type:          "String",
+			Description:   "Harness Drone Plugin Version",
+			VariableSpec:  VariableSpec{ValueType: "FIXED", FixedValue: tag},
+		}})
+	return err
+}
+
+func CheckOrgVariableExistsAndCreate() error {
+	requiredPlugins := [][]string{
+		{"harnessawsdroneplugin", "aws-drone-plugin"},
+		{"harnessbakedeployplugin", "aws-bake-deploy-ami-plugin"},
+	}
+
+	if len(migrationReq.OrgIdentifier) == 0 {
+		migrationReq.OrgIdentifier = TextInput("Identifier for the Org - ")
+	}
+
+	variables := getOrgVariables()
+	existingVariables := make(map[string]bool)
+	for _, v := range variables {
+		existingVariables[v.Name] = true
+	}
+
+	for _, pluginPair := range requiredPlugins {
+		variableName := pluginPair[0]
+		imageName := pluginPair[1]
+
+		tag, err := getLatestDockerTag(imageName)
+		if err != nil {
+			fmt.Println("Error fetching latest tag for", imageName, ":", err)
+			continue
+		}
+		if !existingVariables[variableName] {
+			err := createOrgVariable(migrationReq.OrgIdentifier, variableName, formatString(variableName), tag)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func getOrgVariables() []VariableDetails {
+	url := fmt.Sprintf("%s/api/variables?routingId=%s&pageIndex=0&pageSize=10&orgIdentifier=%s&accountIdentifier=%s&searchTerm=", GetBaseUrl(migrationReq.Environment, NextGenService), migrationReq.Account, migrationReq.OrgIdentifier, migrationReq.Account)
+	resp, err := Get(url, migrationReq.Auth)
+	if err != nil || resp.Status != "SUCCESS" {
+		log.Fatal("Failed to fetch org variables", err)
+	}
+	byteData, err := json.Marshal(resp.Data)
+	if err != nil {
+		log.Fatal("Failed to fetch projects", err)
+	}
+	var variables VariableListBody
+	err = json.Unmarshal(byteData, &variables)
+	if err != nil {
+		log.Fatal("Failed to fetch projects", err)
+	}
+	var variablesDetails []VariableDetails
+
+	for _, p := range variables.Variables {
+		variablesDetails = append(variablesDetails, p.Variable)
+	}
+	return variablesDetails
+}
+
+func getLatestDockerTag(imageName string) (string, error) {
+	url := fmt.Sprintf("https://hub.docker.com/v2/repositories/harnessdev/%s/tags/?page_size=1000", imageName)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", fmt.Errorf("failed to make request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Results []struct {
+			Name string `json:"name"`
+		} `json:"results"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("failed to parse JSON: %v", err)
+	}
+
+	if len(result.Results) == 0 {
+		return "", fmt.Errorf("no tags found")
+	}
+
+	latestTag := result.Results[0].Name
+	for _, tag := range result.Results {
+		if tag.Name > latestTag {
+			latestTag = tag.Name
+		}
+	}
+
+	return latestTag, nil
 }

@@ -261,3 +261,26 @@ type ProjectCSV struct {
 	ProjectIdentifier string `json:"projectIdentifier"`
 	OrgIdentifier     string `json:"orgIdentifier"`
 }
+
+type VariableDetails struct {
+	Identifier    string       `json:"identifier"`
+	Name          string       `json:"name"`
+	OrgIdentifier string       `json:"orgIdentifier"`
+	Type          string       `json:"type"`
+	Description   string       `json:"description"`
+	VariableSpec  VariableSpec `json:"spec"`
+}
+
+type VariableSpec struct {
+	ValueType    string `json:"valueType"`
+	FixedValue   string `json:"fixedValue"`
+	DefaultValue string `json:"defaultValue"`
+	Value        string `json:"value"`
+}
+
+type VariableListBody struct {
+	Variables []VariableBody `json:"content"`
+}
+type VariableBody struct {
+	Variable VariableDetails `json:"variable"`
+}
