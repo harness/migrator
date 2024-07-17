@@ -203,6 +203,11 @@ func TrimQuotes(input string) string {
 	return input
 }
 
+func GenerateHarnessUIFormatWithHyphensIdentifier(name string) string {
+	newId := GenerateHarnessUIFormatIdentifier(strings.ReplaceAll(name, "-", "_"))
+	return strings.ReplaceAll(newId, "_", "-")
+}
+
 func GenerateHarnessUIFormatIdentifier(name string) string {
 	pattern := regexp.MustCompile(`<\+([^>]+)>`)
 	matches := pattern.FindAllStringSubmatch(name, -1)
