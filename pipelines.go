@@ -89,6 +89,7 @@ func migrateSpinnakerPipelines() error {
 	}
 	var jsonBody []byte
 	var pipelines []map[string]interface{}
+	var credentials []map[string]interface{}
 	var err error
 	if len(migrationReq.PipelineName) > 0 {
 		jsonBody, err = getSinglePipeline(authMethod, migrationReq.PipelineName)
@@ -106,7 +107,11 @@ func migrateSpinnakerPipelines() error {
 	if err != nil {
 		return err
 	}
-	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
+	credentials, err = getCredentialsInfo(authMethod)
+	if err != nil {
+		return err
+	}
+	payload := map[string][]map[string]interface{}{"pipelines": pipelines, "credentials": credentials}
 	_, err = createSpinnakerPipelines(payload)
 	return err
 }
@@ -332,6 +337,22 @@ func findPipelineIdByName(pipelines []PipelineDetails, name string) string {
 
 func getAllPipelines(authMethod string, appName string) ([]byte, error) {
 	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+appName+"/pipelineConfigs", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.AllowInsecureReq)
+}
+
+func getCredentialsInfo(authMethod string) ([]map[string]interface{}, error) {
+	jsonBody, err := GetWithAuth(migrationReq.SpinnakerHost, "credentials", authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.AllowInsecureReq)
+	if err != nil {
+		return nil, err
+	}
+	credentials, err := normalizeJsonArray(jsonBody)
+	if err != nil {
+		return nil, err
+	}
+	filtered := make([]map[string]interface{}, 0)
+	for _, credential := range credentials {
+		filtered = append(filtered, map[string]interface{}{"name": credential["name"], "type": credential["type"]})
+	}
+	return filtered, nil
 }
 
 // this is because there's no endpoint in gate to fetch pipeline config based on a pipeline id
