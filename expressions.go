@@ -152,7 +152,7 @@ var DynamicExpressions = map[string]interface{}{
 		return "<+env.variables." + formatString(key) + ">"
 	},
 	"secrets.getValue(": func(key string) string {
-		return "<+secrets.getValue(\"" + TrimQuotes(getSecretKeyWithScope(formatString(key))) + "\")>"
+		return "<+secrets.getValue(\"" + TrimQuotes(getSecretKeyWithScope(formatSecret(key))) + "\")>"
 	},
 	"app.defaults": func(key string) string {
 		return "<+variable." + formatString(key) + ">"
@@ -168,7 +168,19 @@ var DynamicExpressions = map[string]interface{}{
 	},
 }
 
+func formatSecret(key string) string {
+	identifierCase := migrationReq.IdentifierCase
+	if strings.Contains(migrationReq.Flags, "ALLOW_HARNESS_UI_FORMAT_WITH_HYPHENS") {
+		identifierCase = "HARNESS_UI_FORMAT_WITH_HYPHEN"
+	}
+	return formatStringWithCase(key, identifierCase)
+}
+
 func formatString(key string) string {
+	return formatStringWithCase(key, migrationReq.IdentifierCase)
+}
+
+func formatStringWithCase(key, identifierCase string) string {
 	var result string
 	defer func() {
 		if r := recover(); r != nil {
@@ -177,7 +189,6 @@ func formatString(key string) string {
 		}
 	}()
 
-	identifierCase := migrationReq.IdentifierCase
 	log.Debugf("key: %s, format: %s", key, identifierCase)
 	if len(key) == 0 {
 		result = "FIX_ME"
@@ -191,6 +202,8 @@ func formatString(key string) string {
 			result = ToSnakeCase(key)
 		case "HARNESS_UI_FORMAT":
 			result = GenerateHarnessUIFormatIdentifier(key)
+		case "HARNESS_UI_FORMAT_WITH_HYPHEN":
+			result = GenerateHarnessUIFormatWithHyphensIdentifier(key)
 		default:
 			log.Info("Defaulting to Camel Case")
 			result = ToCamelCase(key)
