@@ -204,8 +204,26 @@ func TrimQuotes(input string) string {
 }
 
 func GenerateHarnessUIFormatWithHyphensIdentifier(name string) string {
-	newId := GenerateHarnessUIFormatIdentifier(strings.ReplaceAll(name, "-", "_"))
-	return strings.ReplaceAll(newId, "_", "-")
+	pattern := regexp.MustCompile(`<\+([^>]+)>`)
+	matches := pattern.FindAllStringSubmatch(name, -1)
+	preservedSubstrings := make(map[string]string)
+	for _, match := range matches {
+		placeholder := match[1]
+		preservedKey := fmt.Sprintf("<+%s>", placeholder)
+		preservedSubstrings[preservedKey] = match[0]
+		name = strings.ReplaceAll(name, preservedKey, "PLACEHOLDER")
+	}
+
+	name = removeAccents(name)
+	name = stripStartingChars(name)
+	name = stripSpecialChars2(name)
+	name = strings.ReplaceAll(name, " ", "-")
+
+	for _, preservedValue := range preservedSubstrings {
+		name = strings.ReplaceAll(name, "PLACEHOLDER", preservedValue)
+	}
+
+	return name
 }
 
 func GenerateHarnessUIFormatIdentifier(name string) string {
@@ -242,6 +260,10 @@ func removeAccents(input string) string {
 
 func stripStartingChars(s string) string {
 	return regexp.MustCompile("^[0-9-$]*").ReplaceAllString(s, "")
+}
+
+func stripSpecialChars2(s string) string {
+	return regexp.MustCompile("[^-0-9a-zA-Z_$ ]").ReplaceAllString(s, "")
 }
 
 func stripSpecialChars(s string) string {
