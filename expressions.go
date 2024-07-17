@@ -201,14 +201,13 @@ func formatString(key string) string {
 }
 
 func getSecretKeyWithScope(key string) string {
-	camelCase := ToCamelCase(key)
 	switch migrationReq.SecretScope {
 	case Account:
-		return Account + "." + camelCase
+		return Account + "." + key
 	case Org:
-		return Org + "." + camelCase
+		return Org + "." + key
 	default:
-		return camelCase
+		return key
 	}
 }
 
