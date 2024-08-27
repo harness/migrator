@@ -175,6 +175,11 @@ type SkipDetail struct {
 	Reason string           `json:"reason"`
 }
 
+type NGSkipDetail struct {
+	Type   string `json:"type"`
+	Reason string `json:"reason"`
+}
+
 type UpgradeError struct {
 	Message string           `json:"message"`
 	Entity  CurrentGenEntity `json:"entity"`
@@ -191,6 +196,7 @@ type Resource struct {
 	Errors          []UpgradeError            `json:"errors"`
 	Status          string                    `json:"status"`
 	ResponsePayload interface{}               `json:"responsePayload"`
+	SkipDetails     []NGSkipDetail            `json:"skipDetails"`
 }
 
 type ResponseBody struct {

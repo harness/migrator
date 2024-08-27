@@ -412,6 +412,14 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 		reqId = resource.RequestId
 		log.Infof("The request id is - %s", reqId)
 	}
+	if resource.SkipDetails != nil && len(resource.SkipDetails) > 0 {
+		jsonData, err := json.MarshalIndent(resource.SkipDetails, "", "    ")
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal resource skip details JSON: %v", err)
+		}
+		jsonString := string(jsonData)
+		log.Warnf("Entity not migrated : %s", jsonString)
+	}
 	reconcilePipeline(resp, queryParams)
 	log.Info("Spinnaker migration completed")
 	return reqId, nil
