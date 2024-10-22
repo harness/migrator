@@ -19,4 +19,4 @@ Here's a detailed breakdown of the available Flags and their descriptions:
 | `LONG_RELEASE_NAME`         | False         | Default release names for Kubernetes deployments are migrated with short generate release name `<+INFRA_KEY_SHORT_ID>`. If required, you can enable this flag to use long generated release names `<+INFRA_KEY>`
 | `ENV_AT_DIFFERENT_LEVEL`    | False         | Enable this will allow environment creation at different level.(Default is at project level)                                                                                               |
 | `PREFER_SERVICE_VARIABLE_OVERRIDES`    | False         | Enable this when <+serviceVariableOverrides.var> is prefered over <+serviceVariables.var>                                                                                           |
-
+| `SCRIPT_TO_FILE_STORE`    | False         | When enabled, every script content is stored in the Harness file store instead of inline inside the step.|
