@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"sort"
 	"strconv"
 
@@ -72,14 +73,16 @@ func migrateSpinnakerPipelines() error {
 		authMethod = authx509
 	}
 	log.Info("Importing the application....")
-	if len(migrationReq.SpinnakerHost) == 0 {
+	if len(migrationReq.PipelineJson) == 0 && len(migrationReq.SpinnakerHost) == 0 {
 		migrationReq.SpinnakerHost = TextInput("Please provide spinnaker host : ")
 	}
-	if len(migrationReq.SpinnakerAppName) == 0 {
+	if len(migrationReq.PipelineJson) == 0 && len(migrationReq.SpinnakerAppName) == 0 {
 		migrationReq.SpinnakerAppName = TextInput("Please provide the Spinnaker application name : ")
 	}
 	if !migrationReq.All {
-		migrationReq.PipelineName = TextInput("Please provide the Spinnaker pipeline name : ")
+		if len(migrationReq.PipelineJson) == 0 {
+			migrationReq.PipelineName = TextInput("Please provide the Spinnaker pipeline name : ")
+		}
 	}
 
 	logSpinnakerMigrationDetails(authMethod)
@@ -87,25 +90,41 @@ func migrateSpinnakerPipelines() error {
 	if !confirm {
 		log.Fatal("Aborting...")
 	}
+
 	var jsonBody []byte
 	var pipelines []map[string]interface{}
 	var err error
+
 	if len(migrationReq.PipelineName) > 0 {
 		jsonBody, err = getSinglePipeline(authMethod, migrationReq.PipelineName)
 	} else {
-		jsonBody, err = getAllPipelines(authMethod, migrationReq.SpinnakerAppName)
+		if len(migrationReq.PipelineJson) > 0 {
+			// Read from file
+			jsonBody, err = os.ReadFile(migrationReq.PipelineJson)
+			if err != nil {
+				return fmt.Errorf("failed to read pipeline JSON file: %v", err)
+			}
+		} else {
+			jsonBody, err = getAllPipelines(authMethod, migrationReq.SpinnakerAppName)
+		}
 	}
+
 	if err != nil {
 		return err
 	}
+
 	pipelines, err = normalizeJsonArray(jsonBody)
 	if err != nil {
 		return err
 	}
-	pipelines, err = fetchDependentPipelines(pipelines, err, authMethod)
+
+	if len(migrationReq.PipelineJson) == 0 {
+		pipelines, err = fetchDependentPipelines(pipelines, err, authMethod)
+	}
 	if err != nil {
 		return err
 	}
+
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
 	_, err = createSpinnakerPipelines(payload)
 	return err
@@ -163,7 +182,7 @@ func addDependentPipelineRecursive(pipelines []map[string]interface{}, pipelineS
 		}
 		stages, ok := p["stages"].([]interface{})
 		if !ok {
-			fmt.Println("error: nable to assert 'stages' to the correct type.")
+			fmt.Println("error: unable to assert 'stages' to the correct type.")
 			return nil, errors.New("unable to assert 'stages' to the correct type")
 		}
 		for _, stage := range stages {
