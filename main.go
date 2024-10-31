@@ -65,6 +65,7 @@ var migrationReq = struct {
 	SpinnakerAPIKey       string `survey:"spinnaker-api-key"`
 	SpinnakerAppName      string `survey:"app-name"`
 	PipelineName          string `survey:"pipeline-name"`
+	PipelineJson          string `survey:"pipeline-json"`
 	Cert                  string `survey:"cert"`
 	Key                   string `survey:"key"`
 	Auth64                string `survey:"auth64"`
@@ -136,18 +137,28 @@ func logMigrationDetails() {
 }
 
 func logSpinnakerMigrationDetails(authMethod string) {
+
+	determinePipelineOutput := func() string {
+		if len(migrationReq.PipelineJson) > 0 {
+			return migrationReq.PipelineJson
+		}
+		if len(migrationReq.PipelineName) > 0 {
+			return migrationReq.PipelineName
+		}
+		return "All"
+	}
 	// Manually format the log message with line breaks
 	logMessage := fmt.Sprintf("\nMigration details:\n"+
 		"  Platform: %s\n"+
 		"  Spinnaker Host: %s\n"+
 		"  App name: %s\n"+
-		"  Pipeline Name: %s\n"+
+		"  Pipeline(s): %s\n"+
 		"  Authentication method: %s \n"+
 		"  Insecure: %t",
 		migrationReq.Platform,
 		migrationReq.SpinnakerHost,
 		migrationReq.SpinnakerAppName,
-		migrationReq.PipelineName,
+		determinePipelineOutput(),
 		authMethod,
 		migrationReq.AllowInsecureReq,
 	)
@@ -345,6 +356,11 @@ func main() {
 			Name:        "spinnaker-host",
 			Usage:       "Specifies URL to the Spinnaker Gate service. Required when --platform is spinnaker.",
 			Destination: &migrationReq.SpinnakerHost,
+		}),
+		altsrc.NewStringFlag(&cli.StringFlag{
+			Name:        "pipeline-json",
+			Usage:       "Specifies Spinnaker Pipeline JSON file to be migrated.",
+			Destination: &migrationReq.PipelineJson,
 		}),
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:        "spinnaker-api-key",
@@ -593,7 +609,7 @@ func main() {
 					},
 					&cli.StringFlag{
 						Name:        "pipeline-name",
-						Usage:       "Specifies Spinnaker Pipeline which to be migrated.",
+						Usage:       "Specifies Spinnaker Pipeline to be migrated.",
 						Destination: &migrationReq.PipelineName,
 					},
 					&cli.StringFlag{
