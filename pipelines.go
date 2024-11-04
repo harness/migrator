@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -126,8 +128,66 @@ func migrateSpinnakerPipelines() error {
 	}
 
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
+
+	stages, _ := getSupportedStages()
+	if stages != nil {
+		checkUnsupportedStages(payload, stages)
+	}
+
 	_, err = createSpinnakerPipelines(payload)
 	return err
+}
+
+func checkUnsupportedStages(payload map[string][]map[string]interface{}, supportedStages []string) {
+	unsupportedStagesMap := make(map[string][]string)
+
+	// Convert supported stages to lowercase for case-insensitive comparison
+	supportedMap := make(map[string]bool)
+	for _, stage := range supportedStages {
+		supportedMap[strings.ToLower(stage)] = true
+	}
+
+	// Regular expression to remove non-alphanumeric characters
+	re := regexp.MustCompile(`[^a-zA-Z0-9]+`)
+
+	// Iterate over each pipeline
+	for _, pipeline := range payload["pipelines"] {
+		unsupportedStages := []string{}
+
+		// Get stages from the pipeline
+		if stages, ok := pipeline["stages"].([]interface{}); ok {
+			for _, stage := range stages {
+				// Ensure stage is a map and retrieve the type
+				if stageMap, ok := stage.(map[string]interface{}); ok {
+					if stageType, ok := stageMap["type"].(string); ok {
+						// Remove special characters and convert to lowercase
+						cleanStageType := strings.ToLower(re.ReplaceAllString(stageType, ""))
+
+						// Check if the cleaned stage type is unsupported
+						if !supportedMap[cleanStageType] {
+							unsupportedStages = append(unsupportedStages, stageType) // Add original type for clarity in logs
+						}
+					}
+				}
+			}
+		}
+
+		// Add to results if there are unsupported stages
+		if len(unsupportedStages) > 0 {
+			if name, ok := pipeline["name"].(string); ok {
+				unsupportedStagesMap[name] = unsupportedStages
+			}
+		}
+	}
+
+	// Log unsupported stages
+	if len(unsupportedStagesMap) > 0 {
+		for pipelineID, stages := range unsupportedStagesMap {
+			log.Warnf("Pipeline ID: %s, Unsupported Stages: %v", pipelineID, stages)
+		}
+	} else {
+		log.Info("All stages in all pipelines are supported.")
+	}
 }
 
 func fetchDependentPipelines(pipelines []map[string]interface{}, err error, authMethod string) ([]map[string]interface{}, error) {
@@ -389,6 +449,27 @@ func findPipelineIndexById(pipelines []map[string]interface{}, pipelineId string
 
 func getSinglePipeline(authMethod string, name string) ([]byte, error) {
 	return GetWithAuth(migrationReq.SpinnakerHost, "applications/"+migrationReq.SpinnakerAppName+"/pipelineConfigs/"+name, authMethod, migrationReq.Auth64, migrationReq.Cert, migrationReq.Key, migrationReq.AllowInsecureReq)
+}
+
+func getSupportedStages() ([]string, error) {
+	url := GetUrl(migrationReq.Environment, MigratorService, "spinnaker/pipelines/stages", migrationReq.Account)
+	resp, err := Get(url, migrationReq.Auth)
+	if err != nil {
+		log.Warnf("failed to fetch supported stages: %v", err)
+		return nil, err
+	}
+	byteData, err := json.Marshal(resp.Resource)
+	if err != nil {
+		log.Warnf("failed to parse supported stages: %v", err)
+	}
+
+	var stages []string
+	if err := json.Unmarshal(byteData, &stages); err != nil {
+		log.Warnf("failed to parse supported stages: %v", err)
+		return nil, err
+	}
+
+	return stages, nil
 }
 
 func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
