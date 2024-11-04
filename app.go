@@ -91,6 +91,11 @@ func migrateSpinnakerApplication() error {
 	}
 
 	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
+
+	stages, _ := getSupportedStages()
+	if stages != nil {
+		checkUnsupportedStages(payload, stages)
+	}
 	_, err = createSpinnakerPipelines(payload)
 	return err
 }
