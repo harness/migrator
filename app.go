@@ -90,12 +90,11 @@ func migrateSpinnakerApplication() error {
 		return nil
 	}
 
-	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
-
-	stages, _ := getSupportedStages()
-	if stages != nil {
-		checkUnsupportedStages(payload, stages)
+	dryRun := migrationReq.DryRun
+	payload := map[string]interface{}{
+		"pipelines": pipelines, // Expecting pipelines as []map[string]interface{}
+		"dryRun":    dryRun,    // dryRun as a bool
 	}
-	_, err = createSpinnakerPipelines(payload)
+	_, err = createSpinnakerPipelines(payload, dryRun)
 	return err
 }

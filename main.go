@@ -387,6 +387,11 @@ func main() {
 			Usage:       "x509 key location for authenticating with spinnaker",
 			Destination: &migrationReq.Key,
 		}),
+		altsrc.NewBoolFlag(&cli.BoolFlag{
+			Name:        "dryRun",
+			Usage:       "perform a dry run without side effects",
+			Destination: &migrationReq.DryRun,
+		}),
 	}
 	app := &cli.App{
 		Name:                 "harness-upgrade",
@@ -588,6 +593,11 @@ func main() {
 				Usage: "Import pipelines into an existing project by providing the `appId` & `pipelineIds`",
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
+						Name:        "dryRun",
+						Usage:       "dry run",
+						Destination: &migrationReq.DryRun,
+					},
+					&cli.BoolFlag{
 						Name:        "all",
 						Usage:       "all pipelines",
 						Destination: &migrationReq.All,
@@ -619,7 +629,7 @@ func main() {
 					},
 					&cli.BoolFlag{
 						Name:        "insecure",
-						Usage:       "Weteher to validate the TLS certificate or not",
+						Usage:       "Whether to validate the TLS certificate or not",
 						Destination: &migrationReq.AllowInsecureReq,
 					},
 					&cli.StringFlag{

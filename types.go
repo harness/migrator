@@ -191,12 +191,25 @@ type MigrationStats struct {
 }
 
 type Resource struct {
-	RequestId       string                    `json:"requestId"`
-	Stats           map[string]MigrationStats `json:"stats"`
-	Errors          []UpgradeError            `json:"errors"`
-	Status          string                    `json:"status"`
-	ResponsePayload interface{}               `json:"responsePayload"`
-	SkipDetails     []NGSkipDetail            `json:"skipDetails"`
+	RequestId                   string                       `json:"requestId"`
+	Stats                       map[string]MigrationStats    `json:"stats"`
+	Errors                      []UpgradeError               `json:"errors"`
+	Status                      string                       `json:"status"`
+	ResponsePayload             interface{}                  `json:"responsePayload"`
+	SkipDetails                 []NGSkipDetail               `json:"skipDetails"`
+	SuccessfullyMigratedDetails []SuccessfullyMigratedDetail `json:"successfullyMigratedDetails"`
+}
+
+type SuccessfullyMigratedDetail struct {
+	CgEntityDetail interface{}    `json:"cgEntityDetail"` // Assuming cgEntityDetail can be nil or of a specific type
+	NgEntityDetail NgEntityDetail `json:"ngEntityDetail"`
+}
+
+type NgEntityDetail struct {
+	EntityType        string `json:"entityType"`
+	Identifier        string `json:"identifier"`
+	OrgIdentifier     string `json:"orgIdentifier"`
+	ProjectIdentifier string `json:"projectIdentifier"`
 }
 
 type ResponseBody struct {

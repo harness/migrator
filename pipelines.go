@@ -126,19 +126,17 @@ func migrateSpinnakerPipelines() error {
 	if err != nil {
 		return err
 	}
-
-	payload := map[string][]map[string]interface{}{"pipelines": pipelines}
-
-	stages, _ := getSupportedStages()
-	if stages != nil {
-		checkUnsupportedStages(payload, stages)
+	dryRun := migrationReq.DryRun
+	payload := map[string]interface{}{
+		"pipelines": pipelines, // Expecting pipelines as []map[string]interface{}
+		"dryRun":    dryRun,    // dryRun as a bool
 	}
 
-	_, err = createSpinnakerPipelines(payload)
+	_, err = createSpinnakerPipelines(payload, dryRun)
 	return err
 }
 
-func checkUnsupportedStages(payload map[string][]map[string]interface{}, supportedStages []string) {
+func checkUnsupportedStages(payload map[string]interface{}, supportedStages []string) {
 	unsupportedStagesMap := make(map[string][]string)
 
 	// Convert supported stages to lowercase for case-insensitive comparison
@@ -151,7 +149,7 @@ func checkUnsupportedStages(payload map[string][]map[string]interface{}, support
 	re := regexp.MustCompile(`[^a-zA-Z0-9]+`)
 
 	// Iterate over each pipeline
-	for _, pipeline := range payload["pipelines"] {
+	for _, pipeline := range payload["pipelines"].([]map[string]interface{}) {
 		unsupportedStages := []string{}
 
 		// Get stages from the pipeline
@@ -180,14 +178,19 @@ func checkUnsupportedStages(payload map[string][]map[string]interface{}, support
 		}
 	}
 
-	// Log unsupported stages
 	if len(unsupportedStagesMap) > 0 {
 		for pipelineID, stages := range unsupportedStagesMap {
-			log.Warnf("Pipeline ID: %s, Unsupported Stages: %v", pipelineID, stages)
+			// Construct a single log message for each pipeline
+			message := fmt.Sprintf("\n Pipeline with id: %s\n has unsupported Stages:\n", pipelineID)
+			for _, stage := range stages {
+				message += fmt.Sprintf("  - %s\n", stage)
+			}
+			log.Warn(message)
 		}
 	} else {
 		log.Info("All stages in all pipelines are supported.")
 	}
+
 }
 
 func fetchDependentPipelines(pipelines []map[string]interface{}, err error, authMethod string) ([]map[string]interface{}, error) {
@@ -472,16 +475,19 @@ func getSupportedStages() ([]string, error) {
 	return stages, nil
 }
 
-func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
+func createSpinnakerPipelines(pipelines map[string]interface{}, dryRun bool) (reqId string, err error) {
 	queryParams := map[string]string{
 		ProjectIdentifier: migrationReq.ProjectIdentifier,
 		OrgIdentifier:     migrationReq.OrgIdentifier,
 		AccountIdentifier: migrationReq.Account,
 	}
-	err = CheckProjectExistsAndCreate()
-	if err != nil {
-		return "", err
+	if !dryRun && migrationReq.Environment != Dev {
+		err = CheckProjectExistsAndCreate()
+		if err != nil {
+			return "", err
+		}
 	}
+
 	j, err := json.MarshalIndent(pipelines, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal pipelines JSON: %v", err)
@@ -497,16 +503,9 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get resource: %v", err)
 	}
-	if resource.Errors != nil && len(resource.Errors) > 0 {
-		// Convert the data to JSON
-		jsonData, err := json.MarshalIndent(resource.Errors, "", "    ")
-		if err != nil {
-			return "", fmt.Errorf("failed to marshal resource errors JSON: %v", err)
-		}
-		// Convert bytes to string and print
-		jsonString := string(jsonData)
-		log.Warnf(jsonString)
-		return "", fmt.Errorf("failed to create pipeline : %v", migrationReq.PipelineName)
+	hasErrors := resource.Errors != nil && len(resource.Errors) > 0
+	if hasErrors {
+		printAllErrors(pipelines, resource.Errors)
 	}
 	if len(resource.RequestId) != 0 {
 		reqId = resource.RequestId
@@ -520,7 +519,42 @@ func createSpinnakerPipelines(pipelines interface{}) (reqId string, err error) {
 		jsonString := string(jsonData)
 		log.Warnf("Entity not migrated : %s", jsonString)
 	}
-	reconcilePipeline(resp, queryParams)
-	log.Info("Spinnaker migration completed")
+	// Pretty print successfullyMigratedDetails
+	if len(resource.SuccessfullyMigratedDetails) > 0 {
+		printCreatedEntities(resource.SuccessfullyMigratedDetails)
+	} else {
+		return "", fmt.Errorf("spinnaker migration failed")
+	}
+	if !dryRun && migrationReq.Environment != Dev {
+		reconcilePipeline(resp, queryParams)
+		log.Info("Spinnaker migration completed")
+	} else {
+		log.Infof("Note: This was a dry run of the spinnaker migration")
+	}
+
 	return reqId, nil
+}
+func printAllErrors(pipelines map[string]interface{}, errors []UpgradeError) {
+	stages, _ := getSupportedStages()
+	if stages != nil {
+		checkUnsupportedStages(pipelines, stages)
+	}
+	printResourceErrors(errors)
+}
+
+func printResourceErrors(errors []UpgradeError) error {
+	for _, err := range errors {
+		if !strings.Contains(err.Message, "SpinnakerStageType") {
+			log.Warnf(fmt.Sprintf("  . %s\n", err.Message))
+		}
+	}
+	return nil
+}
+
+func printCreatedEntities(resources []SuccessfullyMigratedDetail) {
+	for _, detail := range resources {
+		ngDetail := detail.NgEntityDetail
+		log.Printf("created entity:\n  EntityType: %s\n  Identifier: %s\n  OrgIdentifier: %s\n  ProjectIdentifier: %s\n",
+			ngDetail.EntityType, ngDetail.Identifier, ngDetail.OrgIdentifier, ngDetail.ProjectIdentifier)
+	}
 }
