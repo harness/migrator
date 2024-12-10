@@ -44,6 +44,7 @@ var migrationReq = struct {
 	UrlNG                 string `survey:"urlNG"`
 	UrlCG                 string `survey:"urlCG"`
 	DryRun                bool   `survey:"dryRun"`
+	Plan                  bool   `survey:"plan"`
 	FileExtensions        string `survey:"fileExtensions"`
 	CustomExpressionsFile string `survey:"customExpressionsFile"`
 	CustomStringsFile     string `survey:"customStringsFile"`
@@ -392,6 +393,11 @@ func main() {
 			Usage:       "perform a dry run without side effects",
 			Destination: &migrationReq.DryRun,
 		}),
+		altsrc.NewBoolFlag(&cli.BoolFlag{
+			Name:        "plan",
+			Usage:       "gets the harness entities as yaml",
+			Destination: &migrationReq.DryRun,
+		}),
 	}
 	app := &cli.App{
 		Name:                 "harness-upgrade",
@@ -596,6 +602,11 @@ func main() {
 						Name:        "dryRun",
 						Usage:       "dry run",
 						Destination: &migrationReq.DryRun,
+					},
+					&cli.BoolFlag{
+						Name:        "plan",
+						Usage:       "shows the entities as yaml",
+						Destination: &migrationReq.Plan,
 					},
 					&cli.BoolFlag{
 						Name:        "all",

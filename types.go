@@ -203,6 +203,7 @@ type Resource struct {
 type SuccessfullyMigratedDetail struct {
 	CgEntityDetail interface{}    `json:"cgEntityDetail"` // Assuming cgEntityDetail can be nil or of a specific type
 	NgEntityDetail NgEntityDetail `json:"ngEntityDetail"`
+	AdditionalInfo string         `json:"additionalInfo"`
 }
 
 type NgEntityDetail struct {
