@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -127,9 +129,11 @@ func migrateSpinnakerPipelines() error {
 		return err
 	}
 	dryRun := migrationReq.DryRun
+	plan := migrationReq.Plan
 	payload := map[string]interface{}{
 		"pipelines": pipelines, // Expecting pipelines as []map[string]interface{}
 		"dryRun":    dryRun,    // dryRun as a bool
+		"planOnly":  plan,
 	}
 
 	_, err = createSpinnakerPipelines(payload, dryRun)
@@ -522,18 +526,58 @@ func createSpinnakerPipelines(pipelines map[string]interface{}, dryRun bool) (re
 	// Pretty print successfullyMigratedDetails
 	if len(resource.SuccessfullyMigratedDetails) > 0 {
 		printCreatedEntities(resource.SuccessfullyMigratedDetails)
+		if migrationReq.Plan {
+			saveProjectFiles(resource.SuccessfullyMigratedDetails, migrationReq.ProjectIdentifier)
+		}
 	} else {
 		return "", fmt.Errorf("spinnaker migration failed")
 	}
 	if !dryRun && migrationReq.Environment != Dev {
 		reconcilePipeline(resp, queryParams)
+	}
+
+	if !dryRun {
 		log.Info("Spinnaker migration completed")
 	} else {
-		log.Infof("Note: This was a dry run of the spinnaker migration")
+		log.Info("Note: This was a dry run of the spinnaker migration")
 	}
 
 	return reqId, nil
 }
+
+func saveProjectFiles(details []SuccessfullyMigratedDetail, projectIdentifier string) {
+	// Create the project folder if it doesn't exist
+	projectFolder := filepath.Join(".", projectIdentifier)
+	if _, err := os.Stat(projectFolder); os.IsNotExist(err) {
+		err := os.MkdirAll(projectFolder, os.ModePerm)
+		if err != nil {
+			log.Fatalf("Error creating directory %s: %v", projectFolder, err)
+		}
+		log.Printf("Created directory: %s", projectFolder)
+	}
+
+	for _, detail := range details {
+		if len(detail.AdditionalInfo) > 0 {
+			// Generate the filename with the full path under the project folder
+			filename := filepath.Join(projectFolder, fmt.Sprintf("%s_%s.yaml", detail.NgEntityDetail.EntityType, detail.NgEntityDetail.Identifier))
+
+			// Decode the Base64 string
+			decodedInfo, err := base64.StdEncoding.DecodeString(detail.AdditionalInfo)
+			if err != nil {
+				log.Printf("Error decoding AdditionalInfo for %s: %v", filename, err)
+				continue
+			}
+			// Save the decoded content to the file
+			err = os.WriteFile(filename, decodedInfo, 0644)
+			if err != nil {
+				log.Printf("Error saving file %s: %v", filename, err)
+			} else {
+				log.Printf("Successfully saved file: %s", filename)
+			}
+		}
+	}
+}
+
 func printAllErrors(pipelines map[string]interface{}, errors []UpgradeError) {
 	stages, _ := getSupportedStages()
 	if stages != nil {
@@ -554,7 +598,7 @@ func printResourceErrors(errors []UpgradeError) error {
 func printCreatedEntities(resources []SuccessfullyMigratedDetail) {
 	for _, detail := range resources {
 		ngDetail := detail.NgEntityDetail
-		log.Printf("created entity:\n  EntityType: %s\n  Identifier: %s\n  OrgIdentifier: %s\n  ProjectIdentifier: %s\n",
+		log.Printf("created entity:\n  EntityType: %s\n  Identifier: %s\n  OrgIdentifier: %s\n  ProjectIdentifier: %s\n\n",
 			ngDetail.EntityType, ngDetail.Identifier, ngDetail.OrgIdentifier, ngDetail.ProjectIdentifier)
 	}
 }

@@ -91,9 +91,11 @@ func migrateSpinnakerApplication() error {
 	}
 
 	dryRun := migrationReq.DryRun
+	plan := migrationReq.Plan
 	payload := map[string]interface{}{
 		"pipelines": pipelines, // Expecting pipelines as []map[string]interface{}
 		"dryRun":    dryRun,    // dryRun as a bool
+		"planOnly":  plan,
 	}
 	_, err = createSpinnakerPipelines(payload, dryRun)
 	return err
